@@ -3,7 +3,7 @@
 
   var root = window;
   var documentRef = document;
-  var MODULE_VERSION = '20260507-operation-send-v13';
+  var MODULE_VERSION = '20260517-tablet-v55-final';
   var state = {
     agents: [],
     operations: [],

@@ -3,7 +3,7 @@
 
   var root = window;
   var documentRef = document;
-  var MODULE_VERSION = '20260505-liraa-operation-source-v15';
+  var MODULE_VERSION = '20260517-tablet-v55-final';
   var PLAN_STORAGE_KEY = 'ace_liraa_sampling_plan_v1';
   var CYCLE_HISTORY_STORAGE_KEY = 'ace_liraa_cycle_history_v1';
   var DEPOSIT_CODES = ['A1', 'A2', 'B', 'C', 'D1', 'D2', 'E'];

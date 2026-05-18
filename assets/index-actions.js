@@ -393,7 +393,7 @@
         chip: 'Enviando',
         kind: 'accent',
         button: 'Enviando',
-        headerButton: 'Enviando',
+        headerButton: 'Sinc',
         title: 'Enviando dados para a Nuvem.',
         disabled: true
       };
@@ -403,7 +403,7 @@
         chip: 'Pend. ' + pendingTotal,
         kind: 'warn',
         button: 'Sincronizar',
-        headerButton: 'Enviar',
+        headerButton: 'Sinc',
         title: 'Enviar agora os dados salvos no aparelho.',
         disabled: false
       };
@@ -412,7 +412,7 @@
       chip: 'Enviado',
       kind: 'ok',
       button: 'Sincronizar',
-      headerButton: 'Checar',
+      headerButton: 'Sinc',
       title: 'Verificar a Nuvem e confirmar que não há pendências.',
       disabled: false
     };

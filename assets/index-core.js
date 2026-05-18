@@ -88,7 +88,7 @@
     BOOTSTRAP_TIMEOUT_MS: 45000,
     SYNC_TIMEOUT_MS: 45000,
     AUTO_SYNC_COOLDOWN_MS: 5 * 60 * 1000,
-    APP_VERSION: 'ACE Campo 20260517-tablet-v53-final - Galaxy Tab A11',
+    APP_VERSION: 'ACE Campo 20260517-tablet-v55-final - Galaxy Tab A11',
     BAIRROS: BAIRRO_CATALOG.slice(),
     PROPERTY_TYPES: [
       'Residencial', 'Comercial', 'Terreno Baldio', 'Obra/Construção', 'Ponto Estratégico', 'Órgão Público', 'Outro'
@@ -1742,7 +1742,7 @@
   };
 
   app.getOfflineCacheName = function () {
-    return 'ace-campo-offline-20260517-tablet-v53-final';
+    return 'ace-campo-offline-20260517-tablet-v55-final';
   };
 
   app.isLocalFileMode = function () {

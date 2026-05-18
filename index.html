@@ -8,14 +8,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ACE Campo">
-  <link rel="manifest" href="./manifest.webmanifest?v=20260517-tablet-v53-final">
+  <link rel="manifest" href="./manifest.webmanifest?v=20260517-tablet-v55-final">
   <title>ACE Campo | Carmo/RJ</title>
-  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260517-tablet-v53-final">
+  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260517-tablet-v55-final">
 
-  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260517-tablet-v53-final">
+  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260517-tablet-v55-final">
 
-  <style id="index-tablet-field-final-v53">
-    /* v53: CSS consolidado do app ACE Campo para tablet; remove blocos antigos v48/v49/v50 e une o refinamento v51/v52. */
+  <style id="index-tablet-field-final-v55">
+    /* v55: CSS final para tablet; une melhorias do Codex com correção v54 da faixa verde das abas. */
 
 :root {
       --ace-field-green-dark: #073b24;
@@ -212,6 +212,34 @@
       border: 0 !important;
       border-top: 1px solid rgba(255, 255, 255, .10) !important;
       box-shadow: none !important;
+    }
+
+
+    /* v55: garante faixa verde contínua antes/depois das abas, sem fresta branca antes de "Visita". */
+    html body.field-page .topbar.topbar-v43.ace-topbar::after,
+    html body.field-page .topbar.topbar-v43::after,
+    html body.field-page .nav-tabs.nav-tabs-v43::before,
+    html body.field-page .nav-tabs.nav-tabs-v43::after {
+      content: none !important;
+      display: none !important;
+      height: 0 !important;
+      background: transparent !important;
+    }
+
+    html body.field-page .topbar.topbar-v43,
+    html body.field-page header.topbar.topbar-v43,
+    html body.field-page .topbar-v43 .topbar-row,
+    html body.field-page .nav-tabs.nav-tabs-v43 {
+      background-color: var(--ace-field-green-dark) !important;
+    }
+
+    html body.field-page .nav-tabs.nav-tabs-v43 {
+      position: relative !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      background: var(--ace-field-green-dark) !important;
+      box-shadow: 0 0 0 100vmax var(--ace-field-green-dark) !important;
+      clip-path: inset(0 -100vmax) !important;
     }
 
     html body.field-page .nav-tabs-v43 .tab-btn,
@@ -1040,7 +1068,7 @@ html body.field-page {
         </div>
         <div class="chip-row topbar-actions">
           <div id="syncChip" class="chip chip-queue ace-chip">Fila: 0</div>
-          <button id="headerSyncBtn" class="chip header-sync-btn ace-chip" type="button">Checar</button>
+          <button id="headerSyncBtn" class="chip header-sync-btn ace-chip" type="button">Sinc</button>
           <button id="logoutBtn" class="chip chip-logout ace-chip" type="button" aria-label="Sair" title="Sair">Sair</button>
         </div>
       </div>
@@ -1469,15 +1497,15 @@ html body.field-page {
 
   <div id="syncStatus" class="sync-banner is-hidden" aria-hidden="true"></div>
 
-    <script src="./assets/runtime-config.js?v=20260517-tablet-v53-final"></script>
-    <script src="./assets/carmo-territorios-data.js?v=20260517-tablet-v53-final"></script>
-    <script src="./assets/ruas-carmo-data.js?v=20260517-tablet-v53-final"></script>
-  <script src="./assets/ace-storage.js?v=20260517-tablet-v53-final"></script>
-  <script src="./assets/index-core.js?v=20260517-tablet-v53-final"></script>
-  <script src="./assets/index-render.js?v=20260517-tablet-v53-final"></script>
-  <script src="./assets/index-actions.js?v=20260517-tablet-v53-final"></script>
-  <script src="./assets/lgpd-hardening.js?v=20260517-tablet-v53-final"></script>
-  <script src="./assets/operation-mode.js?v=20260517-tablet-v53-final"></script>
-  <script src="./assets/liraa-mode.js?v=20260517-tablet-v53-final"></script>
+    <script src="./assets/runtime-config.js?v=20260517-tablet-v55-final"></script>
+    <script src="./assets/carmo-territorios-data.js?v=20260517-tablet-v55-final"></script>
+    <script src="./assets/ruas-carmo-data.js?v=20260517-tablet-v55-final"></script>
+  <script src="./assets/ace-storage.js?v=20260517-tablet-v55-final"></script>
+  <script src="./assets/index-core.js?v=20260517-tablet-v55-final"></script>
+  <script src="./assets/index-render.js?v=20260517-tablet-v55-final"></script>
+  <script src="./assets/index-actions.js?v=20260517-tablet-v55-final"></script>
+  <script src="./assets/lgpd-hardening.js?v=20260517-tablet-v55-final"></script>
+  <script src="./assets/operation-mode.js?v=20260517-tablet-v55-final"></script>
+  <script src="./assets/liraa-mode.js?v=20260517-tablet-v55-final"></script>
 </body>
 </html>

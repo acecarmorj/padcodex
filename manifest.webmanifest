@@ -1,11 +1,11 @@
 {
   "name": "ACE Campo",
   "short_name": "ACE Campo",
-  "start_url": "./index.html?v=20260517-tablet-v53-final",
+  "start_url": "./index.html?v=20260517-tablet-v55-final",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3f8f5",
   "theme_color": "#073b24",
   "description": "Aplicativo de campo dos Agentes de Combate as Endemias com operacao offline.",
-  "version": "20260517-tablet-v53-final"
+  "version": "20260517-tablet-v55-final"
 }

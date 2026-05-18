@@ -3,7 +3,7 @@
 
   var root = window;
   var documentRef = document;
-  var MODULE_VERSION = '20260502-laboratorio-private-session-v3';
+  var MODULE_VERSION = '20260517-tablet-v55-final';
   var LAB_API_TIMEOUT_MS = 25000;
   var TUBITOS_KEY = 'dengue_db_tubitos_v1';
   var LAB_SESSION_KEY = 'ace_lab_admin_session_v1';

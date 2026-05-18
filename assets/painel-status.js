@@ -3,7 +3,7 @@
 
   var root = window;
   var documentRef = document;
-  var MODULE_VERSION = '20260505-system-status-private-counts-v12';
+  var MODULE_VERSION = '20260517-tablet-v55-final';
   var state = { status: null, schedule: null, lastError: '', loading: false, bundle: null };
 
   function $(id) { return documentRef.getElementById(id); }

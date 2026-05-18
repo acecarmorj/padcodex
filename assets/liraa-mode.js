@@ -3,7 +3,7 @@
 
   var root = window;
   var documentRef = document;
-  var MODULE_VERSION = '20260505-operation-territory-v3-operation-source';
+  var MODULE_VERSION = '20260517-tablet-v55-final';
   var PLAN_STORAGE_KEY = 'ace_liraa_sampling_plan_v1';
   var state = {
     loadingRemotePlan: false,

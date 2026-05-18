@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const ACE_CACHE_VERSION = 'ace-campo-offline-20260517-tablet-v53-final';
+const ACE_CACHE_VERSION = 'ace-campo-offline-20260517-tablet-v55-final';
 const ACE_CACHE_NAME = ACE_CACHE_VERSION;
 const ACE_LEGACY_BRAND_ASSETS = [
   './assets/logo-prefeitura-carmo.png',
