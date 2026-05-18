@@ -88,7 +88,7 @@
     BOOTSTRAP_TIMEOUT_MS: 45000,
     SYNC_TIMEOUT_MS: 45000,
     AUTO_SYNC_COOLDOWN_MS: 5 * 60 * 1000,
-    APP_VERSION: 'ACE Campo 20260517-tablet-v55-final - Galaxy Tab A11',
+    APP_VERSION: 'ACE Campo 20260517-007-v57 - Galaxy Tab A11',
     BAIRROS: BAIRRO_CATALOG.slice(),
     PROPERTY_TYPES: [
       'Residencial', 'Comercial', 'Terreno Baldio', 'Obra/Construção', 'Ponto Estratégico', 'Órgão Público', 'Outro'
@@ -150,7 +150,12 @@
     },
     LOCAL_VISIT_RETENTION_DAYS: 21,
     LOCAL_VISIT_CACHE_LIMIT: 1200,
-    LOCAL_LOG_RETENTION: 600
+    LOCAL_LOG_RETENTION: 600,
+    LOCATION_TRAIL_INTERVAL_MS: 120000,
+    LOCATION_TRAIL_MIN_INTERVAL_MS: 60000,
+    LOCATION_TRAIL_MIN_DISTANCE_METERS: 18,
+    LOCATION_TRAIL_RETENTION_DAYS: 14,
+    LOCATION_TRAIL_CACHE_LIMIT: 2500
   };
 
   app.DEPOSITS = {
@@ -224,6 +229,7 @@
     visits: ['dengue_db_visits_v1'],
     tubitos: ['dengue_db_tubitos_v1'],
     supervisionRequests: ['dengue_db_supervision_requests_v1'],
+    locationTrail: ['dengue_db_location_trail_v1'],
     lastArea: ['dengue_db_last_area_v1'],
     logs: ['dengue_db_logs_v1'],
     systemState: ['dengue_db_system_state_v1'],
@@ -244,7 +250,11 @@
     territoryHint: null,
     visit: null,
     weatherLoading: false,
-    weatherTimer: null
+    weatherTimer: null,
+    locationTrailActive: false,
+    locationTrailTimer: null,
+    locationTrailWatchId: null,
+    lastBatteryLevel: ''
   };
 
   app.storageCache = {};
@@ -374,11 +384,13 @@
       });
       app.storageCache.visits = app.pruneLocalVisitCache(app.storageCache.visits || []);
       app.storageCache.logs = (app.storageCache.logs || []).map(app.normalizeLogEntry).filter(Boolean);
+      app.storageCache.locationTrail = (app.storageCache.locationTrail || []).map(app.normalizeLocationTrailPoint).filter(Boolean);
       app.storageCache.dirtyProperties = Array.from(new Set((app.storageCache.dirtyProperties || []).map(function (item) {
         return String(item || '').trim();
       }).filter(Boolean)));
       app.writeStorageSnapshot('visits', app.storageCache.visits);
       app.writeStorageSnapshot('logs', app.storageCache.logs);
+      app.writeStorageSnapshot('locationTrail', app.storageCache.locationTrail);
       app.writeStorageSnapshot('dirtyProperties', app.storageCache.dirtyProperties);
       app.storageReady = true;
       return Promise.resolve(false);
@@ -395,16 +407,22 @@
       if (!Array.isArray(app.storageCache.logs)) {
         app.storageCache.logs = [];
       }
+      if (!Array.isArray(app.storageCache.locationTrail)) {
+        app.storageCache.locationTrail = [];
+      }
+      app.storageCache.locationTrail = app.storageCache.locationTrail.map(app.normalizeLocationTrailPoint).filter(Boolean);
       if (!Array.isArray(app.storageCache.dirtyProperties)) {
         app.storageCache.dirtyProperties = [];
       }
       app.storageCache.visits = app.pruneLocalVisitCache(app.storageCache.visits || []);
       app.storageCache.logs = (app.storageCache.logs || []).map(app.normalizeLogEntry).filter(Boolean);
+      app.storageCache.locationTrail = (app.storageCache.locationTrail || []).map(app.normalizeLocationTrailPoint).filter(Boolean);
       app.storageCache.dirtyProperties = Array.from(new Set(app.storageCache.dirtyProperties.map(function (item) {
         return String(item || '').trim();
       }).filter(Boolean)));
       app.writeStorageSnapshot('visits', app.storageCache.visits);
       app.writeStorageSnapshot('logs', app.storageCache.logs);
+      app.writeStorageSnapshot('locationTrail', app.storageCache.locationTrail);
       app.writeStorageSnapshot('dirtyProperties', app.storageCache.dirtyProperties);
       app.storageReady = true;
       return true;
@@ -414,11 +432,13 @@
       });
       app.storageCache.visits = app.pruneLocalVisitCache(app.storageCache.visits || []);
       app.storageCache.logs = (app.storageCache.logs || []).map(app.normalizeLogEntry).filter(Boolean);
+      app.storageCache.locationTrail = (app.storageCache.locationTrail || []).map(app.normalizeLocationTrailPoint).filter(Boolean);
       app.storageCache.dirtyProperties = Array.from(new Set((app.storageCache.dirtyProperties || []).map(function (item) {
         return String(item || '').trim();
       }).filter(Boolean)));
       app.writeStorageSnapshot('visits', app.storageCache.visits);
       app.writeStorageSnapshot('logs', app.storageCache.logs);
+      app.writeStorageSnapshot('locationTrail', app.storageCache.locationTrail);
       app.writeStorageSnapshot('dirtyProperties', app.storageCache.dirtyProperties);
       app.storageReady = true;
       return false;
@@ -1599,6 +1619,109 @@
     return count;
   };
 
+
+  app.normalizeLocationTrailPoint = function (row) {
+    var source = row || {};
+    var lat = Number(source.lat !== undefined ? source.lat : (source.gps_lat !== undefined ? source.gps_lat : source.latitude));
+    var lng = Number(source.lng !== undefined ? source.lng : (source.gps_lng !== undefined ? source.gps_lng : source.longitude));
+    var timestamp = String(source.timestamp || source.capturedAt || source.createdAt || new Date().toISOString()).trim();
+    var date = String(source.date || source.data || '').trim() || timestamp.slice(0, 10);
+    var agent = app.normalizeAgent ? app.normalizeAgent(app.state.currentAgent || app.readSession() || {}) : (app.state.currentAgent || {});
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return null;
+    }
+    return {
+      uid: String(source.uid || source.id || app.createId('TRK')).trim(),
+      timestamp: timestamp,
+      date: date,
+      matricula: String(source.matricula || source.agent_matricula || (agent && agent.matricula) || '').trim(),
+      nome: app.cleanUiText ? app.cleanUiText(source.nome || source.agente || source.agent_name || (agent && agent.nome) || '') : String(source.nome || source.agente || source.agent_name || (agent && agent.nome) || ''),
+      operationMode: app.normalizeOperationMode ? app.normalizeOperationMode(source.operationMode || source.operation_mode || source.operational_mode || (app.getCurrentOperationModeLabel && app.getCurrentOperationModeLabel()) || 'VD') : String(source.operationMode || source.operation_mode || 'VD'),
+      lat: Number(lat.toFixed(7)),
+      lng: Number(lng.toFixed(7)),
+      accuracy: Math.round(Number(source.accuracy !== undefined ? source.accuracy : (source.gps_acc !== undefined ? source.gps_acc : source.acc)) || 0),
+      speed: source.speed !== undefined && source.speed !== null ? Number(source.speed) : '',
+      heading: source.heading !== undefined && source.heading !== null ? Number(source.heading) : '',
+      battery: source.battery !== undefined && source.battery !== null ? source.battery : '',
+      eventType: String(source.eventType || source.event_type || source.tipo || 'track').trim() || 'track',
+      eventLabel: app.cleanUiText ? app.cleanUiText(source.eventLabel || source.event_label || source.label || '') : String(source.eventLabel || source.event_label || source.label || ''),
+      visitUid: String(source.visitUid || source.visit_uid || '').trim(),
+      syncedAt: String(source.syncedAt || source.synced_at || '').trim(),
+      synced: source.synced === true
+    };
+  };
+
+  app.readLocationTrail = function () {
+    var rows = app.loadFirst(app.STORAGE_KEYS.locationTrail, []);
+    return Array.isArray(rows) ? rows.map(app.normalizeLocationTrailPoint).filter(Boolean) : [];
+  };
+
+  app.saveLocationTrail = function (rows) {
+    var normalized = Array.isArray(rows) ? rows.map(app.normalizeLocationTrailPoint).filter(Boolean) : [];
+    var map = {};
+    normalized.forEach(function (row) {
+      if (!row || !row.uid) {
+        return;
+      }
+      if (!map[row.uid] || String(row.timestamp || '') > String(map[row.uid].timestamp || '')) {
+        map[row.uid] = row;
+      }
+    });
+    normalized = Object.keys(map).map(function (uid) { return map[uid]; }).sort(function (a, b) {
+      return String(b.timestamp || '').localeCompare(String(a.timestamp || ''));
+    });
+    var retentionStart = app.daysAgoISO(Number(app.CONFIG.LOCATION_TRAIL_RETENTION_DAYS || 14));
+    var unsynced = normalized.filter(function (row) { return row.synced !== true; });
+    var recentSynced = normalized.filter(function (row) {
+      return row.synced === true && (!row.date || row.date >= retentionStart);
+    }).slice(0, Number(app.CONFIG.LOCATION_TRAIL_CACHE_LIMIT || 2500));
+    app.savePrimary('locationTrail', unsynced.concat(recentSynced));
+  };
+
+  app.addLocationTrailPoint = function (row) {
+    var normalized = app.normalizeLocationTrailPoint(row);
+    if (!normalized) {
+      return null;
+    }
+    var rows = app.readLocationTrail();
+    rows.unshift(normalized);
+    app.saveLocationTrail(rows);
+    return normalized;
+  };
+
+  app.getUnsyncedLocationTrail = function () {
+    return app.readLocationTrail().filter(function (row) {
+      return row && row.synced !== true;
+    });
+  };
+
+  app.markLocationTrailSyncedByUid = function (pendingIds) {
+    var lookup = {};
+    var list = Array.isArray(pendingIds) ? pendingIds : Object.keys(pendingIds || {});
+    list.forEach(function (uid) {
+      uid = String(uid || '').trim();
+      if (uid) {
+        lookup[uid] = true;
+      }
+    });
+    if (!Object.keys(lookup).length) {
+      return 0;
+    }
+    var syncedAt = new Date().toISOString();
+    var count = 0;
+    app.saveLocationTrail(app.readLocationTrail().map(function (row) {
+      if (row && row.uid && lookup[row.uid]) {
+        if (row.synced !== true) {
+          count += 1;
+        }
+        row.synced = true;
+        row.syncedAt = syncedAt;
+      }
+      return row;
+    }));
+    return count;
+  };
+
   app.getOfflineQueueSummary = function () {
     var system = app.readSystemState();
     var visits = app.getUnsyncedVisits ? app.getUnsyncedVisits() : [];
@@ -1609,13 +1732,14 @@
     var propertyRows = typeof app.readProperties === 'function' ? app.readProperties() : [];
     var logs = typeof app.getUnsyncedLogs === 'function' ? app.getUnsyncedLogs() : [];
     var supervision = typeof app.getUnsyncedSupervisionRequests === 'function' ? app.getUnsyncedSupervisionRequests() : [];
+    var locationTrail = typeof app.getUnsyncedLocationTrail === 'function' ? app.getUnsyncedLocationTrail() : [];
     var propertyConflictCount = propertyRows.filter(function (property) {
       return property && property.syncConflict === true;
     }).length;
     var adminPending = system.pendingSync ? 1 : 0;
     // Logs de auditoria são mantidos e enviados em carona nas próximas sincronizações,
     // mas não bloqueiam o agente nem aparecem como produção pendente de campo.
-    var total = visits.length + tubitos.length + properties.length + supervision.length + adminPending;
+    var total = visits.length + tubitos.length + properties.length + supervision.length + locationTrail.length + adminPending;
     return {
       visits: visits.length,
       tubitos: tubitos.length,
@@ -1623,6 +1747,7 @@
       propertyConflicts: propertyConflictCount,
       logs: logs.length,
       supervision: supervision.length,
+      locationTrail: locationTrail.length,
       admin: adminPending,
       total: total,
       hasPending: total > 0,
@@ -1687,6 +1812,7 @@
       properties: 0,
       logs: 0,
       supervision: 0,
+      locationTrail: 0,
       admin: system.pendingSync ? 1 : 0,
       total: app.getUnsyncedVisits().length + (system.pendingSync ? 1 : 0),
       hasPending: false
@@ -1700,6 +1826,7 @@
       propertyConflicts: summary.propertyConflicts || 0,
       queueLogs: summary.logs,
       queueSupervision: summary.supervision,
+      queueLocationTrail: summary.locationTrail || 0,
       queueAdmin: summary.admin,
       queueTotal: summary.total,
       queueSummary: summary,
@@ -1742,7 +1869,7 @@
   };
 
   app.getOfflineCacheName = function () {
-    return 'ace-campo-offline-20260517-tablet-v55-final';
+    return 'ace-campo-offline-20260517-007-v57';
   };
 
   app.isLocalFileMode = function () {
@@ -2058,7 +2185,7 @@
     addCheck('properties', 'Base de imóveis disponível localmente', Array.isArray(properties), true, 'Imóveis locais: ' + String(properties.length) + '.');
     addCheck('territory', 'Base territorial disponível', territoryReady, true, territoryReady ? 'Catálogo territorial/KMZ carregado no aparelho.' : 'Catálogo territorial não carregado.');
     addCheck('localStorage', 'Armazenamento local funcionando', localStorageOk, true, localStorageOk ? 'localStorage funcionando.' : 'O navegador bloqueou o armazenamento local.');
-    addCheck('pendingQueue', 'Fila offline protegida', !!queue && Number(queue.total || 0) >= 0, true, 'Pendentes: ' + Number(queue.total || 0) + ' item(ns), incluindo ' + Number(queue.visits || 0) + ' visita(s) e ' + Number(queue.tubitos || 0) + ' tubito(s).');
+    addCheck('pendingQueue', 'Fila offline protegida', !!queue && Number(queue.total || 0) >= 0, true, 'Pendentes: ' + Number(queue.total || 0) + ' item(ns), incluindo ' + Number(queue.visits || 0) + ' visita(s), ' + Number(queue.tubitos || 0) + ' tubito(s) e ' + Number(queue.locationTrail || 0) + ' ponto(s) de rota.');
 
     return Promise.all([
       app.testIndexedStorageAvailable(),

@@ -128,7 +128,7 @@ function ACE_cacheRemove_(key) {
 
 var ACE_API = {
   APP_NAME: 'ACE Campo API',
-  VERSION: '2026-05-05-v15-liraa-cycle-history-cloud',
+  VERSION: '2026-05-17-v57-007-agent-trail',
   SHEETS: {
     CONFIG: 'Config',
     BAIRROS: 'BairrosCatalogo',
@@ -143,6 +143,7 @@ var ACE_API = {
     LIRAA_CYCLES: 'LiraaCycles',
     METRICS: 'MetricsDaily',
     SUPERVISION: 'SupervisionRequests',
+    LOCATION_TRAIL: 'AgentLocationTrail',
     LOG: 'Log',
     SYSTEM: 'SystemState',
     SECRETARIA_DOCUMENTOS: 'SecretariaDocumentos'
@@ -161,6 +162,7 @@ var ACE_API = {
     LiraaCycles: ['cycle_id', 'nome', 'status', 'archived_at', 'archived_date', 'archived_by', 'archived_by_matricula', 'inspected', 'positives', 'iip', 'breteau', 'deposits_positive', 'total_blocks', 'groups', 'target_properties', 'plan_json', 'summary_json', 'archive_json', 'updatedAt'],
     MetricsDaily: ['reference_date', 'total_visitas', 'imoveis_visitados', 'abertos', 'fechados', 'total', 'recuperados', 'pendencias', 'depositos_encontrados', 'depositos_com_foco', 'tubitos_qtd', 'taxa_infestacao', 'cobertura_gps', 'retornos', 'focos'],
     SupervisionRequests: ['uid', 'data', 'hora', 'agente', 'matricula', 'operation_mode', 'mensagem', 'status', 'gps_lat', 'gps_lng', 'gps_acc', 'gps_territory', 'gps_quarteirao', 'createdAt', 'updatedAt'],
+    AgentLocationTrail: ['uid', 'timestamp', 'date', 'matricula', 'nome', 'operation_mode', 'lat', 'lng', 'accuracy', 'speed', 'heading', 'battery', 'event_type', 'event_label', 'visit_uid', 'synced_at'],
     Log: ['timestamp', 'tipo', 'acao', 'ref_uid', 'descricao', 'actor_name', 'actor_matricula'],
     SystemState: ['key', 'value', 'updatedAt'],
     SecretariaDocumentos: ['doc_id', 'doc_type', 'doc_title', 'property_uid', 'visit_uid', 'recipient_name', 'recipient_type', 'bairro', 'microarea', 'quarteirao', 'logradouro', 'numero', 'complemento', 'address_label', 'agent_name', 'agent_matricula', 'status', 'notes', 'printed_count', 'emitted_at', 'emitted_by', 'emitted_by_matricula', 'updatedAt']
@@ -1820,6 +1822,10 @@ function doGet(e) {
       }));
     }
 
+    if (action === 'panel_007_bundle' || action === 'agent_location_trail_private' || action === 'rota_agentes_private') {
+      return respond_(p.callback, wrapPayload_(buildAgentLocationTrailBundle_(p)));
+    }
+
     if (action === 'backup_export') {
       requireApiTokenOrAdminSession_(p);
       return respond_(p.callback, wrapPayload_(buildBackupExportPayload_()));
@@ -1829,6 +1835,191 @@ function doGet(e) {
   } catch (err) {
     return respond_(p.callback, wrapPayload_({ ok: false, error: safeErrorMessage_(err), generatedAt: nowIso_() }));
   }
+}
+
+
+
+function normalizeLocationTrailDate_(value) {
+  var text = String(value || '').trim();
+  if (!text) { return ''; }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) { return text; }
+  var date = new Date(text);
+  if (!isNaN(date.getTime())) {
+    return Utilities.formatDate(date, Session.getScriptTimeZone() || 'America/Sao_Paulo', 'yyyy-MM-dd');
+  }
+  return text.slice(0, 10);
+}
+
+function normalizeLocationTrailNumber_(value, precision) {
+  var number = Number(value);
+  if (!isFinite(number)) { return ''; }
+  if (precision !== undefined) {
+    return Number(number.toFixed(precision));
+  }
+  return number;
+}
+
+function sanitizeLocationTrailRowsForSync_(rows, operationalSession) {
+  var sessionMatricula = String(operationalSession && operationalSession.matricula || '').trim();
+  var sessionNome = String(operationalSession && operationalSession.nome || '').trim();
+  return (rows || []).map(function(row) {
+    row = row || {};
+    var timestamp = String(row.timestamp || row.capturedAt || row.createdAt || nowIso_()).trim();
+    var lat = normalizeLocationTrailNumber_(row.lat !== undefined ? row.lat : row.gps_lat, 7);
+    var lng = normalizeLocationTrailNumber_(row.lng !== undefined ? row.lng : row.gps_lng, 7);
+    if (lat === '' || lng === '') {
+      return null;
+    }
+    return sanitizeObjectForHeaders_({
+      uid: String(row.uid || ('TRK-' + Utilities.getUuid())).trim(),
+      timestamp: timestamp,
+      date: normalizeLocationTrailDate_(row.date || row.data || timestamp) || normalizeLocationTrailDate_(nowIso_()),
+      matricula: String(row.matricula || row.agent_matricula || sessionMatricula || '').trim(),
+      nome: normalizeText_(row.nome || row.agente || row.agent_name || sessionNome || ''),
+      operation_mode: String(row.operation_mode || row.operationMode || row.operational_mode || 'VD').trim() || 'VD',
+      lat: lat,
+      lng: lng,
+      accuracy: normalizeLocationTrailNumber_(row.accuracy !== undefined ? row.accuracy : row.gps_acc, 0),
+      speed: normalizeLocationTrailNumber_(row.speed, 2),
+      heading: normalizeLocationTrailNumber_(row.heading, 0),
+      battery: normalizeLocationTrailNumber_(row.battery, 0),
+      event_type: String(row.event_type || row.eventType || 'track').trim() || 'track',
+      event_label: String(row.event_label || row.eventLabel || '').trim(),
+      visit_uid: String(row.visit_uid || row.visitUid || '').trim(),
+      synced_at: String(row.synced_at || row.syncedAt || nowIso_()).trim()
+    }, ACE_API.HEADERS.AgentLocationTrail);
+  }).filter(function(row) {
+    return row && String(row.uid || '').trim() && String(row.lat || '').trim() && String(row.lng || '').trim();
+  });
+}
+
+function buildAgentLocationTrailBundle_(payload) {
+  payload = payload || {};
+  var session = ACE_panelRequirePrivateSession_(Object.assign({}, payload, {
+    access_module: 'coordenacao',
+    accessModule: 'coordenacao'
+  }));
+  ACE_panelTouchPrivateSession_(session.token, session);
+
+  var requestedDate = normalizeLocationTrailDate_(payload.date || payload.data || nowIso_()) || normalizeLocationTrailDate_(nowIso_());
+  var fromDate = normalizeLocationTrailDate_(payload.from || payload.start || requestedDate) || requestedDate;
+  var toDate = normalizeLocationTrailDate_(payload.to || payload.end || requestedDate) || requestedDate;
+  var trailRows = readRowsAsObjects_(ACE_API.SHEETS.LOCATION_TRAIL);
+  var visitRows = readRowsAsObjects_(ACE_API.SHEETS.VISITAS);
+  var agentRows = buildVisibleAgentRoster_();
+
+  function inRange(date) {
+    date = normalizeLocationTrailDate_(date || '');
+    if (!date) { return false; }
+    if (fromDate && date < fromDate) { return false; }
+    if (toDate && date > toDate) { return false; }
+    return true;
+  }
+
+  function cleanTrail(row) {
+    return {
+      uid: String(row.uid || '').trim(),
+      timestamp: String(row.timestamp || '').trim(),
+      date: normalizeLocationTrailDate_(row.date || row.timestamp || ''),
+      matricula: String(row.matricula || '').trim(),
+      nome: normalizeText_(row.nome || ''),
+      operation_mode: String(row.operation_mode || 'VD').trim() || 'VD',
+      lat: normalizeLocationTrailNumber_(row.lat, 7),
+      lng: normalizeLocationTrailNumber_(row.lng, 7),
+      accuracy: normalizeLocationTrailNumber_(row.accuracy, 0),
+      speed: normalizeLocationTrailNumber_(row.speed, 2),
+      heading: normalizeLocationTrailNumber_(row.heading, 0),
+      battery: normalizeLocationTrailNumber_(row.battery, 0),
+      event_type: String(row.event_type || 'track').trim() || 'track',
+      event_label: String(row.event_label || '').trim(),
+      visit_uid: String(row.visit_uid || '').trim(),
+      source: 'trail'
+    };
+  }
+
+  function cleanVisitPoint(row) {
+    var timestamp = String(row.data || '').trim() + 'T' + String(row.hora || '00:00').trim().slice(0, 5) + ':00';
+    return {
+      uid: String(row.uid || '').trim(),
+      timestamp: timestamp,
+      date: normalizeLocationTrailDate_(row.data || ''),
+      matricula: String(row.matricula || '').trim(),
+      nome: normalizeText_(row.agente || ''),
+      operation_mode: String(row.operation_mode || row.operational_mode || 'VD').trim() || 'VD',
+      lat: normalizeLocationTrailNumber_(row.gps_lat, 7),
+      lng: normalizeLocationTrailNumber_(row.gps_lng, 7),
+      accuracy: normalizeLocationTrailNumber_(row.gps_acc, 0),
+      speed: '',
+      heading: '',
+      battery: '',
+      event_type: 'visit',
+      event_label: [
+        String(row.logradouro || '').trim(),
+        String(row.numero || '').trim(),
+        String(row.situacao || '').trim()
+      ].filter(Boolean).join(' • '),
+      visit_uid: String(row.uid || '').trim(),
+      source: 'visit'
+    };
+  }
+
+  var cleanTrailRows = trailRows.map(cleanTrail).filter(function(row) {
+    return inRange(row.date) && row.lat !== '' && row.lng !== '';
+  });
+
+  var cleanVisitRows = visitRows.map(cleanVisitPoint).filter(function(row) {
+    return inRange(row.date) && row.lat !== '' && row.lng !== '';
+  });
+
+  var byAgent = {};
+  cleanTrailRows.concat(cleanVisitRows).forEach(function(row) {
+    var key = String(row.matricula || row.nome || 'sem_matricula').trim();
+    if (!byAgent[key]) {
+      byAgent[key] = {
+        key: key,
+        matricula: row.matricula,
+        nome: row.nome,
+        points: 0,
+        visits: 0,
+        lastTimestamp: ''
+      };
+    }
+    byAgent[key].points += row.source === 'trail' ? 1 : 0;
+    byAgent[key].visits += row.source === 'visit' ? 1 : 0;
+    if (String(row.timestamp || '') > String(byAgent[key].lastTimestamp || '')) {
+      byAgent[key].lastTimestamp = row.timestamp || '';
+      byAgent[key].lat = row.lat;
+      byAgent[key].lng = row.lng;
+      byAgent[key].operation_mode = row.operation_mode;
+    }
+  });
+
+  return {
+    ok: true,
+    generatedAt: nowIso_(),
+    date: requestedDate,
+    filter: { from: fromDate, to: toDate },
+    session: {
+      nome: normalizeText_(session.nome || ''),
+      matricula: String(session.matricula || '').trim(),
+      role: normalizeRole_(session.role || '')
+    },
+    agents: agentRows.map(function(agent) {
+      return {
+        uid: String(agent.uid || '').trim(),
+        nome: normalizeText_(agent.nome || ''),
+        matricula: String(agent.matricula || '').trim(),
+        role: normalizeRole_(agent.role || '')
+      };
+    }),
+    trail: cleanTrailRows,
+    visit_points: cleanVisitRows,
+    agent_summary: Object.keys(byAgent).map(function(key) {
+      return byAgent[key];
+    }).sort(function(a, b) {
+      return String(b.lastTimestamp || '').localeCompare(String(a.lastTimestamp || ''));
+    })
+  };
 }
 
 
@@ -2212,6 +2403,10 @@ function doPost(e) {
       return jsonResponse_(wrapPayload_(ACE_panelPrivateBundle_(payload)));
     }
 
+    if (action === 'panel_007_bundle' || action === 'agent_location_trail_private' || action === 'rota_agentes_private') {
+      return jsonResponse_(wrapPayload_(buildAgentLocationTrailBundle_(payload)));
+    }
+
     if (action === 'secretaria_bundle_private' || action === 'secretaria_private_bundle') {
       return jsonResponse_(wrapPayload_(ACE_secretariaPrivateBundle_(payload)));
     }
@@ -2359,6 +2554,7 @@ function doPost(e) {
     var visitRows = validateSyncArray_(payload.visits, 'visits');
     var tubitoRows = validateSyncArray_(payload.tubitos, 'tubitos');
     var supervisionRows = validateSyncArray_(payload.supervision_requests || payload.supervisionRequests, 'supervision_requests');
+    var locationTrailRows = validateSyncArray_(payload.location_trail || payload.locationTrail || payload.agent_location_trail, 'location_trail');
     var logRows = validateSyncArray_(payload.logs, 'logs');
     var deletedAgents = syncScope.canAdmin ? sanitizeDeletedAgentsPayload_(payload.deleted_agents || payload.deletedAgentRecords || []) : [];
     var metricsDaily = syncScope.canAdmin ? sanitizeMetricsDailyPayload_(payload.metrics_daily) : null;
@@ -2378,6 +2574,7 @@ function doPost(e) {
     var sanitizedVisits = sanitizeRowsForHeaders_(visitRows, ACE_API.HEADERS.Visitas);
     var sanitizedTubitos = sanitizeTubitoRowsForSync_(tubitoRows);
     var sanitizedSupervision = sanitizeRowsForHeaders_(supervisionRows, ACE_API.HEADERS.SupervisionRequests);
+    var sanitizedLocationTrail = sanitizeLocationTrailRowsForSync_(locationTrailRows, operationalSession);
     var sanitizedLogs = normalizeIncomingLogs_(logRows);
 
     var serverVisitValidation = validateServerVisitRowsForSync_(sanitizedVisits, operationalSession, syncScope);
@@ -2400,6 +2597,7 @@ function doPost(e) {
       visits: upsertVisitRowsPreservingLab_(sanitizedVisits),
       tubitos: upsertTubitoRowsPreservingLab_(sanitizedTubitos, sanitizedVisits),
       supervision_requests: upsertRows_(ACE_API.SHEETS.SUPERVISION, sanitizedSupervision, 'uid', ACE_API.HEADERS.SupervisionRequests),
+      location_trail: upsertRows_(ACE_API.SHEETS.LOCATION_TRAIL, sanitizedLocationTrail, 'uid', ACE_API.HEADERS.AgentLocationTrail),
       logs: appendUniqueLogRows_(sanitizedLogs)
     };
 
@@ -2429,6 +2627,10 @@ function doPost(e) {
     }
 
     var supervisionStatuses = sanitizedSupervision.map(function(row) {
+      return { uid: String(row.uid || '').trim(), ok: true, synced: true };
+    }).filter(function(row) { return !!row.uid; });
+
+    var locationTrailStatuses = sanitizedLocationTrail.map(function(row) {
       return { uid: String(row.uid || '').trim(), ok: true, synced: true };
     }).filter(function(row) { return !!row.uid; });
 
@@ -2470,6 +2672,7 @@ function doPost(e) {
         visits: counts.visits || 0,
         tubitos: counts.tubitos || 0,
         supervision_requests: counts.supervision_requests || 0,
+        location_trail: counts.location_trail || 0,
         logs: counts.logs || 0,
         metrics_daily: counts.metrics_daily || 0,
         system_state: counts.system_state || 0
@@ -2478,12 +2681,14 @@ function doPost(e) {
         visits: visitStatuses.filter(function(row) { return row && row.ok !== false; }).map(function(row) { return row.uid; }),
         tubitos: tubitoStatuses.filter(function(row) { return row && row.ok !== false; }).map(function(row) { return row.uid || row.numero_tubito; }),
         supervision_requests: supervisionStatuses.map(function(row) { return row.uid; }),
+        location_trail: locationTrailStatuses.map(function(row) { return row.uid; }),
         properties: propertyStatuses.map(function(row) { return String(row && row.uid || '').trim(); }).filter(function(uid) { return !!uid; })
       },
       property_statuses: propertyStatuses,
       visit_statuses: visitStatuses,
       tubito_statuses: tubitoStatuses,
       supervision_statuses: supervisionStatuses,
+      location_trail_statuses: locationTrailStatuses,
       errors: {
         visits_blocked: blockedVisits,
         tubitos_blocked: blockedTubitos
@@ -2524,7 +2729,7 @@ function buildStatusPayload_() {
     service: ACE_API.APP_NAME,
     version: ACE_API.VERSION,
     generatedAt: nowIso_(),
-    actions: ['status', 'status_full', 'bootstrap', 'roster', 'login_bootstrap', 'properties_catalog', 'properties', 'catalogs', 'liraa_plan', 'liraa_plan_publish', 'liraa_plan_clear', 'operation_plan', 'operation_schedule', 'operation_workday_settings', 'operation_workday_settings_save', 'operation_plan_publish', 'operation_plan_clear', 'tubitos', 'laboratorio_tubitos', 'laboratorio_resultado', 'dashboard_range', 'dashboard_summary', 'attendance_summary', 'agent_attendance', 'supervision_requests', 'supervision_request', 'supervision_request_status', 'ladder_request_status', 'backup_export', 'login', 'sync', 'restore_backup', 'reset_operational', 'reset_access', 'reset_clean_base', 'diagnose_active_spreadsheet', 'generate_demo_presentation'],
+    actions: ['status', 'status_full', 'bootstrap', 'roster', 'login_bootstrap', 'properties_catalog', 'properties', 'catalogs', 'liraa_plan', 'liraa_plan_publish', 'liraa_plan_clear', 'operation_plan', 'operation_schedule', 'operation_workday_settings', 'operation_workday_settings_save', 'operation_plan_publish', 'operation_plan_clear', 'tubitos', 'laboratorio_tubitos', 'laboratorio_resultado', 'dashboard_range', 'dashboard_summary', 'attendance_summary', 'agent_attendance', 'supervision_requests', 'panel_007_bundle', 'agent_location_trail_private', 'supervision_request', 'supervision_request_status', 'ladder_request_status', 'backup_export', 'login', 'sync', 'restore_backup', 'reset_operational', 'reset_access', 'reset_clean_base', 'diagnose_active_spreadsheet', 'generate_demo_presentation'],
     counts: getCounts_(),
     spreadsheet: spreadsheetInfo,
     system_state: {
@@ -4219,7 +4424,9 @@ function applyTextFormatForIdentityColumns_(sheet, headers) {
     hora: true,
     data_coleta: true,
     hora_coleta: true,
-    reference_date: true
+    reference_date: true,
+    timestamp: true,
+    synced_at: true
   };
   var rows = Math.max(1, sheet.getMaxRows() - 1);
   (headers || []).forEach(function(header, index) {

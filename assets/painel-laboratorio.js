@@ -3,7 +3,7 @@
 
   var root = window;
   var documentRef = document;
-  var MODULE_VERSION = '20260517-tablet-v55-final';
+  var MODULE_VERSION = '20260517-lab-tablet-a11-v56';
   var LAB_API_TIMEOUT_MS = 25000;
   var TUBITOS_KEY = 'dengue_db_tubitos_v1';
   var LAB_SESSION_KEY = 'ace_lab_admin_session_v1';
@@ -762,7 +762,52 @@
       ".lab-status.warn{background:#fffbeb;color:#92400e;border-color:#fde68a}",
       ".lab-status.error{background:#fef2f2;color:#991b1b;border-color:#fecaca}",
       "@media(max-width:920px){.lab-shell{grid-template-columns:1fr}.lab-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-table{max-height:none}}",
-      "@media(max-width:720px){.lab-detail-grid{grid-template-columns:1fr}.lab-login-shell{margin-top:18px}.lab-login-card{border-radius:24px;padding:20px}.lab-login-card::before{margin:-20px -20px 18px}.lab-session-bar{align-items:flex-start;flex-direction:column}.lab-session-bar button{width:100%;min-height:48px}.lab-action-button{width:100%;min-height:50px}}"
+      "@media(max-width:720px){.lab-detail-grid{grid-template-columns:1fr}.lab-login-shell{margin-top:18px}.lab-login-card{border-radius:24px;padding:20px}.lab-login-card::before{margin:-20px -20px 18px}.lab-session-bar{align-items:flex-start;flex-direction:column}.lab-session-bar button{width:100%;min-height:48px}.lab-action-button{width:100%;min-height:50px}}",
+      "/* ACE Laboratório tablet A11 v56 */",
+      ":root{--lab-touch:46px;--lab-radius:16px;--lab-shadow-soft:0 10px 22px rgba(24,60,44,.07)}",
+      ".lab-login-shell,.lab-shell{width:100%;max-width:1040px;margin-left:auto;margin-right:auto;padding-left:0!important;padding-right:0!important}",
+      ".lab-shell{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.82fr);gap:12px;align-items:start}",
+      ".lab-card{border-radius:18px;padding:13px;box-shadow:var(--lab-shadow-soft);background:linear-gradient(180deg,#fff,#f8fbf9)}",
+      ".lab-card::before{height:3px;margin:-13px -13px 12px;background:linear-gradient(90deg,#128044,#4c7cc5 62%,#c78615)}",
+      ".lab-login-shell{max-width:480px;margin-top:16px}",
+      ".lab-login-card{border-radius:22px;padding:20px;box-shadow:0 16px 34px rgba(24,60,44,.12)}",
+      ".lab-login-card::before{height:4px;margin:-20px -20px 16px}",
+      ".lab-login-card h2{font-size:1.28rem}",
+      ".lab-login-card p{font-size:.9rem;margin-bottom:14px}",
+      ".lab-login-form{gap:10px}",
+      ".lab-login-form input,.lab-form input,.lab-form select,.lab-form textarea,.lab-toolbar input{min-height:var(--lab-touch);border-radius:13px;padding:10px 12px;font-size:.95rem}",
+      ".lab-session-bar{position:sticky;top:64px;z-index:35;margin:0 0 10px;padding:9px 11px;border-radius:15px;box-shadow:0 8px 18px rgba(24,60,44,.08);background:linear-gradient(180deg,#ecfdf5,#e4f4eb)}",
+      ".lab-session-stack>span:first-child{font-size:.86rem;line-height:1.2}",
+      ".lab-session-meta{font-size:.72rem;padding:3px 8px}",
+      ".lab-session-bar button,#labLogoutBtn{min-height:38px;border-radius:11px;padding:0 14px;background:#c62828!important;color:#fff!important;font-weight:950;box-shadow:0 8px 18px rgba(198,40,40,.20)}",
+      ".lab-head{gap:9px;margin-bottom:9px}",
+      ".lab-head strong{font-size:1rem}",
+      ".lab-head span{font-size:.78rem;line-height:1.25}",
+      ".lab-head-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;min-width:min(330px,100%)}",
+      ".lab-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:8px 0 10px}",
+      ".lab-stat{min-height:62px;border-radius:14px;padding:9px 10px;box-shadow:0 8px 16px rgba(24,60,44,.045)}",
+      ".lab-stat::before{height:3px}",
+      ".lab-stat small{font-size:.67rem;line-height:1.05;letter-spacing:.02em}",
+      ".lab-stat strong{font-size:1.2rem;line-height:1.05}",
+      ".lab-toolbar{margin-bottom:9px}",
+      ".lab-table{gap:7px;max-height:calc(100vh - 312px);padding-right:2px}",
+      ".lab-row{border-left-width:4px;border-radius:14px;padding:9px 10px;box-shadow:0 7px 14px rgba(24,60,44,.045)}",
+      ".lab-row strong{font-size:.98rem;line-height:1.15}",
+      ".lab-row span{font-size:.76rem;line-height:1.22;margin-top:3px}",
+      ".lab-row small{margin-top:6px;padding:4px 7px;font-size:.68rem;line-height:1.05}",
+      ".lab-form{gap:8px}",
+      ".lab-form label{font-size:.78rem;line-height:1.2}",
+      ".lab-form textarea{min-height:72px}",
+      ".lab-action-button{min-height:var(--lab-touch);border-radius:13px;padding:10px 13px;font-size:.9rem;box-shadow:0 9px 20px rgba(24,60,44,.16)}",
+      ".lab-action-button-soft{box-shadow:none!important}",
+      ".lab-detail-grid{gap:7px}",
+      ".lab-detail-card{border-radius:13px;padding:10px;box-shadow:0 7px 14px rgba(24,60,44,.035)}",
+      ".lab-detail-card small{font-size:.66rem;line-height:1.1}",
+      ".lab-detail-card strong,.lab-detail-card span{font-size:.82rem;line-height:1.22}",
+      ".lab-status{margin-top:8px;border-radius:13px;padding:9px 10px;font-size:.82rem;line-height:1.25}",
+      "@media(max-width:980px){.lab-shell{grid-template-columns:1fr;gap:10px}.lab-table{max-height:none}.lab-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.lab-form{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lab-form label:last-of-type,.lab-form button,.lab-status{grid-column:1/-1}.lab-card{padding:12px}.lab-card::before{margin:-12px -12px 12px}.lab-session-bar{top:60px}.lab-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}",
+      "@media(max-width:760px){.lab-session-bar{top:55px;align-items:stretch;display:grid;grid-template-columns:minmax(0,1fr) 86px}.lab-session-bar button{width:100%}.lab-head{display:grid;grid-template-columns:1fr;align-items:stretch}.lab-head-actions{width:100%;min-width:0}.lab-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-form{grid-template-columns:1fr}.lab-form label:last-of-type,.lab-form button,.lab-status{grid-column:auto}.lab-detail-grid{grid-template-columns:1fr}.lab-action-button{width:100%}.lab-row span:nth-of-type(2){display:none}}",
+      "@media(max-width:430px){.lab-session-bar{grid-template-columns:1fr}.lab-head-actions{grid-template-columns:1fr}.lab-stat strong{font-size:1.08rem}.lab-toolbar input{font-size:.88rem}.lab-login-card{padding:16px}.lab-login-card::before{margin:-16px -16px 14px}}"
     ].join('\n');
     documentRef.head.appendChild(style);
   }

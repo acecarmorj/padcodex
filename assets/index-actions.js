@@ -637,6 +637,7 @@
         imoveis: app.readProperties(),
         tubitos: typeof app.readTubitos === 'function' ? app.readTubitos() : [],
         solicitacoesSupervisao: typeof app.readSupervisionRequests === 'function' ? app.readSupervisionRequests() : [],
+        rastreioAgentes: typeof app.readLocationTrail === 'function' ? app.readLocationTrail() : [],
         agentes: app.readAgents(),
         logs: app.readLogs(),
         dirtyProperties: typeof app.readDirtyPropertyIds === 'function' ? app.readDirtyPropertyIds() : [],
@@ -650,7 +651,7 @@
   app.exportLocalBackupJson = function () {
     var payload = app.buildLocalBackupPayload();
     var summary = payload.fila || {};
-    var message = 'O backup local contém visitas, imóveis, tubitos, GPS, supervisão e dados de fila deste aparelho.' +
+    var message = 'O backup local contém visitas, imóveis, tubitos, GPS, rastreio de rota, supervisão e dados de fila deste aparelho.' +
       '\n\nPendentes totais: ' + (summary.total || 0) +
       '\n\nUse apenas para contingência ou suporte autorizado. Deseja gerar o arquivo agora?';
     if (!window.confirm(message)) {
@@ -705,6 +706,197 @@
     app.state.visit.gps = cachedGps;
     app.applyGpsTerritoryContext();
     return true;
+  };
+
+
+  app.toLocationTrailGps = function (gps) {
+    if (!gps) { return null; }
+    var lat = Number(gps.lat !== undefined ? gps.lat : gps.latitude);
+    var lng = Number(gps.lng !== undefined ? gps.lng : gps.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return null;
+    }
+    return {
+      lat: lat,
+      lng: lng,
+      accuracy: Math.round(Number(gps.accuracy || gps.acc || 0) || 0),
+      speed: gps.speed !== undefined && gps.speed !== null ? gps.speed : '',
+      heading: gps.heading !== undefined && gps.heading !== null ? gps.heading : ''
+    };
+  };
+
+  app.locationTrailDistanceMeters = function (a, b) {
+    var pointA = app.toLocationTrailGps(a);
+    var pointB = app.toLocationTrailGps(b);
+    var earthRadius = 6371000;
+    var dLat;
+    var dLng;
+    var lat1;
+    var lat2;
+    var h;
+    if (!pointA || !pointB) { return Infinity; }
+    dLat = (pointB.lat - pointA.lat) * Math.PI / 180;
+    dLng = (pointB.lng - pointA.lng) * Math.PI / 180;
+    lat1 = pointA.lat * Math.PI / 180;
+    lat2 = pointB.lat * Math.PI / 180;
+    h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * earthRadius * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  };
+
+  app.buildLocationTrailPoint = function (gps, eventType, extra) {
+    var normalizedGps = app.toLocationTrailGps(gps);
+    var agent = app.state.currentAgent || app.readSession() || {};
+    var now = new Date();
+    var payload = extra || {};
+    if (!normalizedGps || !agent || !String(agent.matricula || agent.nome || '').trim()) {
+      return null;
+    }
+    return {
+      uid: app.createId('TRK'),
+      timestamp: now.toISOString(),
+      date: app.todayISO ? app.todayISO() : now.toISOString().slice(0, 10),
+      matricula: agent.matricula || '',
+      nome: agent.nome || '',
+      operationMode: app.getCurrentOperationModeLabel ? app.getCurrentOperationModeLabel() : (app.state.visit && app.state.visit.operationMode || 'VD'),
+      lat: normalizedGps.lat,
+      lng: normalizedGps.lng,
+      accuracy: normalizedGps.accuracy,
+      speed: normalizedGps.speed,
+      heading: normalizedGps.heading,
+      battery: app.state.lastBatteryLevel !== undefined ? app.state.lastBatteryLevel : '',
+      eventType: eventType || 'track',
+      eventLabel: payload.eventLabel || payload.label || '',
+      visitUid: payload.visitUid || payload.visit_uid || '',
+      synced: false
+    };
+  };
+
+  app.shouldStoreLocationTrailPoint = function (point) {
+    var rows = typeof app.readLocationTrail === 'function' ? app.readLocationTrail() : [];
+    var last = rows.find(function (row) {
+      return row && row.matricula === point.matricula && row.date === point.date;
+    });
+    var eventType = String(point.eventType || 'track');
+    var minMs = Number(app.CONFIG.LOCATION_TRAIL_MIN_INTERVAL_MS || 60000);
+    var minMeters = Number(app.CONFIG.LOCATION_TRAIL_MIN_DISTANCE_METERS || 18);
+    var lastTime;
+    if (!last) { return true; }
+    if (eventType !== 'track') { return true; }
+    lastTime = Date.parse(last.timestamp || '') || 0;
+    if (Date.now() - lastTime >= minMs * 2) { return true; }
+    return app.locationTrailDistanceMeters(last, point) >= minMeters;
+  };
+
+  app.saveLocationTrailFromGps = function (gps, eventType, extra) {
+    var point = app.buildLocationTrailPoint(gps, eventType, extra);
+    if (!point || typeof app.addLocationTrailPoint !== 'function') {
+      return null;
+    }
+    if (!app.shouldStoreLocationTrailPoint(point)) {
+      return null;
+    }
+    app.addLocationTrailPoint(point);
+    app.touchPendingSync('location-trail');
+    return point;
+  };
+
+  app.recordLocationTrailPoint = function (eventType, gps, extra) {
+    var knownGps = gps || (app.readSystemState && app.readSystemState().lastKnownGps) || null;
+    if (knownGps && app.saveLocationTrailFromGps(knownGps, eventType, extra)) {
+      return Promise.resolve(true);
+    }
+    if (!navigator.geolocation) {
+      return Promise.resolve(false);
+    }
+    return new Promise(function (resolve) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        var point = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          speed: position.coords.speed,
+          heading: position.coords.heading
+        };
+        app.saveSystemState({
+          gpsPermissionState: 'granted',
+          lastKnownGps: Object.assign({}, app.toLocationTrailGps(point), {
+            capturedAt: new Date().toISOString(),
+            source: eventType || 'track'
+          })
+        });
+        app.saveLocationTrailFromGps(point, eventType || 'track', extra || {});
+        resolve(true);
+      }, function (error) {
+        if (error && error.code === 1) {
+          app.saveSystemState({ gpsPermissionState: 'denied' });
+        }
+        resolve(false);
+      }, {
+        enableHighAccuracy: true,
+        timeout: Number(app.CONFIG.LOCATION_TRAIL_GPS_TIMEOUT_MS || 12000),
+        maximumAge: Number(app.CONFIG.LOCATION_TRAIL_MAXIMUM_AGE_MS || 45000)
+      });
+    });
+  };
+
+  app.refreshBatteryForTrail = function () {
+    if (!navigator.getBattery) {
+      return;
+    }
+    navigator.getBattery().then(function (battery) {
+      app.state.lastBatteryLevel = Math.round(Number(battery.level || 0) * 100);
+    }).catch(function () {});
+  };
+
+  app.startAgentLocationTrail = function () {
+    if (app.state.locationTrailActive || !navigator.geolocation || !app.state.currentAgent) {
+      return false;
+    }
+    app.state.locationTrailActive = true;
+    app.refreshBatteryForTrail();
+    app.recordLocationTrailPoint('login', null, { eventLabel: 'Entrada no app' });
+    app.state.locationTrailTimer = window.setInterval(function () {
+      if (!app.state.currentAgent) {
+        app.stopAgentLocationTrail();
+        return;
+      }
+      app.refreshBatteryForTrail();
+      app.recordLocationTrailPoint('track', null, {});
+    }, Number(app.CONFIG.LOCATION_TRAIL_INTERVAL_MS || 120000));
+    try {
+      app.state.locationTrailWatchId = navigator.geolocation.watchPosition(function (position) {
+        app.saveLocationTrailFromGps({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          speed: position.coords.speed,
+          heading: position.coords.heading
+        }, 'track', {});
+      }, function () {}, {
+        enableHighAccuracy: true,
+        maximumAge: Number(app.CONFIG.LOCATION_TRAIL_MAXIMUM_AGE_MS || 45000),
+        timeout: Number(app.CONFIG.LOCATION_TRAIL_GPS_TIMEOUT_MS || 12000)
+      });
+    } catch (error) {
+      app.state.locationTrailWatchId = null;
+    }
+    return true;
+  };
+
+  app.stopAgentLocationTrail = function (eventType) {
+    if (app.state.locationTrailTimer) {
+      window.clearInterval(app.state.locationTrailTimer);
+      app.state.locationTrailTimer = null;
+    }
+    if (app.state.locationTrailWatchId !== null && app.state.locationTrailWatchId !== undefined && navigator.geolocation) {
+      try { navigator.geolocation.clearWatch(app.state.locationTrailWatchId); } catch (error) {}
+    }
+    app.state.locationTrailWatchId = null;
+    app.state.locationTrailActive = false;
+    if (eventType) {
+      app.recordLocationTrailPoint(eventType, null, { eventLabel: eventType === 'logout' ? 'Saída do app' : '' });
+    }
   };
 
   app.maybeCaptureGpsOnEnter = function () {
@@ -1074,6 +1266,9 @@
         lastKnownGps: Object.assign({}, app.state.visit.gps, {
           capturedAt: new Date().toISOString()
         })
+      });
+      app.saveLocationTrailFromGps(app.state.visit.gps, purpose === 'focus' ? 'focus' : 'gps_capture', {
+        eventLabel: purpose === 'focus' ? 'Foco marcado' : 'GPS capturado'
       });
       app.refreshGpsDrivenViews();
       if (withFeedback !== false) {
@@ -2265,6 +2460,10 @@
     }
 
     app.addLog('visit', index > -1 ? 'update' : 'create', record.uid, record.logradouro + ', ' + record.numero + ' • ' + record.situacao);
+    app.saveLocationTrailFromGps(record.gps || (app.readSystemState && app.readSystemState().lastKnownGps), 'visit', {
+      visitUid: record.uid,
+      eventLabel: (record.logradouro || '') + ', ' + (record.numero || '') + ' • ' + (record.situacao || '')
+    });
     app.touchPendingSync('visit');
     var pendingAfterSave = app.getUnsyncedVisits().length;
     var tubitoCodes = generatedTubitos.map(function (row) {
@@ -2323,6 +2522,7 @@
     var pendingTubitos = app.readTubitos().filter(function (row) {
       return row.synced === false;
     });
+    var pendingLocationTrail = typeof app.getUnsyncedLocationTrail === 'function' ? app.getUnsyncedLocationTrail() : [];
     var validTubitos = [];
     var tubitoValidationErrors = [];
 
@@ -2547,6 +2747,26 @@
           gps_quarteirao: row.gpsQuarteirao,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt
+        };
+      }),
+      location_trail: pendingLocationTrail.map(function (row) {
+        return {
+          uid: row.uid,
+          timestamp: row.timestamp,
+          date: row.date,
+          matricula: row.matricula,
+          nome: row.nome,
+          operation_mode: row.operationMode || 'VD',
+          lat: row.lat,
+          lng: row.lng,
+          accuracy: row.accuracy,
+          speed: row.speed,
+          heading: row.heading,
+          battery: row.battery,
+          event_type: row.eventType || 'track',
+          event_label: row.eventLabel || '',
+          visit_uid: row.visitUid || '',
+          synced_at: row.syncedAt || ''
         };
       }),
       metrics_daily: canSyncAdministrativeData ? app.buildMetricsForSync() : null,
@@ -3456,7 +3676,9 @@
     var pendingLogIds = {};
     var pendingTubitoIds = {};
     var pendingSupervisionRequests = typeof app.getUnsyncedSupervisionRequests === 'function' ? app.getUnsyncedSupervisionRequests() : [];
+    var pendingLocationTrail = typeof app.getUnsyncedLocationTrail === 'function' ? app.getUnsyncedLocationTrail() : [];
     var pendingSupervisionIds = {};
+    var pendingLocationTrailIds = {};
     var dirtyPropertyIds = app.readDirtyPropertyIds ? app.readDirtyPropertyIds().slice() : [];
     pending.forEach(function (visit) {
       if (visit.uid) {
@@ -3471,6 +3693,11 @@
     pendingSupervisionRequests.forEach(function (row) {
       if (row && row.uid) {
         pendingSupervisionIds[row.uid] = true;
+      }
+    });
+    pendingLocationTrail.forEach(function (row) {
+      if (row && row.uid) {
+        pendingLocationTrailIds[row.uid] = true;
       }
     });
     app.getUnsyncedLogs().forEach(function (logEntry) {
@@ -3498,7 +3725,7 @@
       ? syncPayload.sync_validation.tubitos_blocked
       : [];
     var hasPendingState = !!systemState.pendingSync;
-    var pendingTotal = syncPayload.visits.length + syncPayload.tubitos.length + pendingSupervisionRequests.length + dirtyPropertyIds.length;
+    var pendingTotal = syncPayload.visits.length + syncPayload.tubitos.length + pendingSupervisionRequests.length + (syncPayload.location_trail || []).length + dirtyPropertyIds.length;
     var blockedTotal = blockedVisits.length + blockedTubitos.length;
     var visiblePendingTotal = pendingTotal + blockedTotal;
     app.setSyncChip((visiblePendingTotal || hasPendingState) ? ('Sincronizando ' + visiblePendingTotal) : 'Sem pendência', (visiblePendingTotal || hasPendingState) ? 'accent' : 'ok');
@@ -3542,6 +3769,7 @@
       var visitStatuses = Array.isArray(payload.visit_statuses) ? payload.visit_statuses : null;
       var tubitoStatuses = Array.isArray(payload.tubito_statuses) ? payload.tubito_statuses : null;
       var supervisionStatuses = Array.isArray(payload.supervision_statuses) ? payload.supervision_statuses : null;
+      var locationTrailStatuses = Array.isArray(payload.location_trail_statuses) ? payload.location_trail_statuses : null;
       var statusByUid = {};
       var tubitoStatusByUid = {};
       var supervisionStatusByUid = {};
@@ -3604,6 +3832,19 @@
           app.markSupervisionRequestsSyncedByUid(pendingSupervisionIds);
         }
       }
+      if (pendingLocationTrail.length && typeof app.markLocationTrailSyncedByUid === 'function') {
+        if (locationTrailStatuses) {
+          var syncedTrailIds = {};
+          locationTrailStatuses.forEach(function (item) {
+            if (item && item.uid && item.ok !== false) {
+              syncedTrailIds[item.uid] = true;
+            }
+          });
+          app.markLocationTrailSyncedByUid(syncedTrailIds);
+        } else {
+          app.markLocationTrailSyncedByUid(pendingLocationTrailIds);
+        }
+      }
       var propertyStatusResult = typeof app.applyPropertySyncStatuses === 'function'
         ? app.applyPropertySyncStatuses(Array.isArray(payload.property_statuses) ? payload.property_statuses : [])
         : { cleared: dirtyPropertyIds.slice(), conflicts: 0 };
@@ -3615,7 +3856,7 @@
       }
       app.state.nextAutoSyncAt = 0;
       app.saveSystemState({ lastSyncAt: new Date().toISOString(), lastSyncError: '', pendingSync: false, pendingReason: '', deletedAgentRecords: [] });
-      app.addLog('sync', 'success', '', pending.length + ' visita(s), ' + pendingTubitos.length + ' tubito(s) e ' + pendingSupervisionRequests.length + ' solicitação(ões) de supervisão enviados.');
+      app.addLog('sync', 'success', '', pending.length + ' visita(s), ' + pendingTubitos.length + ' tubito(s), ' + pendingSupervisionRequests.length + ' supervisão(ões) e ' + pendingLocationTrail.length + ' ponto(s) de rota enviados.');
       app.setSyncChip('Sincronizado', 'ok');
       app.state.syncInFlight = false;
       app.renderAll();
@@ -3725,6 +3966,7 @@
             source: 'supervision_request'
           })
         });
+        app.saveLocationTrailFromGps(gps, 'supervision', { eventLabel: 'Solicitação de supervisão' });
         resolve({ gps: gps, territory: territory });
       }).catch(function (error) {
         if (error && error.code === 1) {
@@ -4655,6 +4897,7 @@
       } catch (error) {}
     }
     app.maybeCaptureGpsOnEnter();
+    app.startAgentLocationTrail();
     greeting = app.getDailyLoginGreeting(app.state.currentAgent);
     app.showMessage(greeting, 'accent');
   };
@@ -4697,6 +4940,7 @@
     if (typeof app.clearPropertyForm === 'function') {
       app.clearPropertyForm();
     }
+    app.stopAgentLocationTrail('logout');
     app.state.currentAgent = null;
     app.state.selectedScreen = 'painel';
     app.resetRoutineState();
@@ -5157,6 +5401,9 @@
       app.showMessage('Sem internet. Os registros serão salvos no tablet e enviados depois. Não limpe os dados do app antes de sincronizar.', 'danger');
     });
     window.addEventListener('beforeunload', function (event) {
+      if (app.state.currentAgent && typeof app.recordLocationTrailPoint === 'function') {
+        app.recordLocationTrailPoint('app_close', null, { eventLabel: 'App fechado' });
+      }
       var summary = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { total: app.getUnsyncedVisits().length };
       if (Number(summary.total || 0) > 0) {
         event.preventDefault();

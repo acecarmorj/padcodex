@@ -1,11 +1,11 @@
 {
   "name": "ACE Campo",
   "short_name": "ACE Campo",
-  "start_url": "./index.html?v=20260517-tablet-v55-final",
+  "start_url": "./index.html?v=20260517-007-v57",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f8f5",
-  "theme_color": "#073b24",
-  "description": "Aplicativo de campo dos Agentes de Combate as Endemias com operacao offline.",
-  "version": "20260517-tablet-v55-final"
+  "background_color": "#edf4f0",
+  "theme_color": "#0b4f2f",
+  "description": "Aplicativo ACE Campo com trilha offline dos agentes e Painel 007 de rotas.",
+  "version": "20260517-007-v57"
 }

@@ -9,7 +9,7 @@
    */
   window.ACS_RUNTIME_CONFIG = Object.assign({}, window.ACS_RUNTIME_CONFIG || {}, {
 
-    BUILD_VERSION: '20260517-tablet-v55-final',
+    BUILD_VERSION: '20260517-007-v57',
     API_URL: API_URL,
     SHEETS_WEBAPP_URL: API_URL,
     API_TOKEN: '',
@@ -17,6 +17,6 @@
     ACE_LAB_ACCESS_KEY: '',
     MAP_CENTER: [-21.9325, -42.6075],
     MAP_ZOOM: 13,
-    FRONTEND_PATCH: 'agent-tablet-a11-offline-v55-final'
+    FRONTEND_PATCH: 'painel-007-trilha-agentes-v57'
   });
 }());

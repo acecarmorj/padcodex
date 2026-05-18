@@ -1,10 +1,10 @@
 /* ACE Campo - service worker offline
  * Garante abertura 100% offline somente do INDEX após o primeiro carregamento online.
- * Painel, Laboratório, Secretaria e Supervisão devem depender da rede.
+ * Painel, 007, Laboratório, Secretaria e Supervisão dependem da rede para dados da Nuvem.
  */
 'use strict';
 
-const ACE_CACHE_VERSION = 'ace-campo-offline-20260517-tablet-v55-final';
+const ACE_CACHE_VERSION = 'ace-campo-offline-20260517-007-v57';
 const ACE_CACHE_NAME = ACE_CACHE_VERSION;
 const ACE_LEGACY_BRAND_ASSETS = [
   './assets/logo-prefeitura-carmo.png',
@@ -14,6 +14,7 @@ const ACE_LEGACY_BRAND_ASSETS = [
 const ACE_STATIC_ASSETS = [
   './',
   './index.html',
+  './007.html',
   './manifest.webmanifest',
   './sw-acs.js',
   './assets/ace-theme.css',

@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#073b24">
+  <title>ACE 007 | Rota dos Agentes</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --green-950: #052e1c;
+      --green-900: #073b24;
+      --green-800: #0b4f2f;
+      --green-700: #0f6f3d;
+      --green-600: #128044;
+      --red-700: #c62828;
+      --blue-700: #2563eb;
+      --amber-700: #b7791f;
+      --bg: #eef6f1;
+      --card: #ffffff;
+      --text: #17231d;
+      --muted: #6b7780;
+      --line: rgba(7, 59, 36, .14);
+      --shadow: 0 18px 44px rgba(7, 59, 36, .14);
+      --soft-shadow: 0 10px 24px rgba(7, 59, 36, .09);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * { box-sizing: border-box; min-width: 0; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(18, 128, 68, .14), transparent 26rem),
+        linear-gradient(180deg, #eaf4ee 0%, var(--bg) 18rem, #f8fbf9 100%);
+      overflow-x: hidden;
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; border: 0; }
+    .hidden { display: none !important; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 16px;
+      color: #fff;
+      background:
+        linear-gradient(120deg, rgba(5, 46, 28, .98), rgba(11, 79, 47, .98) 58%, rgba(15, 111, 61, .96)),
+        radial-gradient(circle at top right, rgba(255, 255, 255, .10), transparent 32%);
+      box-shadow: 0 12px 30px rgba(5, 46, 28, .25);
+    }
+
+    .brand {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand strong {
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      letter-spacing: -.02em;
+      line-height: 1.05;
+    }
+
+    .brand span {
+      color: rgba(243, 250, 246, .82);
+      font-size: .82rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill,
+    .action-btn {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 0 14px;
+      font-weight: 900;
+      font-size: .82rem;
+      white-space: nowrap;
+    }
+
+    .pill {
+      background: rgba(255, 255, 255, .13);
+      border: 1px solid rgba(255, 255, 255, .16);
+      color: #ecfdf5;
+    }
+
+    .action-btn {
+      background: #fff;
+      color: var(--green-900);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .action-btn.primary { background: var(--green-600); color: #fff; }
+    .action-btn.danger { background: var(--red-700); color: #fff; }
+    .action-btn.blue { background: var(--blue-700); color: #fff; }
+
+    .app {
+      height: calc(100vh - 62px);
+      min-height: 620px;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .panel,
+    .map-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .panel-head {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f3faf6);
+    }
+
+    .panel-head h1 {
+      margin: 0;
+      font-size: 1.08rem;
+      letter-spacing: -.02em;
+    }
+
+    .panel-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: .68rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 40px;
+      padding: 0 10px;
+      border: 1px solid rgba(7, 59, 36, .18);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      font-weight: 800;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(18, 128, 68, .60);
+      box-shadow: 0 0 0 4px rgba(18, 128, 68, .13);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .metric {
+      min-height: 62px;
+      display: grid;
+      gap: 4px;
+      align-content: center;
+      padding: 9px;
+      border: 1px solid rgba(7, 59, 36, .10);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #fff, #f6fbf8);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: .66rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .metric strong {
+      font-size: 1.28rem;
+      line-height: 1;
+      color: var(--green-900);
+    }
+
+    .agent-list {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .agent-card {
+      display: grid;
+      grid-template-columns: 12px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(7, 59, 36, .11);
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(7, 59, 36, .06);
+    }
+
+    .agent-card.active {
+      border-color: rgba(18, 128, 68, .50);
+      box-shadow: 0 0 0 4px rgba(18, 128, 68, .10);
+    }
+
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      margin-top: 3px;
+      background: var(--green-600);
+    }
+
+    .agent-card strong {
+      display: block;
+      font-size: .95rem;
+      line-height: 1.16;
+    }
+
+    .agent-card small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
+    .agent-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      min-height: 24px;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 8px;
+      color: #31503e;
+      background: #eef8f2;
+      border: 1px solid rgba(7, 59, 36, .10);
+      font-size: .7rem;
+      font-weight: 900;
+    }
+
+    .tag.warn { background: #fff7ed; color: #92400e; }
+    .tag.blue { background: #eff6ff; color: #1d4ed8; }
+
+    .map-card {
+      position: relative;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+    }
+
+    #map {
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      background: #dfeee5;
+    }
+
+    .map-footer {
+      min-height: 50px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.98);
+    }
+
+    .status {
+      flex: 1;
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .legend {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+
+    .legend::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--green-600);
+    }
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        radial-gradient(circle at top left, rgba(18, 128, 68, .28), transparent 28rem),
+        linear-gradient(135deg, #031b11, #073b24 58%, #0f6f3d);
+    }
+
+    .login-card {
+      width: min(430px, 100%);
+      padding: 24px;
+      border-radius: 26px;
+      background: #fff;
+      color: var(--text);
+      box-shadow: 0 26px 70px rgba(0,0,0,.35);
+    }
+
+    .login-card h2 {
+      margin: 0;
+      font-size: 1.55rem;
+      letter-spacing: -.03em;
+    }
+
+    .login-card p {
+      margin: 8px 0 18px;
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.42;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .login-form input {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 1px solid rgba(7, 59, 36, .18);
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .login-form button {
+      min-height: 48px;
+      border-radius: 14px;
+      background: var(--green-800);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1rem;
+    }
+
+    .login-message {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: .86rem;
+      font-weight: 800;
+    }
+
+    .login-message.error { color: #b91c1c; }
+    .login-message.ok { color: #166534; }
+
+    .leaflet-popup-content {
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 980px) {
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+      }
+
+      .top-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        width: 100%;
+      }
+
+      .pill,
+      .action-btn {
+        min-height: 36px;
+        padding-inline: 8px;
+        border-radius: 12px;
+        font-size: .75rem;
+      }
+
+      .app {
+        height: auto;
+        min-height: calc(100vh - 116px);
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+
+      .map-card {
+        min-height: 58vh;
+        order: 1;
+      }
+
+      .panel {
+        order: 2;
+        max-height: none;
+      }
+
+      #map {
+        min-height: 58vh;
+      }
+
+      .filters {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(3, 1fr);
+        padding: 10px;
+      }
+
+      .agent-list {
+        max-height: 42vh;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .top-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+      .filters {
+        grid-template-columns: 1fr;
+      }
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <strong>ACE 007 | Rota dos Agentes</strong>
+      <span>Mapa de rastreio offline sincronizado: tablet em campo, computador na coordenação.</span>
+    </div>
+    <div class="top-actions">
+      <span class="pill" id="sessionLabel">Coordenação</span>
+      <button class="action-btn primary" id="refreshBtn" type="button">Atualizar</button>
+      <button class="action-btn blue" id="playBtn" type="button">Reproduzir</button>
+      <button class="action-btn" id="fitBtn" type="button">Centralizar</button>
+      <button class="action-btn danger" id="logoutBtn" type="button">Sair</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <aside class="panel">
+      <div class="panel-head">
+        <h1>Agentes e linha do tempo</h1>
+        <p>Selecione uma data e um agente. A rota usa pontos gravados no app do agente e, quando não houver trilha, usa as visitas com GPS como fallback.</p>
+        <div class="filters">
+          <div class="field">
+            <label for="dateInput">Data</label>
+            <input id="dateInput" type="date">
+          </div>
+          <div class="field">
+            <label for="agentSelect">Agente</label>
+            <select id="agentSelect">
+              <option value="">Todos</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <section class="metrics">
+        <div class="metric"><span>Agentes</span><strong id="metricAgents">0</strong></div>
+        <div class="metric"><span>Pontos</span><strong id="metricPoints">0</strong></div>
+        <div class="metric"><span>Visitas GPS</span><strong id="metricVisits">0</strong></div>
+      </section>
+
+      <section class="agent-list" id="agentList"></section>
+    </aside>
+
+    <section class="map-card">
+      <div id="map"></div>
+      <footer class="map-footer">
+        <div class="status" id="statusText">Faça login para carregar o Painel 007.</div>
+        <span class="legend">Trilha do agente</span>
+      </footer>
+    </section>
+  </main>
+
+  <section class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <h2>Entrar no ACE 007</h2>
+      <p>Use CPF e senha de perfil Coordenador ou Administrador. A sessão é separada do app do agente.</p>
+      <form class="login-form" id="loginForm">
+        <input id="loginCpf" inputmode="numeric" autocomplete="username" placeholder="CPF">
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Senha">
+        <button id="loginSubmit" type="submit">Entrar</button>
+        <div class="login-message" id="loginMessage"></div>
+      </form>
+    </div>
+  </section>
+
+  <script src="./assets/runtime-config.js?v=20260517-007-v57"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var CFG = window.ACS_RUNTIME_CONFIG || {};
+      var API_URL = String(CFG.API_URL || CFG.SHEETS_WEBAPP_URL || '').trim();
+      var SESSION_KEY = 'ace_007_session_v1';
+      var COLORS = ['#128044', '#2563eb', '#c2410c', '#7c3aed', '#0891b2', '#be123c', '#4d7c0f', '#b45309', '#0f766e', '#4338ca'];
+      var map;
+      var layers = [];
+      var agentData = [];
+      var selectedAgent = '';
+      var animationMarker = null;
+      var animationTimer = null;
+
+      function $(id) { return document.getElementById(id); }
+
+      function todayISO() {
+        var d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+
+      function cleanCpf(value) {
+        return String(value || '').replace(/\D+/g, '').slice(0, 11);
+      }
+
+      function setStatus(text) {
+        $('statusText').textContent = text || '';
+      }
+
+      function setLoginMessage(text, kind) {
+        var node = $('loginMessage');
+        node.textContent = text || '';
+        node.className = 'login-message' + (kind ? ' ' + kind : '');
+      }
+
+      function getSession() {
+        try {
+          return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function saveSession(session) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session || {}));
+      }
+
+      function clearSession() {
+        localStorage.removeItem(SESSION_KEY);
+      }
+
+      function apiPost(payload) {
+        if (!API_URL) {
+          return Promise.reject(new Error('API não configurada em assets/runtime-config.js.'));
+        }
+        return fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+            Accept: 'application/json'
+          },
+          body: JSON.stringify(payload || {})
+        }).then(function (response) {
+          if (!response.ok) {
+            throw new Error('Falha de comunicação com a API.');
+          }
+          return response.json();
+        }).then(function (json) {
+          if (!json || json.ok === false) {
+            throw new Error((json && (json.error || json.message)) || 'A API não confirmou a operação.');
+          }
+          return json;
+        });
+      }
+
+      function initMap() {
+        if (map || !window.L) { return; }
+        var center = Array.isArray(CFG.MAP_CENTER) ? CFG.MAP_CENTER : [-21.9325, -42.6075];
+        map = L.map('map', { zoomControl: true }).setView(center, Number(CFG.MAP_ZOOM || 13));
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+      }
+
+      function clearLayers() {
+        layers.forEach(function (layer) {
+          try { map.removeLayer(layer); } catch (error) {}
+        });
+        layers = [];
+        if (animationMarker) {
+          try { map.removeLayer(animationMarker); } catch (error) {}
+          animationMarker = null;
+        }
+        if (animationTimer) {
+          clearInterval(animationTimer);
+          animationTimer = null;
+        }
+      }
+
+      function toTime(text) {
+        var date = new Date(text);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+        var match = String(text || '').match(/T(\d{2}:\d{2})/);
+        return match ? match[1] : '--:--';
+      }
+
+      function agentKey(row) {
+        return String(row.matricula || row.nome || 'sem_matricula').trim();
+      }
+
+      function normalizePoint(row) {
+        var lat = Number(row.lat);
+        var lng = Number(row.lng);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+          return null;
+        }
+        return Object.assign({}, row, {
+          lat: lat,
+          lng: lng,
+          timestamp: String(row.timestamp || row.date || ''),
+          matricula: String(row.matricula || '').trim(),
+          nome: String(row.nome || '').trim(),
+          event_type: String(row.event_type || row.eventType || row.source || 'track').trim()
+        });
+      }
+
+      function groupByAgent(payload) {
+        var allPoints = [];
+        var groups = {};
+        (payload.trail || []).forEach(function (row) {
+          var point = normalizePoint(Object.assign({ source: 'trail' }, row));
+          if (point) { allPoints.push(point); }
+        });
+        (payload.visit_points || []).forEach(function (row) {
+          var point = normalizePoint(Object.assign({ source: 'visit' }, row));
+          if (point) { allPoints.push(point); }
+        });
+        allPoints.sort(function (a, b) {
+          return String(a.timestamp || '').localeCompare(String(b.timestamp || ''));
+        });
+        allPoints.forEach(function (point) {
+          var key = agentKey(point);
+          if (!groups[key]) {
+            groups[key] = {
+              key: key,
+              matricula: point.matricula,
+              nome: point.nome || point.matricula || 'Agente',
+              points: [],
+              trailCount: 0,
+              visitCount: 0,
+              lastTimestamp: ''
+            };
+          }
+          groups[key].points.push(point);
+          if (point.source === 'visit') {
+            groups[key].visitCount += 1;
+          } else {
+            groups[key].trailCount += 1;
+          }
+          if (String(point.timestamp || '') > String(groups[key].lastTimestamp || '')) {
+            groups[key].lastTimestamp = point.timestamp || '';
+          }
+        });
+        return Object.keys(groups).map(function (key, index) {
+          groups[key].color = COLORS[index % COLORS.length];
+          return groups[key];
+        }).sort(function (a, b) {
+          return String(b.lastTimestamp || '').localeCompare(String(a.lastTimestamp || ''));
+        });
+      }
+
+      function popupHtml(point, agent) {
+        return '<strong>' + escapeHtml(agent.nome || point.nome || '-') + '</strong><br>' +
+          'Matrícula: ' + escapeHtml(agent.matricula || point.matricula || '-') + '<br>' +
+          'Horário: ' + escapeHtml(toTime(point.timestamp)) + '<br>' +
+          'Evento: ' + escapeHtml(point.event_label || point.eventLabel || point.event_type || point.source || '-') +
+          (point.accuracy ? '<br>Precisão: ' + escapeHtml(point.accuracy) + ' m' : '');
+      }
+
+      function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, function (ch) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+        });
+      }
+
+      function renderAgentSelect() {
+        var current = selectedAgent;
+        $('agentSelect').innerHTML = '<option value="">Todos</option>' + agentData.map(function (agent) {
+          return '<option value="' + escapeHtml(agent.key) + '">' + escapeHtml(agent.nome || agent.matricula || agent.key) + '</option>';
+        }).join('');
+        $('agentSelect').value = current;
+      }
+
+      function renderAgentList() {
+        var list = $('agentList');
+        if (!agentData.length) {
+          list.innerHTML = '<div class="agent-card"><span class="color-dot"></span><div><strong>Nenhum ponto sincronizado</strong><small>Quando o agente conectar e sincronizar no fim do dia, a rota aparece aqui.</small></div></div>';
+          return;
+        }
+        list.innerHTML = agentData.map(function (agent) {
+          var active = selectedAgent === agent.key || (!selectedAgent && agentData.length === 1);
+          return '<button type="button" class="agent-card ' + (active ? 'active' : '') + '" data-agent="' + escapeHtml(agent.key) + '">' +
+            '<span class="color-dot" style="background:' + agent.color + '"></span>' +
+            '<span>' +
+              '<strong>' + escapeHtml(agent.nome || 'Agente') + '</strong>' +
+              '<small>' + escapeHtml(agent.matricula || '-') + ' • último ponto ' + escapeHtml(toTime(agent.lastTimestamp)) + '</small>' +
+              '<span class="agent-meta">' +
+                '<span class="tag">' + agent.trailCount + ' ponto(s)</span>' +
+                '<span class="tag blue">' + agent.visitCount + ' visita(s)</span>' +
+                '<span class="tag warn">' + (agent.points[agent.points.length - 1] && agent.points[agent.points.length - 1].operation_mode || 'VD') + '</span>' +
+              '</span>' +
+            '</span>' +
+          '</button>';
+        }).join('');
+        Array.from(list.querySelectorAll('[data-agent]')).forEach(function (button) {
+          button.addEventListener('click', function () {
+            selectedAgent = button.getAttribute('data-agent') || '';
+            $('agentSelect').value = selectedAgent;
+            render();
+          });
+        });
+      }
+
+      function renderMetrics() {
+        var visible = getVisibleAgents();
+        var pointTotal = visible.reduce(function (sum, agent) { return sum + agent.trailCount; }, 0);
+        var visitTotal = visible.reduce(function (sum, agent) { return sum + agent.visitCount; }, 0);
+        $('metricAgents').textContent = visible.length;
+        $('metricPoints').textContent = pointTotal;
+        $('metricVisits').textContent = visitTotal;
+      }
+
+      function getVisibleAgents() {
+        if (!selectedAgent) { return agentData; }
+        return agentData.filter(function (agent) { return agent.key === selectedAgent; });
+      }
+
+      function renderMap() {
+        var bounds = [];
+        clearLayers();
+        getVisibleAgents().forEach(function (agent) {
+          var route = agent.points.map(function (p) { return [p.lat, p.lng]; });
+          if (route.length >= 2) {
+            var line = L.polyline(route, { color: agent.color, weight: 5, opacity: .82 }).addTo(map);
+            layers.push(line);
+          }
+          agent.points.forEach(function (point, index) {
+            var marker;
+            bounds.push([point.lat, point.lng]);
+            if (point.source === 'visit') {
+              marker = L.circleMarker([point.lat, point.lng], {
+                radius: 7,
+                color: agent.color,
+                fillColor: '#fff',
+                fillOpacity: 1,
+                weight: 3
+              });
+            } else if (index === agent.points.length - 1) {
+              marker = L.circleMarker([point.lat, point.lng], {
+                radius: 9,
+                color: '#052e1c',
+                fillColor: agent.color,
+                fillOpacity: .95,
+                weight: 3
+              });
+            } else {
+              marker = L.circleMarker([point.lat, point.lng], {
+                radius: 4,
+                color: agent.color,
+                fillColor: agent.color,
+                fillOpacity: .70,
+                weight: 2
+              });
+            }
+            marker.bindPopup(popupHtml(point, agent));
+            marker.addTo(map);
+            layers.push(marker);
+          });
+        });
+        if (bounds.length) {
+          map.fitBounds(bounds, { padding: [32, 32], maxZoom: 17 });
+        }
+      }
+
+      function render() {
+        renderAgentSelect();
+        renderAgentList();
+        renderMetrics();
+        renderMap();
+      }
+
+      function loadData() {
+        var session = getSession();
+        if (!session || !session.sessionToken) {
+          $('loginOverlay').classList.remove('hidden');
+          return Promise.resolve(false);
+        }
+        $('loginOverlay').classList.add('hidden');
+        $('sessionLabel').textContent = session.agentName ? ('Coord. ' + session.agentName.split(' ')[0]) : 'Coordenação';
+        setStatus('Carregando rotas sincronizadas...');
+        return apiPost({
+          action: 'panel_007_bundle',
+          access_module: 'coordenacao',
+          sessionToken: session.sessionToken,
+          date: $('dateInput').value || todayISO()
+        }).then(function (payload) {
+          agentData = groupByAgent(payload);
+          selectedAgent = $('agentSelect').value || selectedAgent;
+          if (selectedAgent && !agentData.some(function (agent) { return agent.key === selectedAgent; })) {
+            selectedAgent = '';
+          }
+          render();
+          setStatus('Atualizado em ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '. ' + agentData.length + ' agente(s) com dados sincronizados.');
+          return true;
+        }).catch(function (error) {
+          setStatus(error.message || 'Falha ao carregar rotas.');
+          if (/sessão|sessao|expirada|ausente/i.test(error.message || '')) {
+            clearSession();
+            $('loginOverlay').classList.remove('hidden');
+          }
+          return false;
+        });
+      }
+
+      function login(event) {
+        event.preventDefault();
+        var cpf = cleanCpf($('loginCpf').value);
+        var password = String($('loginPassword').value || '').trim();
+        if (!cpf || !password) {
+          setLoginMessage('Informe CPF e senha.', 'error');
+          return;
+        }
+        $('loginSubmit').disabled = true;
+        setLoginMessage('Entrando...', '');
+        apiPost({
+          action: 'panel_login',
+          access_module: 'coordenacao',
+          cpf: cpf,
+          senha: password
+        }).then(function (payload) {
+          saveSession({
+            sessionToken: payload.sessionToken || payload.session_token,
+            agentName: payload.agent && payload.agent.nome || '',
+            agentMatricula: payload.agent && payload.agent.matricula || '',
+            createdAt: new Date().toISOString()
+          });
+          setLoginMessage('Acesso liberado.', 'ok');
+          $('loginPassword').value = '';
+          $('loginOverlay').classList.add('hidden');
+          return loadData();
+        }).catch(function (error) {
+          setLoginMessage(error.message || 'Não foi possível entrar.', 'error');
+        }).finally(function () {
+          $('loginSubmit').disabled = false;
+        });
+      }
+
+      function fitMap() {
+        var bounds = [];
+        getVisibleAgents().forEach(function (agent) {
+          agent.points.forEach(function (point) {
+            bounds.push([point.lat, point.lng]);
+          });
+        });
+        if (bounds.length) {
+          map.fitBounds(bounds, { padding: [32, 32], maxZoom: 17 });
+        }
+      }
+
+      function playRoute() {
+        var agents = getVisibleAgents();
+        var agent = selectedAgent ? agents[0] : (agents.length === 1 ? agents[0] : null);
+        var index = 0;
+        if (!agent || agent.points.length < 2) {
+          setStatus('Selecione um agente com pelo menos 2 pontos para reproduzir a rota.');
+          return;
+        }
+        if (animationTimer) {
+          clearInterval(animationTimer);
+          animationTimer = null;
+        }
+        if (animationMarker) {
+          try { map.removeLayer(animationMarker); } catch (error) {}
+        }
+        animationMarker = L.circleMarker([agent.points[0].lat, agent.points[0].lng], {
+          radius: 11,
+          color: '#052e1c',
+          fillColor: agent.color,
+          fillOpacity: 1,
+          weight: 4
+        }).addTo(map);
+        animationTimer = setInterval(function () {
+          var point = agent.points[index];
+          animationMarker.setLatLng([point.lat, point.lng]);
+          animationMarker.bindPopup(popupHtml(point, agent));
+          setStatus('Reproduzindo ' + (agent.nome || agent.matricula || 'agente') + ' • ' + toTime(point.timestamp));
+          index += 1;
+          if (index >= agent.points.length) {
+            clearInterval(animationTimer);
+            animationTimer = null;
+            setStatus('Reprodução concluída para ' + (agent.nome || agent.matricula || 'agente') + '.');
+          }
+        }, 650);
+      }
+
+      function logout() {
+        var session = getSession();
+        if (session && session.sessionToken) {
+          apiPost({ action: 'panel_logout', sessionToken: session.sessionToken }).catch(function () {});
+        }
+        clearSession();
+        agentData = [];
+        selectedAgent = '';
+        render();
+        $('loginOverlay').classList.remove('hidden');
+        setStatus('Sessão encerrada.');
+      }
+
+      function bind() {
+        $('loginForm').addEventListener('submit', login);
+        $('refreshBtn').addEventListener('click', loadData);
+        $('fitBtn').addEventListener('click', fitMap);
+        $('playBtn').addEventListener('click', playRoute);
+        $('logoutBtn').addEventListener('click', logout);
+        $('dateInput').addEventListener('change', function () {
+          selectedAgent = '';
+          loadData();
+        });
+        $('agentSelect').addEventListener('change', function () {
+          selectedAgent = $('agentSelect').value || '';
+          render();
+        });
+      }
+
+      function init() {
+        $('dateInput').value = todayISO();
+        bind();
+        initMap();
+        if (!API_URL) {
+          setStatus('API não configurada em assets/runtime-config.js.');
+          return;
+        }
+        loadData();
+      }
+
+      init();
+    }());
+  </script>
+</body>
+</html>

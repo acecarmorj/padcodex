@@ -2,25 +2,37 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0b4f2f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laboratório ACE">
   <title>ACE Campo - Análise de Tubitos</title>
-  <style>
+  <style id="lab-tablet-a11-v56">
     :root {
       --lab-ink: #183c2c;
       --lab-text: #1b252e;
       --lab-muted: #66727c;
       --lab-bg: #eef2ef;
       --lab-card: #ffffff;
-      --lab-brand: #21563c;
-      --lab-brand-soft: #2f7a52;
+      --lab-brand: #0b4f2f;
+      --lab-brand-soft: #128044;
       --lab-accent: #4c7cc5;
       --lab-warn: #c78615;
       --lab-border: rgba(24, 60, 44, .12);
-      --lab-shadow: 0 18px 42px rgba(24, 60, 44, .10);
+      --lab-shadow: 0 12px 26px rgba(24, 60, 44, .08);
     }
 
     * {
       box-sizing: border-box;
+      min-width: 0;
+    }
+
+    html,
+    body {
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     body {
@@ -29,104 +41,92 @@
       font-family: "Segoe UI", Tahoma, sans-serif;
       color: var(--lab-text);
       background:
-        radial-gradient(circle at top left, rgba(24, 60, 44, .16), transparent 24%),
-        radial-gradient(circle at top right, rgba(53, 95, 159, .12), transparent 28%),
-        linear-gradient(180deg, #edf4f0 0%, #e7efeb 230px, #edf2ef 100%);
+        radial-gradient(circle at top left, rgba(24, 60, 44, .12), transparent 24%),
+        radial-gradient(circle at top right, rgba(53, 95, 159, .08), transparent 28%),
+        linear-gradient(180deg, #edf4f0 0%, #e7efeb 210px, #edf2ef 100%);
+      -webkit-font-smoothing: antialiased;
     }
 
     .lab-page {
-      width: min(1180px, calc(100vw - 28px));
+      width: min(1040px, calc(100vw - 20px));
       margin: 0 auto;
-      padding: 22px 0 34px;
+      padding: max(10px, env(safe-area-inset-top)) 0 22px;
     }
 
     .lab-page-head {
-      position: relative;
+      position: sticky;
+      top: 0;
+      z-index: 40;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 18px;
-      padding: 22px;
+      align-items: center;
+      gap: 12px;
+      margin: 0 -10px 10px;
+      padding: 12px 14px;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, .16);
-      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 0 0 18px 18px;
       color: #fff;
       background:
-        linear-gradient(120deg, rgba(10, 43, 29, .96), rgba(15, 95, 47, .96) 56%, rgba(23, 107, 55, .94)),
-        radial-gradient(circle at top right, rgba(255, 255, 255, .10), transparent 32%);
-      box-shadow: 0 18px 42px rgba(10, 32, 22, .24);
+        linear-gradient(120deg, rgba(8, 47, 32, .98), rgba(11, 79, 47, .98) 58%, rgba(18, 128, 68, .95)),
+        radial-gradient(circle at top right, rgba(255, 255, 255, .10), transparent 36%);
+      box-shadow: 0 12px 24px rgba(10, 32, 22, .20);
     }
 
     .lab-page-head::after {
-      content: "";
-      position: absolute;
-      inset: auto 0 0;
-      height: 5px;
-      background: linear-gradient(90deg, #2f7a52, #4c7cc5 62%, #c78615);
+      display: none;
     }
 
     .lab-page-head h1 {
       margin: 0;
-      font-size: clamp(1.55rem, 3vw, 2.35rem);
-      letter-spacing: -.03em;
-    }
-
-    .lab-page-head p {
-      max-width: 760px;
-      margin: 7px 0 0;
-      color: rgba(255, 255, 255, .82);
-      line-height: 1.5;
-      font-weight: 650;
-    }
-
-    .lab-page-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 48px;
-      padding: 12px 18px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .14);
       color: #fff;
-      text-decoration: none;
-      font-weight: 900;
+      font-size: clamp(1.08rem, 2.4vw, 1.34rem);
+      line-height: 1.12;
+      letter-spacing: -.02em;
       white-space: nowrap;
-      box-shadow: 0 12px 28px rgba(10, 32, 22, .18);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .lab-page-note {
       display: inline-flex;
       width: fit-content;
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: #fffbeb;
-      color: #92400e;
-      border: 1px solid #fde68a;
-      box-shadow: 0 12px 26px rgba(10, 32, 22, .14);
-      font-weight: 850;
+      max-width: 100%;
+      margin-top: 5px;
+      padding: 6px 9px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .12);
+      color: rgba(255, 255, 255, .86);
+      box-shadow: none;
+      font-size: .78rem;
+      font-weight: 800;
+      line-height: 1.18;
+    }
+
+    #labStandaloneRoot {
+      display: block;
+      width: 100%;
     }
 
     @media (max-width: 760px) {
       .lab-page {
-        width: min(100% - 22px, 1180px);
-        padding-top: 14px;
+        width: min(100% - 14px, 1040px);
+        padding-top: 6px;
       }
 
       .lab-page-head {
-        flex-direction: column;
-        border-radius: 22px;
+        margin-inline: -7px;
+        padding: 10px 11px;
+        border-radius: 0 0 16px 16px;
       }
 
-      .lab-page-link {
-        width: 100%;
-        min-height: 50px;
+      .lab-page-note {
+        font-size: .72rem;
       }
     }
-
   </style>
-  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260517-tablet-v55-final">
+  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260517-lab-tablet-a11-v56">
 </head>
 <body class="ace-page ace-page--lab">
   <main class="lab-page ace-shell">
@@ -140,7 +140,7 @@
     <section id="labStandaloneRoot" data-lab-standalone="1"></section>
   </main>
 
-  <script src="./assets/runtime-config.js?v=20260502-role-v6"></script>
-  <script src="./assets/painel-laboratorio.js?v=20260504-ace-standard-v3"></script>
+  <script src="./assets/runtime-config.js?v=20260517-lab-tablet-a11-v56"></script>
+  <script src="./assets/painel-laboratorio.js?v=20260517-lab-tablet-a11-v56"></script>
 </body>
 </html>
