@@ -1,0 +1,2105 @@
+/* ACE UI Standard Theme
+   Camada comum do tema institucional.
+   Mantém as classes antigas como compatibilidade e usa o prefixo ace- para novas telas. */
+:root{
+  --ace-brand-950:#0a2b1d;
+  --ace-brand-900:#183c2c;
+  --ace-brand-800:#21563c;
+  --ace-brand-700:#2f7a52;
+  --ace-brand-600:#3e9667;
+  --ace-accent-700:#355f9f;
+  --ace-accent-600:#4c7cc5;
+  --ace-warn-700:#c78615;
+  --ace-danger-700:#c34747;
+
+  --ace-page-bg:#eef2ef;
+  --ace-page-bg-soft:#f7f9f8;
+  --ace-surface:#ffffff;
+  --ace-surface-soft:#f7faf8;
+  --ace-text:#1b252e;
+  --ace-muted:#66727c;
+  --ace-line:rgba(24,60,44,.12);
+
+  --ace-radius-xl:28px;
+  --ace-radius-lg:22px;
+  --ace-radius-md:16px;
+  --ace-radius-sm:12px;
+  --ace-content:1180px;
+
+  --ace-shadow-card:0 18px 42px rgba(24,60,44,.10);
+  --ace-shadow-soft:0 12px 24px rgba(24,60,44,.06);
+  --ace-shadow-header:0 18px 42px rgba(10,32,22,.24);
+
+  --ace-gradient-page:
+    radial-gradient(circle at top left, rgba(24,60,44,.16), transparent 24%),
+    radial-gradient(circle at top right, rgba(53,95,159,.12), transparent 28%),
+    linear-gradient(180deg,#edf4f0 0%,#e7efeb 230px,#edf2ef 100%);
+  --ace-gradient-header:
+    linear-gradient(120deg,rgba(10,43,29,.96),rgba(15,95,47,.96) 56%,rgba(23,107,55,.94)),
+    radial-gradient(circle at top right,rgba(255,255,255,.10),transparent 32%);
+  --ace-gradient-card:
+    linear-gradient(180deg,#ffffff,#f7faf8);
+  --ace-gradient-card-soft:
+    linear-gradient(180deg,#ffffff,#f4f8f6);
+  --ace-gradient-line:
+    linear-gradient(90deg,#2f7a52,#4c7cc5 62%,#c78615);
+
+  --brand-900:var(--ace-brand-900);
+  --brand-800:var(--ace-brand-800);
+  --brand-700:var(--ace-brand-700);
+  --brand-600:var(--ace-brand-600);
+  --accent-700:var(--ace-accent-700);
+  --accent-600:var(--ace-accent-600);
+  --warn-700:var(--ace-warn-700);
+  --danger-700:var(--ace-danger-700);
+  --bg:var(--ace-page-bg);
+  --bg-soft:var(--ace-page-bg-soft);
+  --card:var(--ace-surface);
+  --text:var(--ace-text);
+  --muted:var(--ace-muted);
+  --border:#d6dfe2;
+  --shadow:var(--ace-shadow-card);
+  --radius-xl:var(--ace-radius-xl);
+  --radius-lg:var(--ace-radius-lg);
+  --radius-md:var(--ace-radius-md);
+  --radius-sm:var(--ace-radius-sm);
+
+  --lab-ink:var(--ace-brand-900);
+  --lab-text:var(--ace-text);
+  --lab-muted:var(--ace-muted);
+  --lab-bg:var(--ace-page-bg);
+  --lab-card:var(--ace-surface);
+  --lab-brand:var(--ace-brand-800);
+  --lab-brand-soft:var(--ace-brand-700);
+  --lab-accent:var(--ace-accent-600);
+  --lab-warn:var(--ace-warn-700);
+  --lab-border:var(--ace-line);
+  --lab-shadow:var(--ace-shadow-card);
+
+  --sec-brand-950:var(--ace-brand-950);
+  --sec-brand-900:var(--ace-brand-900);
+  --sec-brand-800:var(--ace-brand-800);
+  --sec-brand-700:var(--ace-brand-700);
+  --sec-brand-600:var(--ace-brand-600);
+  --sec-accent-700:var(--ace-accent-700);
+  --sec-accent-600:var(--ace-accent-600);
+  --sec-warn:var(--ace-warn-700);
+  --sec-danger:var(--ace-danger-700);
+  --sec-bg:var(--ace-page-bg);
+  --sec-bg-soft:var(--ace-page-bg-soft);
+  --sec-card:var(--ace-surface);
+  --sec-text:var(--ace-text);
+  --sec-muted:var(--ace-muted);
+  --sec-border:#d6dfe2;
+  --sec-line:var(--ace-line);
+  --sec-surface:var(--ace-surface);
+  --sec-surface-soft:var(--ace-surface-soft);
+  --sec-shadow:var(--ace-shadow-card);
+  --sec-shadow-soft:var(--ace-shadow-soft);
+  --sec-radius-xl:var(--ace-radius-xl);
+  --sec-radius-lg:var(--ace-radius-lg);
+  --sec-radius-md:var(--ace-radius-md);
+  --sec-radius-sm:var(--ace-radius-sm);
+
+  --coord-brand-950:var(--ace-brand-950);
+  --coord-brand-900:var(--ace-brand-900);
+  --coord-brand-800:var(--ace-brand-800);
+  --coord-brand-700:var(--ace-brand-700);
+  --coord-brand-600:var(--ace-brand-600);
+  --coord-accent-600:var(--ace-accent-600);
+  --coord-warn:var(--ace-warn-700);
+  --coord-bg:var(--ace-page-bg);
+  --coord-line:var(--ace-line);
+  --coord-surface:var(--ace-surface);
+  --coord-surface-soft:var(--ace-surface-soft);
+  --coord-shadow:var(--ace-shadow-card);
+  --coord-shadow-soft:var(--ace-shadow-soft);
+
+  --green:var(--ace-brand-800);
+  --green-dark:var(--ace-brand-950);
+  --green-soft:#e6f3ec;
+  --soft:#eaf5ee;
+  --blue:var(--ace-accent-600);
+  --danger:var(--ace-danger-700);
+  --warn:var(--ace-warn-700);
+}
+
+body.ace-page{
+  color:var(--ace-text);
+  background:var(--ace-gradient-page) !important;
+  font-family:"Segoe UI",Arial,Helvetica,sans-serif;
+}
+
+.ace-page .ace-shell{
+  margin-inline:auto;
+}
+
+.ace-page .ace-topbar{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.16);
+  color:#fff;
+  background:var(--ace-gradient-header) !important;
+  box-shadow:var(--ace-shadow-header) !important;
+}
+
+.ace-page .ace-topbar::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:5px;
+  background:var(--ace-gradient-line);
+  pointer-events:none;
+}
+
+.ace-page .ace-card{
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--ace-line) !important;
+  border-radius:var(--ace-radius-lg) !important;
+  background:var(--ace-gradient-card) !important;
+  box-shadow:var(--ace-shadow-card) !important;
+}
+
+.ace-page .ace-card--lined::before{
+  content:"";
+  display:block;
+  height:4px;
+  margin:calc(var(--ace-card-pad, 16px) * -1) calc(var(--ace-card-pad, 16px) * -1) var(--ace-card-pad, 16px);
+  background:var(--ace-gradient-line);
+}
+
+.ace-page .login-card::before,
+.ace-page .lab-card::before,
+.ace-page .lab-login-card::before,
+.ace-page .hero-card::before,
+.ace-page .statistics-card::before{
+  background:var(--ace-gradient-line) !important;
+}
+
+.ace-page .ace-section-title,
+.ace-page .lab-head,
+.ace-page .super-card-title{
+  color:var(--ace-brand-900);
+}
+
+.ace-page .ace-field input,
+.ace-page .ace-field select,
+.ace-page .ace-field textarea,
+.ace-page input,
+.ace-page select,
+.ace-page textarea{
+  border:1.5px solid rgba(24,60,44,.14);
+  border-radius:var(--ace-radius-md);
+  background:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.86);
+}
+
+.ace-page .ace-field input:focus,
+.ace-page .ace-field select:focus,
+.ace-page .ace-field textarea:focus,
+.ace-page input:focus,
+.ace-page select:focus,
+.ace-page textarea:focus{
+  border-color:rgba(76,124,197,.76);
+  box-shadow:0 0 0 4px rgba(76,124,197,.13);
+  outline:none;
+}
+
+.ace-page .ace-btn,
+.ace-page .btn,
+.ace-page button{
+  border-radius:var(--ace-radius-md);
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;
+}
+
+.ace-page .ace-btn:hover,
+.ace-page .btn:hover{
+  transform:translateY(-1px);
+}
+
+.ace-page .ace-btn--primary,
+.ace-page .btn-primary,
+.ace-page .primary,
+.ace-page .lab-action-button:not(.lab-action-button-soft){
+  border-color:var(--ace-brand-800) !important;
+  background:linear-gradient(180deg,var(--ace-brand-700),var(--ace-brand-800)) !important;
+  color:#fff !important;
+  box-shadow:0 12px 28px rgba(24,60,44,.22) !important;
+}
+
+.ace-page .ace-btn--soft,
+.ace-page .btn-soft,
+.ace-page .btn-secondary,
+.ace-page .secondary,
+.ace-page .lab-action-button-soft{
+  border-color:rgba(24,60,44,.14) !important;
+  background:linear-gradient(180deg,#ffffff,#eef6f1) !important;
+  color:var(--ace-brand-800) !important;
+}
+
+.ace-page .ace-stat-card,
+.ace-page .lab-stat,
+.ace-page .summary-card,
+.ace-page .statistics-card,
+.ace-page .super-kpis > *{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(24,60,44,.10) !important;
+  border-radius:18px !important;
+  background:var(--ace-gradient-card-soft) !important;
+  box-shadow:var(--ace-shadow-soft) !important;
+}
+
+.ace-page .ace-stat-card::before,
+.ace-page .lab-stat::before,
+.ace-page .summary-card::before,
+.ace-page .statistics-card::before,
+.ace-page .super-kpis > *::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:4px;
+  background:linear-gradient(90deg,var(--ace-brand-700),var(--ace-accent-600));
+}
+
+/* Compatibilidade visual com classes antigas das telas principais. */
+.ace-page--field .topbar,
+.ace-page--field .login-card,
+.ace-page--field .card,
+.ace-page--field .hero-card,
+.ace-page--dashboard .panel-shell-card,
+.ace-page--dashboard .panel-fixed-card,
+.ace-page--dashboard .panel-map-card,
+.ace-page--dashboard .panel-report-screen-card,
+.ace-page--dashboard .panel-statistics-card,
+.ace-page--dashboard .statistics-card,
+.ace-page--secretaria .card,
+.ace-page--super .super-card,
+.ace-page--lab .lab-card,
+.ace-page--lab .lab-login-card{
+  border-radius:var(--ace-radius-lg) !important;
+}
+
+.ace-page--field .topbar,
+.ace-page--dashboard .topbar-v3__title-row,
+.ace-page--secretaria header,
+.ace-page--super .super-topbar,
+.ace-page--lab .lab-page-head{
+  background:var(--ace-gradient-header) !important;
+  box-shadow:var(--ace-shadow-header) !important;
+}
+
+.ace-page--secretaria header,
+.ace-page--super .super-topbar{
+  border-bottom:0;
+}
+
+@media (max-width:760px){  .ace-page .ace-topbar,
+  .ace-page .ace-card{
+    border-radius:22px !important;
+  }
+}
+
+/* =========================================================
+   AJUSTE V3 - tema lab padronizado e mais compacto
+   Mantém visual, reduz espaçamentos e evita empilhar correções antigas.
+   ========================================================= */
+
+.dashboard-layout-v3 button,
+.dashboard-layout-v3 .btn,
+.dashboard-layout-v3 .field-button-v3 .btn,
+.dashboard-layout-v3 .field-button-v6,
+.dashboard-layout-v3 .field-button-v6 .btn,
+.dashboard-layout-v3 .panel-action-refresh,
+.dashboard-layout-v3 .panel-action-clear,
+.dashboard-layout-v3 .panel-action-exec,
+.dashboard-layout-v3 .panel-action-button,
+.dashboard-layout-v3 .ace-panel-refresh-cloud-btn,
+.dashboard-layout-v3 .ace-panel-action-slot button,
+.dashboard-layout-v3 .map-toggle,
+.dashboard-layout-v3 .header-widget-v3,
+.dashboard-layout-v3 .sidebar-tab,
+.dashboard-layout-v3 .panel-filter-drawer summary,
+.dashboard-layout-v3 .chip,
+.dashboard-layout-v3 .ace-btn{
+  border-radius:16px !important;
+}
+
+.dashboard-layout-v3 .header-widget-v3__icon,
+.dashboard-layout-v3 .sidebar-tab__icon,
+.dashboard-layout-v3 .topbar-v3__menu-btn{
+  border-radius:14px !important;
+}
+
+.dashboard-layout-v3 .panel-main-v3{
+  padding-top:4px !important;
+  gap:10px !important;
+}
+
+.dashboard-layout-v3 .topbar-v3{
+  gap:4px !important;
+  margin-bottom:0 !important;
+}
+
+.dashboard-layout-v3 .topbar-v3__title-row{
+  gap:10px !important;
+  padding:9px 12px !important;
+  border-radius:22px !important;
+}
+
+.dashboard-layout-v3 .topbar-v3__menu-btn{
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
+}
+
+.dashboard-layout-v3 .topbar-v3__copy{
+  padding-top:0 !important;
+}
+
+.dashboard-layout-v3 .topbar-v3__copy h1{
+  font-size:1.58rem !important;
+  line-height:1.02 !important;
+}
+
+.dashboard-layout-v3 .topbar-v3__copy p{
+  margin-top:2px !important;
+  font-size:.88rem !important;
+  line-height:1.22 !important;
+}
+
+.dashboard-layout-v3 .topbar-v3__widgets{
+  gap:7px !important;
+}
+
+.dashboard-layout-v3 .header-widget-v3{
+  min-height:54px !important;
+  padding:8px 10px !important;
+  gap:8px !important;
+}
+
+.dashboard-layout-v3 .header-widget-v3__copy{
+  gap:1px !important;
+}
+
+.dashboard-layout-v3 .header-widget-v3__copy strong{
+  font-size:.82rem !important;
+}
+
+.dashboard-layout-v3 .header-widget-v3__copy span{
+  font-size:.72rem !important;
+}
+
+.dashboard-layout-v3 .panel-shell-card-v3{
+  margin-top:0 !important;
+  padding:10px 12px !important;
+  border-radius:22px !important;
+}
+
+.dashboard-layout-v3 .panel-filter-drawer summary{
+  padding:0 0 7px !important;
+}
+
+.dashboard-layout-v3 .panel-filter-toolbar-v3{
+  gap:8px !important;
+}
+
+.dashboard-layout-v3 .panel-filter-toolbar-v3 input,
+.dashboard-layout-v3 .panel-filter-toolbar-v3 select{
+  min-height:38px !important;
+  border-radius:14px !important;
+}
+
+.secretaria-page header{
+  margin-bottom:0 !important;
+}
+
+body.secretaria-page main.shell{
+  padding-top:6px !important;
+}
+
+.secretaria-page .secretaria-shell{
+  gap:10px !important;
+}
+
+.secretaria-page .secretaria-sidebar{
+  top:64px !important;
+  min-height:calc(100vh - 78px) !important;
+  margin-top:0 !important;
+}
+
+@media (max-width:920px){
+  .dashboard-layout-v3 .panel-main-v3{
+    padding-top:2px !important;
+    gap:8px !important;
+  }
+
+  .dashboard-layout-v3 .topbar-v3__title-row{
+    padding:8px 10px !important;
+    border-radius:20px !important;
+  }
+
+  .dashboard-layout-v3 .header-widget-v3{
+    min-height:50px !important;
+    padding:7px 9px !important;
+  }
+
+  body.secretaria-page main.shell{
+    padding-top:5px !important;
+    width:min(100% - 12px,100%) !important;
+  }
+
+  .secretaria-page .secretaria-shell{
+    gap:8px !important;
+  }
+
+  .secretaria-page .secretaria-sidebar{
+    position:relative !important;
+    top:auto !important;
+    min-height:0 !important;
+    margin-top:0 !important;
+    padding:12px !important;
+  }
+
+  .secretaria-page .sidebar-brand{
+    padding-bottom:10px !important;
+  }
+
+  .secretaria-page .sidebar-nav{
+    gap:8px !important;
+  }
+
+  .secretaria-page .sidebar-nav .tab{
+    min-height:54px !important;
+    padding:10px 11px !important;
+  }
+}
+
+@media (max-width:760px){
+  .dashboard-layout-v3 button,
+  .dashboard-layout-v3 .btn,
+  .dashboard-layout-v3 .field-button-v6,
+  .dashboard-layout-v3 .field-button-v6 .btn,
+  .dashboard-layout-v3 .ace-panel-action-slot button,
+  .dashboard-layout-v3 .map-toggle,
+  .dashboard-layout-v3 .sidebar-tab{
+    border-radius:14px !important;
+  }
+
+  .dashboard-layout-v3 .panel-main-v3{
+    padding-top:0 !important;
+  }
+
+  .dashboard-layout-v3 .topbar-v3{
+    gap:3px !important;
+  }
+
+  .dashboard-layout-v3 .topbar-v3__copy h1{
+    font-size:1.32rem !important;
+  }
+
+  .dashboard-layout-v3 .topbar-v3__copy p{
+    font-size:.82rem !important;
+  }
+
+  .dashboard-layout-v3 .panel-shell-card-v3{
+    padding:9px 10px !important;
+  }
+
+  body.secretaria-page main.shell{
+    padding-top:4px !important;
+  }
+
+  .secretaria-page .secretaria-sidebar{
+    border-radius:20px !important;
+  }
+}
+
+
+/* =========================================================
+   AJUSTE V4 - Secretaria com lateral no topo e cabeçalho tipo painel/lab
+   ========================================================= */
+
+body.secretaria-page.secretaria-app-ready > header{
+  display:none !important;
+}
+
+body.secretaria-page.secretaria-app-ready main.shell{
+  width:min(1780px,calc(100% - 28px)) !important;
+  max-width:none !important;
+  padding:14px !important;
+}
+
+body.secretaria-page.secretaria-app-ready .secretaria-shell{
+  grid-template-columns:264px minmax(0,1fr) !important;
+  gap:16px !important;
+  align-items:start !important;
+  min-height:calc(100vh - 28px) !important;
+}
+
+body.secretaria-page.secretaria-app-ready .secretaria-sidebar{
+  position:sticky !important;
+  top:14px !important;
+  align-self:start !important;
+  min-height:calc(100vh - 28px) !important;
+  margin-top:0 !important;
+  padding:16px !important;
+  gap:14px !important;
+  border-radius:28px !important;
+}
+
+body.secretaria-page.secretaria-app-ready .secretaria-workspace{
+  display:grid !important;
+  gap:14px !important;
+  padding-top:8px !important;
+}
+
+.secretaria-page .secretaria-page-head{
+  position:relative;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  min-height:104px;
+  padding:20px 22px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:28px;
+  color:#fff;
+  background:
+    linear-gradient(120deg,rgba(10,43,29,.96),rgba(15,95,47,.96) 56%,rgba(23,107,55,.94)),
+    radial-gradient(circle at top right,rgba(255,255,255,.10),transparent 32%);
+  box-shadow:0 18px 42px rgba(10,32,22,.24);
+}
+
+.secretaria-page .secretaria-page-head::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:5px;
+  background:linear-gradient(90deg,#2f7a52,#4c7cc5 62%,#c78615);
+}
+
+.secretaria-page .secretaria-page-head__copy{
+  position:relative;
+  z-index:1;
+  min-width:0;
+}
+
+.secretaria-page .secretaria-page-head__eyebrow{
+  display:inline-flex;
+  width:fit-content;
+  margin-bottom:8px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.14);
+  color:#f1fbf4;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.secretaria-page .secretaria-page-head h1{
+  margin:0;
+  color:#fff;
+  font-size:clamp(1.48rem,2.4vw,2.05rem);
+  line-height:1.05;
+  letter-spacing:-.02em;
+}
+
+.secretaria-page .secretaria-page-head p{
+  max-width:760px;
+  margin:7px 0 0;
+  color:rgba(255,255,255,.84);
+  font-size:14px;
+  line-height:1.45;
+  font-weight:650;
+}
+
+.secretaria-page .secretaria-page-head__status{
+  position:relative;
+  z-index:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:max-content;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.16);
+  color:#fff;
+  font-size:12px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  box-shadow:0 12px 28px rgba(10,32,22,.18);
+}
+
+body.secretaria-page.secretaria-app-ready .secretaria-workspace > .intro{
+  margin-bottom:0 !important;
+}
+
+body.secretaria-page.secretaria-app-ready .module-titlebar{
+  display:none !important;
+}
+
+@media (max-width:920px){
+  body.secretaria-page.secretaria-app-ready main.shell{
+    width:100% !important;
+    padding:10px !important;
+  }
+
+  body.secretaria-page.secretaria-app-ready .secretaria-shell{
+    grid-template-columns:1fr !important;
+    min-height:0 !important;
+    gap:10px !important;
+  }
+
+  body.secretaria-page.secretaria-app-ready .secretaria-sidebar{
+    position:relative !important;
+    top:auto !important;
+    min-height:0 !important;
+    padding:12px !important;
+    border-radius:22px !important;
+  }
+
+  body.secretaria-page.secretaria-app-ready .secretaria-workspace{
+    padding-top:0 !important;
+    gap:10px !important;
+  }
+
+  .secretaria-page .secretaria-page-head{
+    min-height:0;
+    padding:18px;
+    border-radius:22px;
+  }
+}
+
+@media (max-width:720px){
+  .secretaria-page .secretaria-page-head{
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .secretaria-page .secretaria-page-head__status{
+    width:100%;
+  }
+}
+
+
+/* =========================================================
+   AJUSTE V5 - Painel com o mesmo esquema visual da Secretaria
+   Barra lateral alta + cabeçalho flutuante arredondado.
+   ========================================================= */
+
+body.dashboard-layout-v3{
+  background:
+    radial-gradient(circle at top left, rgba(24,60,44,.12), transparent 24%),
+    linear-gradient(180deg,#eef4f1 0%,#e7efeb 100%) !important;
+}
+
+body.dashboard-layout-v3 .panel-shell-v3{
+  width:min(1780px,100%) !important;
+  max-width:none !important;
+  grid-template-columns:264px minmax(0,1fr) !important;
+  gap:16px !important;
+  align-items:start !important;
+  min-height:100vh !important;
+  padding:14px !important;
+  box-sizing:border-box !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar{
+  position:sticky !important;
+  top:14px !important;
+  align-self:start !important;
+  min-height:calc(100vh - 28px) !important;
+  margin-top:0 !important;
+  padding:16px !important;
+  gap:14px !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  border-radius:28px !important;
+  background:
+    linear-gradient(180deg,rgba(12,71,47,.98),rgba(20,96,63,.98)),
+    radial-gradient(circle at top right,rgba(255,255,255,.16),transparent 34%) !important;
+  box-shadow:0 22px 44px rgba(9,48,31,.22) !important;
+  color:#fff !important;
+  overflow:auto !important;
+  scrollbar-width:thin;
+}
+
+body.dashboard-layout-v3 .app-sidebar__brand-card{
+  display:flex !important;
+  align-items:center !important;
+  gap:12px !important;
+  padding:0 0 14px !important;
+  border:0 !important;
+  border-bottom:1px solid rgba(255,255,255,.14) !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar__brand-logo{
+  width:44px !important;
+  height:44px !important;
+  flex:0 0 44px !important;
+  border-radius:15px !important;
+  background:rgba(255,255,255,.14) !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18) !important;
+  color:#fff !important;
+  font-weight:950 !important;
+  letter-spacing:.08em !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar__brand-copy strong{
+  color:#fff !important;
+  font-size:18px !important;
+  line-height:1.1 !important;
+  font-weight:950 !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar__brand-copy span{
+  color:rgba(240,253,244,.76) !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+  margin-top:3px !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar__nav{
+  display:grid !important;
+  gap:8px !important;
+  padding:0 !important;
+}
+
+body.dashboard-layout-v3 .sidebar-divider{
+  height:1px !important;
+  margin:2px 0 !important;
+  background:rgba(255,255,255,.14) !important;
+  border:0 !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:10px !important;
+  width:100% !important;
+  min-height:56px !important;
+  padding:11px 13px !important;
+  border-radius:18px !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  background:rgba(255,255,255,.08) !important;
+  color:rgba(255,255,255,.88) !important;
+  box-shadow:none !important;
+  text-align:left !important;
+  transform:none !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab:hover{
+  background:rgba(255,255,255,.14) !important;
+  border-color:rgba(255,255,255,.24) !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab.active,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"]{
+  background:#fff !important;
+  color:var(--ace-brand-900) !important;
+  border-color:#fff !important;
+  box-shadow:0 16px 28px rgba(0,0,0,.18) !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab__icon{
+  width:30px !important;
+  height:30px !important;
+  flex:0 0 30px !important;
+  display:grid !important;
+  place-items:center !important;
+  border-radius:12px !important;
+  background:rgba(255,255,255,.12) !important;
+  color:inherit !important;
+  font-size:15px !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab.active .sidebar-tab__icon,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .sidebar-tab__icon{
+  background:#e8f7ee !important;
+  color:var(--ace-brand-800) !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab span:not(.sidebar-tab__icon){
+  font-size:14px !important;
+  font-weight:950 !important;
+  line-height:1.12 !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar__footer{
+  margin-top:auto !important;
+  display:grid !important;
+  gap:10px !important;
+  padding-top:14px !important;
+  border-top:1px solid rgba(255,255,255,.14) !important;
+}
+
+body.dashboard-layout-v3 .sidebar-status-card{
+  border:1px solid rgba(255,255,255,.18) !important;
+  background:rgba(255,255,255,.12) !important;
+  color:#fff !important;
+  box-shadow:none !important;
+  border-radius:16px !important;
+  padding:12px 13px !important;
+}
+
+body.dashboard-layout-v3 .panel-main-v3{
+  display:grid !important;
+  gap:14px !important;
+  min-width:0 !important;
+  padding:8px 0 18px !important;
+  align-content:start !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3{
+  display:grid !important;
+  gap:14px !important;
+  margin:0 !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__title-row{
+  position:relative !important;
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:space-between !important;
+  gap:16px !important;
+  min-height:104px !important;
+  padding:20px 22px !important;
+  overflow:hidden !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  border-radius:28px !important;
+  color:#fff !important;
+  background:
+    linear-gradient(120deg,rgba(10,43,29,.96),rgba(15,95,47,.96) 56%,rgba(23,107,55,.94)),
+    radial-gradient(circle at top right,rgba(255,255,255,.10),transparent 32%) !important;
+  box-shadow:0 18px 42px rgba(10,32,22,.24) !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__title-row::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:5px;
+  background:linear-gradient(90deg,#2f7a52,#4c7cc5 62%,#c78615);
+}
+
+body.dashboard-layout-v3 .topbar-v3__menu-btn{
+  display:none !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__copy{
+  position:relative !important;
+  z-index:1 !important;
+  min-width:0 !important;
+  padding-top:0 !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__copy::before{
+  content:"Área de trabalho";
+  display:inline-flex;
+  width:fit-content;
+  margin-bottom:8px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.14);
+  color:#f1fbf4;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+body.dashboard-layout-v3 .topbar-v3__copy h1{
+  margin:0 !important;
+  color:#fff !important;
+  font-size:clamp(1.48rem,2.4vw,2.05rem) !important;
+  line-height:1.05 !important;
+  letter-spacing:-.02em !important;
+  font-weight:950 !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__copy p{
+  max-width:760px !important;
+  margin:7px 0 0 !important;
+  color:rgba(255,255,255,.84) !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+  font-weight:650 !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__widgets{
+  position:relative !important;
+  z-index:1 !important;
+  display:flex !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-end !important;
+  align-items:flex-start !important;
+  gap:10px !important;
+  max-width:620px !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3{
+  min-height:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:8px !important;
+  width:auto !important;
+  min-width:max-content !important;
+  padding:10px 13px !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.14) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  color:#fff !important;
+  box-shadow:0 12px 28px rgba(10,32,22,.18) !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3__icon{
+  width:24px !important;
+  height:24px !important;
+  flex:0 0 24px !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.14) !important;
+  color:#fff !important;
+  font-size:13px !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3__copy{
+  gap:0 !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3__copy strong,
+body.dashboard-layout-v3 .header-widget-v3__copy .chip{
+  color:#fff !important;
+  font-size:12px !important;
+  font-weight:950 !important;
+  text-transform:uppercase !important;
+  letter-spacing:.04em !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:0 !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3__copy span{
+  display:none !important;
+}
+
+body.dashboard-layout-v3 .panel-shell-card-v3{
+  margin-top:0 !important;
+  padding:14px 16px !important;
+  border-radius:24px !important;
+}
+
+@media (max-width:1120px){
+  body.dashboard-layout-v3 .panel-shell-v3{
+    grid-template-columns:1fr !important;
+    min-height:0 !important;
+    gap:10px !important;
+    padding:10px !important;
+  }
+
+  body.dashboard-layout-v3 .app-sidebar{
+    position:relative !important;
+    top:auto !important;
+    min-height:0 !important;
+    padding:12px !important;
+    border-radius:22px !important;
+  }
+
+  body.dashboard-layout-v3 .app-sidebar__nav{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+
+  body.dashboard-layout-v3 .panel-main-v3{
+    padding-top:0 !important;
+    gap:10px !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3__title-row{
+    min-height:0 !important;
+    padding:18px !important;
+    border-radius:22px !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3__widgets{
+    max-width:none !important;
+    justify-content:flex-start !important;
+  }
+}
+
+@media (max-width:720px){
+  body.dashboard-layout-v3 .app-sidebar__nav{
+    grid-template-columns:1fr !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3__title-row{
+    flex-direction:column !important;
+    gap:12px !important;
+  }
+
+  body.dashboard-layout-v3 .header-widget-v3{
+    width:100% !important;
+    min-width:0 !important;
+    justify-content:flex-start !important;
+  }
+}
+
+/* =========================================================
+   AJUSTE V6 - Painel com cabeçalho compacto igual Secretaria
+   Remove a faixa inferior e aproxima filtros do topo.
+   ========================================================= */
+
+body.dashboard-layout-v3 .panel-shell-v3{
+  padding:12px 14px !important;
+  gap:14px !important;
+}
+
+body.dashboard-layout-v3 .panel-main-v3{
+  padding:0 0 18px !important;
+  gap:8px !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3{
+  gap:7px !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__title-row{
+  min-height:0 !important;
+  padding:15px 18px !important;
+  align-items:center !important;
+  gap:14px !important;
+  overflow:hidden !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__title-row::after{
+  display:none !important;
+  content:none !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__copy::before{
+  margin-bottom:6px !important;
+  padding:6px 10px !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__copy h1{
+  font-size:clamp(1.34rem,2vw,1.76rem) !important;
+  line-height:1.04 !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__copy p{
+  margin-top:4px !important;
+  font-size:13px !important;
+  line-height:1.35 !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__widgets{
+  max-width:none !important;
+  display:flex !important;
+  flex-wrap:nowrap !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:8px !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3{
+  min-height:0 !important;
+  padding:8px 11px !important;
+  border-radius:999px !important;
+  box-shadow:none !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3__icon{
+  width:22px !important;
+  height:22px !important;
+  flex-basis:22px !important;
+  font-size:12px !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3__copy strong,
+body.dashboard-layout-v3 .header-widget-v3__copy .chip{
+  font-size:11px !important;
+  line-height:1.1 !important;
+}
+
+body.dashboard-layout-v3 .header-widget-v3--profile{
+  max-width:360px !important;
+}
+
+body.dashboard-layout-v3 .panel-shell-card-v3{
+  margin-top:0 !important;
+  padding:12px 14px !important;
+  border-radius:22px !important;
+}
+
+body.dashboard-layout-v3 .panel-filter-drawer{
+  margin:0 !important;
+}
+
+body.dashboard-layout-v3 .panel-filter-drawer summary{
+  padding-top:0 !important;
+}
+
+@media (max-width:1320px){
+  body.dashboard-layout-v3 .topbar-v3__title-row{
+    align-items:flex-start !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3__widgets{
+    flex-wrap:wrap !important;
+  }
+}
+
+@media (max-width:1120px){
+  body.dashboard-layout-v3 .panel-shell-v3{
+    padding:10px !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3__title-row{
+    padding:15px !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3__widgets{
+    justify-content:flex-start !important;
+  }
+}
+
+
+/* =========================================================
+   AJUSTE V7 - Painel alinhado à Secretaria
+   Remove o fundo/linha verde do contêiner do cabeçalho,
+   mantém o botão Atualizar nuvem no bloco de filtros e
+   aproxima a barra lateral do mesmo padrão visual da Secretaria.
+   ========================================================= */
+
+body.dashboard-layout-v3 .topbar-v3.ace-topbar{
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:inherit !important;
+  overflow:visible !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3.ace-topbar::before,
+body.dashboard-layout-v3 .topbar-v3.ace-topbar::after{
+  display:none !important;
+  content:none !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3{
+  gap:8px !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__title-row{
+  margin:0 !important;
+  border-radius:28px !important;
+  box-shadow:0 18px 42px rgba(10,32,22,.24) !important;
+}
+
+body.dashboard-layout-v3 .topbar-v3__title-row::after{
+  display:none !important;
+  content:none !important;
+}
+
+body.dashboard-layout-v3 .panel-shell-card-v3{
+  margin-top:0 !important;
+}
+
+body.dashboard-layout-v3 .panel-filter-toolbar-v3{
+  grid-template-columns:repeat(8,minmax(0,1fr)) !important;
+  align-items:end !important;
+  gap:9px !important;
+}
+
+body.dashboard-layout-v3 .panel-filter-toolbar-v3 .field-search-v3--wide{
+  grid-column:span 2 !important;
+}
+
+body.dashboard-layout-v3 .panel-filter-toolbar-v3 .field-button-v6{
+  display:grid !important;
+  grid-column:span 1 !important;
+  gap:6px !important;
+  min-width:0 !important;
+  width:100% !important;
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:inherit !important;
+}
+
+body.dashboard-layout-v3 .field-button-v6 .label-spacer{
+  display:block !important;
+  visibility:hidden !important;
+}
+
+body.dashboard-layout-v3 .field-button-v6 .btn,
+body.dashboard-layout-v3 .field-button-v6 .ace-panel-refresh-cloud-btn,
+body.dashboard-layout-v3 #acePanelRefreshCloudBtn{
+  width:100% !important;
+  min-width:0 !important;
+  min-height:40px !important;
+  border-radius:12px !important;
+  padding:0 12px !important;
+  font-size:12px !important;
+  font-weight:900 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  white-space:nowrap !important;
+}
+
+body.dashboard-layout-v3 .field-button-v6--apply .btn,
+body.dashboard-layout-v3 .field-button-v6--cloud .ace-panel-refresh-cloud-btn,
+body.dashboard-layout-v3 #acePanelRefreshCloudBtn{
+  border:1px solid #21563c !important;
+  background:linear-gradient(180deg,#2f7a52,#21563c) !important;
+  color:#fff !important;
+  box-shadow:0 10px 20px rgba(24,60,44,.14) !important;
+}
+
+body.dashboard-layout-v3 .field-button-v6--clear .btn{
+  border:1px solid rgba(24,60,44,.14) !important;
+  background:linear-gradient(180deg,#ffffff,#eef6f1) !important;
+  color:#21563c !important;
+  box-shadow:none !important;
+}
+
+body.dashboard-layout-v3 .field-button-v6--cloud .ace-panel-action-slot{
+  width:100% !important;
+  min-height:40px !important;
+  display:block !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar{
+  border-radius:24px !important;
+  background:
+    linear-gradient(180deg,rgba(10,43,29,.97),rgba(15,95,47,.96) 58%,rgba(23,107,55,.94)),
+    radial-gradient(circle at top right,rgba(255,255,255,.12),transparent 34%) !important;
+  border-color:rgba(255,255,255,.16) !important;
+  box-shadow:0 18px 42px rgba(10,32,22,.24) !important;
+}
+
+body.dashboard-layout-v3 .app-sidebar::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:5px;
+  background:linear-gradient(90deg,#2f7a52,#4c7cc5 62%,#c78615);
+  pointer-events:none;
+}
+
+body.dashboard-layout-v3 .app-sidebar__nav{
+  gap:10px !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab{
+  display:grid !important;
+  grid-template-columns:38px minmax(0,1fr) !important;
+  align-items:center !important;
+  column-gap:10px !important;
+  width:100% !important;
+  min-height:62px !important;
+  padding:12px 13px !important;
+  border-radius:16px !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  background:rgba(255,255,255,.08) !important;
+  color:rgba(255,255,255,.88) !important;
+  box-shadow:none !important;
+  text-align:left !important;
+  transform:none !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab:hover{
+  background:rgba(255,255,255,.14) !important;
+  border-color:rgba(255,255,255,.24) !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab.active,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"]{
+  border-color:#21563c !important;
+  background:linear-gradient(180deg,#2f7a52,#21563c) !important;
+  color:#fff !important;
+  box-shadow:0 12px 28px rgba(24,60,44,.22) !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab__icon,
+body.dashboard-layout-v3 .sidebar-tab .nav-icon{
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  display:grid !important;
+  place-items:center !important;
+  border-radius:13px !important;
+  background:rgba(255,255,255,.12) !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  color:inherit !important;
+  font-size:18px !important;
+  line-height:1 !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab.active .sidebar-tab__icon,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .sidebar-tab__icon,
+body.dashboard-layout-v3 .sidebar-tab.active .nav-icon,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .nav-icon{
+  background:rgba(255,255,255,.14) !important;
+  border-color:rgba(255,255,255,.18) !important;
+  color:#fff !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab .nav-copy{
+  display:grid !important;
+  gap:3px !important;
+  min-width:0 !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab .nav-copy > span{
+  color:inherit !important;
+  font-size:15px !important;
+  font-weight:950 !important;
+  line-height:1.12 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab .nav-copy > small{
+  color:rgba(240,253,244,.68) !important;
+  font-size:11px !important;
+  font-weight:750 !important;
+  line-height:1.2 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab.active .nav-copy > small,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .nav-copy > small{
+  color:rgba(255,255,255,.80) !important;
+}
+
+body.dashboard-layout-v3 .sidebar-status-card{
+  border:1px solid rgba(255,255,255,.18) !important;
+  background:rgba(255,255,255,.12) !important;
+  color:#fff !important;
+  box-shadow:none !important;
+  border-radius:16px !important;
+  padding:12px 13px !important;
+}
+
+@media (max-width:1480px){
+  body.dashboard-layout-v3 .panel-filter-toolbar-v3{
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  }
+
+  body.dashboard-layout-v3 .panel-filter-toolbar-v3 .field-search-v3--wide{
+    grid-column:span 2 !important;
+  }
+
+  body.dashboard-layout-v3 .panel-filter-toolbar-v3 .field-button-v6{
+    grid-column:span 1 !important;
+  }
+}
+
+@media (max-width:1120px){
+  body.dashboard-layout-v3 .panel-filter-toolbar-v3{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+
+  body.dashboard-layout-v3 .panel-filter-toolbar-v3 .field-search-v3--wide,
+  body.dashboard-layout-v3 .panel-filter-toolbar-v3 .field-button-v6{
+    grid-column:auto !important;
+  }
+}
+
+@media (max-width:720px){
+  body.dashboard-layout-v3 .panel-filter-toolbar-v3{
+    grid-template-columns:1fr !important;
+  }
+
+  body.dashboard-layout-v3 .sidebar-tab{
+    grid-template-columns:32px minmax(0,1fr) !important;
+    min-height:54px !important;
+    padding:10px 11px !important;
+  }
+
+  body.dashboard-layout-v3 .sidebar-tab__icon,
+  body.dashboard-layout-v3 .sidebar-tab .nav-icon{
+    width:30px !important;
+    height:30px !important;
+    min-width:30px !important;
+    border-radius:11px !important;
+    font-size:15px !important;
+  }
+}
+
+body.dashboard-layout-v3 .field-button-v6--cloud #acePanelRefreshCloudBtn{
+  position:static !important;
+  left:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  z-index:auto !important;
+  margin:0 !important;
+}
+
+
+/* =========================================================
+   AJUSTE V8 - centraliza filtro entre cabeçalho e avisos do Painel
+   Mantém o cabeçalho correto e reposiciona apenas o card de filtros.
+   ========================================================= */
+
+@media (min-width:721px){
+  body.dashboard-layout-v3 .panel-main-v3{
+    gap:0 !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3{
+    position:relative !important;
+    z-index:8 !important;
+    gap:5px !important;
+    margin:0 !important;
+  }
+
+  body.dashboard-layout-v3 .panel-shell-card-v3{
+    position:relative !important;
+    z-index:7 !important;
+    width:100% !important;
+    max-width:100% !important;
+    margin:-2px auto 14px !important;
+    padding:10px 12px !important;
+    border-radius:22px !important;
+    transform:none !important;
+  }
+
+  body.dashboard-layout-v3 .panel-workspace-v3{
+    position:relative !important;
+    z-index:1 !important;
+    margin-top:0 !important;
+    padding-top:0 !important;
+  }
+
+  body.dashboard-layout-v3 .panel-fixed-card.panel-fixed-metrics-card{
+    margin-top:0 !important;
+  }
+}
+
+@media (max-width:720px){
+  body.dashboard-layout-v3 .panel-workspace-v3{
+    padding-top:8px !important;
+  }
+}
+
+/* =========================================================
+   AJUSTE V9 - Filtro do Painel realmente reposicionado
+   Mantém o cabeçalho correto, sobe o card de filtros no fluxo
+   e iguala a lateral ao padrão visual da Secretaria.
+   ========================================================= */
+
+@media (min-width:721px){
+  body.dashboard-layout-v3 .panel-main-v3{
+    gap:0 !important;
+    padding-top:0 !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3{
+    gap:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  body.dashboard-layout-v3 .topbar-v3__title-row{
+    margin:0 !important;
+  }
+
+  body.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    position:relative !important;
+    z-index:7 !important;
+    width:100% !important;
+    max-width:100% !important;
+    margin:-64px auto 18px !important;
+    padding:10px 12px !important;
+    border-radius:22px !important;
+    transform:none !important;
+  }
+
+  body.dashboard-layout-v3 .panel-workspace.panel-workspace-v3{
+    position:relative !important;
+    z-index:1 !important;
+    margin-top:0 !important;
+    padding-top:0 !important;
+  }
+
+  body.dashboard-layout-v3 .panel-fixed-card.panel-fixed-metrics-card{
+    margin-top:0 !important;
+  }
+}
+
+@media (min-width:1500px){
+  body.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    margin-top:-76px !important;
+  }
+}
+
+@media (max-width:1320px) and (min-width:921px){
+  body.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    margin-top:-38px !important;
+  }
+}
+
+@media (max-width:920px) and (min-width:721px){
+  body.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    margin-top:10px !important;
+  }
+}
+
+/* Barra lateral do Painel igual à Secretaria */
+body.dashboard-layout-v3 .sidebar-tab.active,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"]{
+  background:#fff !important;
+  color:var(--ace-brand-900) !important;
+  border-color:#fff !important;
+  box-shadow:0 16px 28px rgba(0,0,0,.18) !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab.active .sidebar-tab__icon,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .sidebar-tab__icon,
+body.dashboard-layout-v3 .sidebar-tab.active .nav-icon,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .nav-icon{
+  background:rgba(47,122,82,.10) !important;
+  border-color:rgba(47,122,82,.16) !important;
+  color:var(--ace-brand-800) !important;
+}
+
+body.dashboard-layout-v3 .sidebar-tab.active .nav-copy > small,
+body.dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .nav-copy > small{
+  color:#4b6358 !important;
+}
+
+
+
+/* =========================================================
+   AJUSTE V12 - filtro parado e recorte ainda mais baixo
+   ========================================================= */
+@media (min-width:721px){
+  body.dashboard-layout-v3 [data-panel-view-content="indicators"] .panel-fixed-card.panel-fixed-metrics-card{
+    margin-top:70px !important;
+  }
+
+  body.dashboard-layout-v3 [data-panel-view-content="indicators"] .panel-priority-band{
+    margin-top:0 !important;
+  }
+}
+
+@media (max-width:720px){
+  body.dashboard-layout-v3 [data-panel-view-content="indicators"] .panel-fixed-card.panel-fixed-metrics-card{
+    margin-top:40px !important;
+  }
+}
+
+
+/* =========================================================
+   AJUSTE V13 - restaura lista de imóveis do Painel do Agente
+   Mantém o tema geral, mas impede que o CSS padrão quebre os
+   cards da consulta/visita do agente.
+   ========================================================= */
+body.field-page.ace-page--field .visit-screen .property-list-body,
+body.field-page.ace-page--field .properties-screen .property-list-body{
+  display:grid !important;
+  gap:10px !important;
+  align-items:start !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-result-card,
+body.field-page.ace-page--field .properties-screen .property-result-card{
+  position:relative !important;
+  display:block !important;
+  overflow:hidden !important;
+  padding:14px 16px !important;
+  border:1px solid rgba(20,46,32,.09) !important;
+  border-radius:16px !important;
+  background:linear-gradient(180deg,#ffffff 0%,#f9fbfa 100%) !important;
+  box-shadow:0 8px 20px rgba(14,39,28,.05) !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-result-card::before,
+body.field-page.ace-page--field .properties-screen .property-result-card::before{
+  content:"" !important;
+  position:absolute !important;
+  inset:0 auto 0 0 !important;
+  width:5px !important;
+  border-radius:16px 0 0 16px !important;
+  background:linear-gradient(180deg,#2f7a52,#4c7cc5) !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-row,
+body.field-page.ace-page--field .properties-screen .property-card-row{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 196px !important;
+  gap:14px !important;
+  align-items:center !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-copy,
+body.field-page.ace-page--field .properties-screen .property-card-copy{
+  min-width:0 !important;
+  display:block !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-title,
+body.field-page.ace-page--field .properties-screen .property-card-title{
+  display:block !important;
+  margin:0 !important;
+  padding-left:0 !important;
+  color:#173826 !important;
+  font-size:1.04rem !important;
+  font-weight:900 !important;
+  line-height:1.2 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-statusline,
+body.field-page.ace-page--field .properties-screen .property-card-statusline{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:6px !important;
+  margin:6px 0 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .status-cell,
+body.field-page.ace-page--field .properties-screen .status-cell{
+  display:flex !important;
+  align-items:center !important;
+  min-height:29px !important;
+  padding:5px 8px !important;
+  border:1px solid #d8e2de !important;
+  border-radius:8px !important;
+  background:#f8fbf9 !important;
+  color:#42544b !important;
+  font-size:.77rem !important;
+  font-weight:800 !important;
+  line-height:1.22 !important;
+  overflow-wrap:anywhere !important;
+}
+
+body.field-page.ace-page--field .visit-screen .status-cell.is-ok,
+body.field-page.ace-page--field .properties-screen .status-cell.is-ok{
+  border-color:#b9d9c2 !important;
+  background:#edf8f1 !important;
+  color:#1d613b !important;
+}
+
+body.field-page.ace-page--field .visit-screen .status-cell.is-warn,
+body.field-page.ace-page--field .properties-screen .status-cell.is-warn{
+  border-color:#f1ddb5 !important;
+  background:#fff8e8 !important;
+  color:#805300 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .status-cell.is-danger,
+body.field-page.ace-page--field .properties-screen .status-cell.is-danger{
+  border-color:#f2b8b8 !important;
+  background:#fff1f1 !important;
+  color:#9a2d2d !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-mainline,
+body.field-page.ace-page--field .visit-screen .property-card-subline,
+body.field-page.ace-page--field .properties-screen .property-card-mainline,
+body.field-page.ace-page--field .properties-screen .property-card-subline{
+  display:block !important;
+  margin:4px 0 0 !important;
+  color:#53645a !important;
+  font-size:.84rem !important;
+  font-weight:700 !important;
+  line-height:1.35 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-mainline,
+body.field-page.ace-page--field .properties-screen .property-card-mainline{
+  color:#3f5248 !important;
+  font-size:.9rem !important;
+  font-weight:800 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .meta-pills,
+body.field-page.ace-page--field .properties-screen .meta-pills{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:6px !important;
+  margin-top:8px !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-result-card .meta-pill,
+body.field-page.ace-page--field .visit-screen .property-result-card .status-pill,
+body.field-page.ace-page--field .properties-screen .property-result-card .meta-pill,
+body.field-page.ace-page--field .properties-screen .property-result-card .status-pill{
+  display:inline-flex !important;
+  align-items:center !important;
+  width:auto !important;
+  min-width:0 !important;
+  min-height:29px !important;
+  padding:5px 8px !important;
+  border-radius:999px !important;
+  font-size:.76rem !important;
+  font-weight:800 !important;
+  line-height:1.15 !important;
+  white-space:normal !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-actions-side,
+body.field-page.ace-page--field .properties-screen .property-card-actions-side{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  gap:8px !important;
+  align-self:stretch !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-actions-side .btn,
+body.field-page.ace-page--field .properties-screen .property-card-actions-side .btn{
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:42px !important;
+  padding:9px 12px !important;
+  border-radius:12px !important;
+  font-size:.92rem !important;
+  font-weight:800 !important;
+  line-height:1.1 !important;
+  text-align:center !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-actions-side .btn-warn,
+body.field-page.ace-page--field .properties-screen .property-card-actions-side .btn-warn{
+  border-color:#cfe0d7 !important;
+  background:#ffffff !important;
+  color:#21563c !important;
+  box-shadow:none !important;
+}
+
+@media (max-width:980px){
+  body.field-page.ace-page--field .visit-screen .property-card-row,
+  body.field-page.ace-page--field .properties-screen .property-card-row{
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+
+  body.field-page.ace-page--field .visit-screen .property-card-actions-side,
+  body.field-page.ace-page--field .properties-screen .property-card-actions-side{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+@media (max-width:720px){
+  body.field-page.ace-page--field .visit-screen .property-result-card,
+  body.field-page.ace-page--field .properties-screen .property-result-card{
+    padding:12px !important;
+  }
+
+  body.field-page.ace-page--field .visit-screen .property-card-statusline,
+  body.field-page.ace-page--field .properties-screen .property-card-statusline,
+  body.field-page.ace-page--field .visit-screen .property-card-actions-side,
+  body.field-page.ace-page--field .properties-screen .property-card-actions-side{
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+}
+
+
+/* =========================================================
+   Lista do agente no mesmo padrão da consulta da secretaria
+   ========================================================= */
+body.field-page.ace-page--field .visit-screen .property-list-body,
+body.field-page.ace-page--field .properties-screen .property-list-body{
+  gap:12px !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-result-card.secretaria-style-card,
+body.field-page.ace-page--field .properties-screen .property-result-card.secretaria-style-card{
+  display:block !important;
+  padding:18px 20px !important;
+  border:1px solid rgba(24,60,44,.10) !important;
+  border-radius:18px !important;
+  background:linear-gradient(180deg,#fff,#f7fbf8) !important;
+  box-shadow:0 14px 28px rgba(24,60,44,.08) !important;
+  overflow:visible !important;
+  overflow-wrap:anywhere !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-result-card.secretaria-style-card::before,
+body.field-page.ace-page--field .properties-screen .property-result-card.secretaria-style-card::before{
+  display:none !important;
+  content:none !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-result-card.secretaria-style-card.is-selected,
+body.field-page.ace-page--field .properties-screen .property-result-card.secretaria-style-card.is-selected{
+  border-color:rgba(47,122,82,.30) !important;
+  box-shadow:0 0 0 2px rgba(47,122,82,.12), 0 18px 32px rgba(24,60,44,.10) !important;
+}
+
+body.field-page.ace-page--field .visit-screen .property-card-row-secretaria,
+body.field-page.ace-page--field .properties-screen .property-card-row-secretaria{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  gap:14px !important;
+  align-items:start !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-copy,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-copy{
+  display:block !important;
+  min-width:0 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-title,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-title{
+  display:block !important;
+  margin:0 0 6px !important;
+  padding:0 !important;
+  color:#173826 !important;
+  font-size:1.05rem !important;
+  font-weight:900 !important;
+  line-height:1.25 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-address,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-address{
+  display:block !important;
+  margin:0 !important;
+  color:#243b2e !important;
+  font-size:.94rem !important;
+  font-weight:700 !important;
+  line-height:1.42 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-secretaria-line,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-secretaria-line{
+  display:block !important;
+  margin-top:4px !important;
+  color:#6a756f !important;
+  font-size:.86rem !important;
+  font-weight:700 !important;
+  line-height:1.38 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-badges,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-badges{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:8px !important;
+  margin-top:10px !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .badge,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .badge{
+  display:inline-flex !important;
+  align-items:center !important;
+  width:auto !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  padding:5px 10px !important;
+  border:1px solid rgba(24,60,44,.10) !important;
+  border-radius:999px !important;
+  background:#edf5f1 !important;
+  color:#173826 !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  line-height:1.25 !important;
+  white-space:normal !important;
+  box-shadow:none !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .badge.warn,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .badge.warn{
+  border-color:#f0d7a6 !important;
+  background:#fff5e6 !important;
+  color:#8d5a20 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .badge.success,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .badge.success{
+  border-color:#b8dfc8 !important;
+  background:#edf8f3 !important;
+  color:#1f6b49 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .badge.purple,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .badge.purple{
+  border-color:#d4c8ff !important;
+  background:#f1ecff !important;
+  color:#5b46a5 !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-actions-bottom,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-actions-bottom{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-end !important;
+  align-items:center !important;
+  gap:8px !important;
+  align-self:auto !important;
+  margin-top:2px !important;
+}
+
+body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-actions-bottom .btn,
+body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-actions-bottom .btn{
+  width:auto !important;
+  min-width:138px !important;
+  min-height:38px !important;
+  padding:9px 14px !important;
+  border-radius:999px !important;
+  font-size:.9rem !important;
+  font-weight:800 !important;
+  line-height:1.1 !important;
+}
+
+@media (max-width:720px){
+  body.field-page.ace-page--field .visit-screen .property-result-card.secretaria-style-card,
+  body.field-page.ace-page--field .properties-screen .property-result-card.secretaria-style-card{
+    padding:16px !important;
+  }
+
+  body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-actions-bottom,
+  body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-actions-bottom{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+
+  body.field-page.ace-page--field .visit-screen .secretaria-style-card .property-card-actions-bottom .btn,
+  body.field-page.ace-page--field .properties-screen .secretaria-style-card .property-card-actions-bottom .btn{
+    width:100% !important;
+    min-width:0 !important;
+  }
+}
+
+
+/* =========================================================
+   AJUSTE V10 - distância real de 1cm entre filtros e quadros
+   Regra final carregada depois dos ajustes anteriores do painel.
+   ========================================================= */
+body.dashboard-page.dashboard-layout-v3{
+  --coord-panel-filter-gap:1cm;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+  position:relative !important;
+  top:auto !important;
+  z-index:2 !important;
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 auto var(--coord-panel-filter-gap) !important;
+  transform:none !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-filter-drawer{
+  margin:0 !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-workspace.panel-workspace-v3{
+  position:relative !important;
+  z-index:1 !important;
+  clear:both !important;
+  margin-top:0 !important;
+  padding-top:0 !important;
+  display:grid !important;
+  gap:var(--coord-panel-filter-gap) !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-workspace.panel-workspace-v3 > .panel-view{
+  margin-top:0 !important;
+  padding-top:0 !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-workspace.panel-workspace-v3 > .panel-view.is-active{
+  margin-top:0 !important;
+  padding-top:0 !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-view,
+body.dashboard-page.dashboard-layout-v3 .panel-view.is-active,
+body.dashboard-page.dashboard-layout-v3 .panel-view.panel-view-split,
+body.dashboard-page.dashboard-layout-v3 .panel-view.panel-view-split.is-active{
+  gap:var(--coord-panel-filter-gap) !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-view-split .panel-view-fixed{
+  top:calc(var(--coord-panel-filter-gap) + 14px) !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .panel-fixed-card.panel-fixed-metrics-card,
+body.dashboard-page.dashboard-layout-v3 .panel-view > .card:first-child,
+body.dashboard-page.dashboard-layout-v3 .panel-view > .panel-shell-card:first-child,
+body.dashboard-page.dashboard-layout-v3 .panel-view > .panel-fixed-card:first-child,
+body.dashboard-page.dashboard-layout-v3 .panel-view > .panel-scroll-box:first-child{
+  margin-top:0 !important;
+}
+
+@media (min-width:721px){
+  body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    margin-top:0 !important;
+    margin-bottom:var(--coord-panel-filter-gap) !important;
+  }
+
+  body.dashboard-page.dashboard-layout-v3 .panel-workspace.panel-workspace-v3{
+    margin-top:0 !important;
+  }
+}
+
+@media (min-width:1500px){
+  body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    margin-top:0 !important;
+    margin-bottom:var(--coord-panel-filter-gap) !important;
+  }
+}
+
+@media (max-width:1320px) and (min-width:921px){
+  body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    margin-top:0 !important;
+    margin-bottom:var(--coord-panel-filter-gap) !important;
+  }
+}
+
+@media (max-width:920px) and (min-width:721px){
+  body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+    margin-top:0 !important;
+    margin-bottom:var(--coord-panel-filter-gap) !important;
+  }
+}
+
+/* Desktop coordination screens: keep the dense dashboard, but make controls
+   consistently comfortable for repeated mouse and occasional touch use. */
+body.dashboard-page.dashboard-layout-v3 input,
+body.dashboard-page.dashboard-layout-v3 select,
+body.dashboard-page.dashboard-layout-v3 textarea,
+body.dashboard-page.dashboard-layout-v3 button,
+body.dashboard-page.dashboard-layout-v3 .btn,
+body.dashboard-page.dashboard-layout-v3 .field-button-v6,
+body.dashboard-page.dashboard-layout-v3 .field-button-v6 .btn,
+body.dashboard-page.dashboard-layout-v3 .panel-action-refresh,
+body.dashboard-page.dashboard-layout-v3 .panel-action-clear,
+body.dashboard-page.dashboard-layout-v3 .panel-action-exec,
+body.dashboard-page.dashboard-layout-v3 .panel-action-button,
+body.dashboard-page.dashboard-layout-v3 .ace-panel-refresh-cloud-btn,
+body.dashboard-page.dashboard-layout-v3 .ace-panel-action-slot button{
+  min-height:44px !important;
+}
+
+body.dashboard-page.dashboard-layout-v3 .ace-panel-privacy-close,
+body.dashboard-page.dashboard-layout-v3 #acePanelPrivacyNoticeCloseX{
+  min-width:44px !important;
+  width:44px !important;
+  min-height:44px !important;
+}

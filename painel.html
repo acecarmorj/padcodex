@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#21563c">
+  <title>Painel ACE | Carmo/RJ</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260505-coord-filter-gap-v8-1cm">
+
+  <style>
+    body:not(.ace-panel-ready) .page-shell { visibility: hidden; }
+    .ace-panel-login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99990;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #0f172a 0%, #14532d 100%);
+    }
+    .ace-panel-login-card {
+      width: min(420px, 100%);
+      padding: 28px;
+      border-radius: 24px;
+      background: #ffffff;
+      box-shadow: 0 28px 70px rgba(15, 23, 42, 0.35);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #0f172a;
+    }
+    .ace-panel-login-brand {
+      display: inline-flex;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    .ace-panel-login-card h1 {
+      margin: 14px 0 8px;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+    .ace-panel-login-card p {
+      margin: 0 0 18px;
+      color: #334155;
+      line-height: 1.45;
+    }
+    .ace-panel-login-form {
+      display: grid;
+      gap: 14px;
+    }
+    .ace-panel-login-field {
+      display: grid;
+      gap: 6px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .ace-panel-login-field input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .ace-panel-login-field input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+    }
+    #acePanelLoginSubmit {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #166534;
+      color: #fff;
+    }
+    #acePanelLoginSubmit[disabled] {
+      opacity: .75;
+      cursor: wait;
+    }
+    .ace-panel-login-message {
+      min-height: 20px;
+      font-size: 14px;
+      color: #334155;
+    }
+    .ace-panel-login-message.is-error { color: #b91c1c; }
+    .ace-panel-login-message.is-ok { color: #166534; }
+    .ace-panel-login-message.is-warn { color: #92400e; }
+    .ace-panel-login-message.is-info { color: #1d4ed8; }
+    .ace-panel-private-logout-btn,
+    .ace-panel-refresh-cloud-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      min-height: 44px;
+      padding: 0 16px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+    .ace-panel-private-logout-btn:hover,
+    .ace-panel-refresh-cloud-btn:hover {
+      transform: translateY(-1px);
+    }
+    .ace-panel-private-logout-btn {
+      background: #0f172a;
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(15,23,42,.22);
+    }
+    .ace-panel-refresh-cloud-btn {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(37,99,235,.22);
+    }
+    .ace-panel-action-slot {
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+    .header-widget-v3__copy--logout {
+      gap: 10px;
+      width: 100%;
+    }
+    .header-widget-v3__logout-note {
+      color: rgba(255,255,255,.82);
+      font-size: 13px;
+      line-height: 1.2;
+    }
+    .header-widget-v3--logout {
+      align-items: center;
+    }
+    @media (max-width: 880px) {
+      .dashboard-layout-v3 .header-widget-v3--logout {
+        display: flex !important;
+      }
+    }
+
+    /* Painel Coordenação — acabamento visual inspirado na Secretaria */
+    :root{
+      --coord-brand-950:#082c1c;
+      --coord-brand-900:#183c2c;
+      --coord-brand-800:#21563c;
+      --coord-brand-700:#2f7a52;
+      --coord-brand-600:#3e9667;
+      --coord-accent-600:#4c7cc5;
+      --coord-warn:#c78615;
+      --coord-bg:#eef4f1;
+      --coord-surface:#ffffff;
+      --coord-surface-soft:#f8fbf9;
+      --coord-line:rgba(15,70,44,.11);
+      --coord-shadow:0 18px 42px rgba(24,60,44,.08);
+      --coord-shadow-soft:0 12px 24px rgba(24,60,44,.06);
+    }
+
+    body.dashboard-layout-v3{
+      background:
+        radial-gradient(circle at top left,rgba(24,60,44,.14),transparent 24%),
+        radial-gradient(circle at top right,rgba(53,95,159,.10),transparent 28%),
+        linear-gradient(180deg,#edf4f0 0%,#e7efeb 260px,#edf2ef 100%);
+      color:#1b252e;
+    }
+
+    .dashboard-layout-v3 .panel-shell-v3{
+      grid-template-columns:264px minmax(0,1fr);
+      gap:16px;
+      min-height:100vh;
+      padding:14px;
+      box-sizing:border-box;
+    }
+
+    .dashboard-layout-v3 .app-sidebar{
+      position:sticky;
+      top:14px;
+      align-self:start;
+      min-height:calc(100vh - 28px);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      padding:16px;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:28px;
+      background:
+        linear-gradient(180deg,rgba(12,71,47,.98),rgba(20,96,63,.98)),
+        radial-gradient(circle at top right,rgba(255,255,255,.16),transparent 34%);
+      box-shadow:0 22px 44px rgba(9,48,31,.22);
+      color:#fff;
+      overflow:hidden;
+    }
+
+    .dashboard-layout-v3 .app-sidebar::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 20% 0%,rgba(255,255,255,.10),transparent 32%),
+        linear-gradient(180deg,rgba(255,255,255,.04),transparent 42%);
+    }
+
+    .dashboard-layout-v3 .app-sidebar__brand-card{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:0;
+      padding:0 0 12px;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+      border-bottom:1px solid rgba(255,255,255,.14);
+    }
+
+    .dashboard-layout-v3 .app-sidebar__brand-logo{
+      width:42px;
+      height:42px;
+      flex:0 0 42px;
+      display:grid;
+      place-items:center;
+      border-radius:14px;
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+      font-size:13px;
+      font-weight:950;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    .dashboard-layout-v3 .app-sidebar__brand-copy{
+      display:grid;
+      gap:3px;
+      color:#fff;
+      min-width:0;
+    }
+
+    .dashboard-layout-v3 .app-sidebar__brand-copy strong{
+      display:block;
+      color:#fff;
+      font-size:16px;
+      line-height:1.08;
+      font-weight:950;
+    }
+
+    .dashboard-layout-v3 .app-sidebar__brand-copy span{
+      display:block;
+      color:rgba(240,253,244,.76);
+      font-size:11px;
+      font-weight:800;
+      margin-top:1px;
+    }
+
+    .dashboard-layout-v3 .app-sidebar__nav{
+      position:relative;
+      z-index:1;
+      display:grid;
+      gap:7px;
+      padding:0;
+    }
+
+    .dashboard-layout-v3 .sidebar-tab{
+      display:grid;
+      grid-template-columns:31px minmax(0,1fr);
+      align-items:center;
+      column-gap:9px;
+      width:100%;
+      min-height:48px;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.90);
+      box-shadow:none;
+      text-align:left;
+      transform:none;
+      font-size:13px;
+      font-weight:950;
+      line-height:1.12;
+      transition:background .16s ease,border-color .16s ease,box-shadow .16s ease,color .16s ease;
+    }
+
+    .dashboard-layout-v3 .sidebar-tab:hover{
+      background:rgba(255,255,255,.14);
+      border-color:rgba(255,255,255,.24);
+      transform:none;
+      box-shadow:none;
+    }
+
+    .dashboard-layout-v3 .sidebar-tab.active,
+    .dashboard-layout-v3 .sidebar-tab[aria-selected="true"]{
+      background:#fff;
+      color:var(--coord-brand-900);
+      border-color:#fff;
+      box-shadow:0 16px 28px rgba(0,0,0,.18);
+    }
+
+    .dashboard-layout-v3 .sidebar-tab__icon{
+      width:31px;
+      height:31px;
+      min-width:31px;
+      display:grid;
+      place-items:center;
+      border-radius:11px;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.13);
+      font-size:15px;
+      line-height:1;
+      color:inherit;
+    }
+
+    .dashboard-layout-v3 .sidebar-tab.active .sidebar-tab__icon,
+    .dashboard-layout-v3 .sidebar-tab[aria-selected="true"] .sidebar-tab__icon{
+      background:rgba(47,122,82,.10);
+      border-color:rgba(47,122,82,.16);
+    }
+
+    .dashboard-layout-v3 .sidebar-divider{
+      height:1px;
+      margin:2px 0;
+      background:rgba(255,255,255,.14);
+    }
+
+    .dashboard-layout-v3 .app-sidebar__footer{
+      position:relative;
+      z-index:1;
+      margin-top:auto;
+      padding:10px 0 0;
+      border-top:1px solid rgba(255,255,255,.14);
+    }
+
+    .dashboard-layout-v3 .sidebar-status-card{
+      display:grid;
+      gap:7px;
+      padding:10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.10);
+      box-shadow:none;
+    }
+
+    .dashboard-layout-v3 .sidebar-status-card__row{
+      display:flex;
+      align-items:center;
+      gap:7px;
+    }
+
+    .dashboard-layout-v3 .sidebar-status-card__row--head strong{
+      color:#fff;
+      font-size:13px;
+      font-weight:950;
+    }
+
+    .dashboard-layout-v3 .sidebar-status-card__row--meta{
+      flex-direction:column;
+      align-items:flex-start;
+      gap:2px;
+    }
+
+    .dashboard-layout-v3 .sidebar-status-card__row--meta span{
+      color:rgba(240,253,244,.68);
+      font-size:10px;
+      font-weight:750;
+    }
+
+    .dashboard-layout-v3 .sidebar-status-card__row--meta strong{
+      color:#fff;
+      font-size:12px;
+      font-weight:950;
+    }
+
+    .dashboard-layout-v3 .sidebar-status-card__dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:#86efac;
+      box-shadow:0 0 0 4px rgba(134,239,172,.16);
+    }
+
+    .dashboard-layout-v3 #panelStatus.sync-banner{
+      position:static;
+      width:auto;
+      margin:0;
+      padding:7px 9px;
+      min-height:auto;
+      border-radius:11px;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:none;
+      font-size:11px;
+      font-weight:850;
+    }
+
+    /* Refinamento solicitado: barra lateral compacta, sem alterar filtros ou navegação. */
+
+    .dashboard-layout-v3 .panel-main-v3{
+      min-width:0;
+      padding:0 0 18px;
+      display:grid;
+      gap:16px;
+      align-content:start;
+    }
+
+    .dashboard-layout-v3 .topbar-v3{
+      display:grid;
+      gap:14px;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__title-row{
+      display:grid;
+      grid-template-columns:46px minmax(280px,.82fr) minmax(720px,1.18fr);
+      gap:14px;
+      align-items:center;
+      padding:16px 18px;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:28px;
+      background:
+        linear-gradient(120deg,rgba(10,43,29,.96),rgba(15,95,47,.96) 56%,rgba(23,107,55,.94)),
+        radial-gradient(circle at top right,rgba(255,255,255,.10),transparent 34%);
+      box-shadow:0 16px 34px rgba(10,32,22,.22);
+    }
+
+    .dashboard-layout-v3 .topbar-v3__menu-btn{
+      width:46px;
+      height:46px;
+      border-radius:15px;
+      border:1px solid rgba(255,255,255,.18);
+      display:grid;
+      place-items:center;
+      background:rgba(255,255,255,.10);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+
+    .dashboard-layout-v3 .topbar-v3__menu-btn span{
+      width:21px;
+      height:2.5px;
+      margin:2px 0;
+      border-radius:999px;
+      background:#fff;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy{
+      padding-top:0;
+      min-width:0;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy h1{
+      margin:0;
+      color:#fff;
+      font-size:1.42rem;
+      line-height:1.08;
+      font-weight:950;
+      letter-spacing:.005em;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy p{
+      margin:5px 0 0;
+      color:rgba(240,248,244,.86);
+      font-size:13px;
+      line-height:1.35;
+      max-width:720px;
+      font-weight:650;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__widgets{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      justify-content:end;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3{
+      min-height:62px;
+      padding:10px 12px;
+      border-radius:16px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow:none;
+      gap:10px;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__icon{
+      width:34px;
+      height:34px;
+      flex:0 0 34px;
+      display:grid;
+      place-items:center;
+      border-radius:13px;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      font-size:1rem;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__copy{
+      display:grid;
+      gap:2px;
+      min-width:0;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__copy strong{
+      color:#fff;
+      font-size:12px;
+      line-height:1.15;
+      font-weight:950;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__copy span{
+      color:rgba(240,253,244,.76);
+      font-size:11px;
+      line-height:1.18;
+      font-weight:750;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3 .chip,
+    .dashboard-layout-v3 .header-widget-v3 .chip-inline{
+      position:static;
+      min-height:auto;
+      border-radius:999px;
+      padding:5px 8px;
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow:none;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .dashboard-layout-v3 .panel-shell-card-v3,
+    .dashboard-layout-v3 .panel-shell-card,
+    .dashboard-layout-v3 .panel-fixed-card,
+    .dashboard-layout-v3 .panel-placeholder-card,
+    .dashboard-layout-v3 .panel-report-actions-fixed,
+    .dashboard-layout-v3 .panel-report-screen-card,
+    .dashboard-layout-v3 .panel-strategy-card,
+    .dashboard-layout-v3 .panel-visits-table-card,
+    .dashboard-layout-v3 .panel-visit-inspection-card,
+    .dashboard-layout-v3 .card{
+      border:1px solid var(--coord-line);
+      border-radius:22px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.99),rgba(248,252,250,.99));
+      box-shadow:0 14px 30px rgba(24,60,44,.075);
+    }
+
+    .dashboard-layout-v3 .panel-shell-card-v3{
+      padding:16px 18px;
+      border-radius:24px;
+    }
+
+    .dashboard-layout-v3 .panel-shell-card-v3::before,
+    .dashboard-layout-v3 .panel-fixed-card::before,
+    .dashboard-layout-v3 .card::before,
+    .dashboard-layout-v3 .panel-visits-table-card::before,
+    .dashboard-layout-v3 .panel-visit-inspection-card::before{
+      background:linear-gradient(90deg,var(--coord-brand-800),var(--coord-brand-600) 54%,#8fbf9d);
+    }
+
+    .dashboard-layout-v3 .panel-filter-drawer summary{
+      color:var(--coord-brand-900);
+      font-weight:950;
+    }
+
+    .dashboard-layout-v3 .panel-filter-toolbar-v3{
+      display:grid;
+      grid-template-columns:repeat(8,minmax(0,1fr));
+      gap:10px;
+      align-items:end;
+    }
+
+    .dashboard-layout-v3 .panel-filter-toolbar-v3 label,
+    .dashboard-layout-v3 label{
+      color:#52665b;
+      font-size:11px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+
+    .dashboard-layout-v3 input,
+    .dashboard-layout-v3 select,
+    .dashboard-layout-v3 textarea,
+    .dashboard-layout-v3 .panel-filter-toolbar-v3 input,
+    .dashboard-layout-v3 .panel-filter-toolbar-v3 select{
+      min-height:40px;
+      border-radius:12px;
+      padding:0 12px;
+      border:1px solid #dce5df;
+      background:#fff;
+      color:#1b252e;
+      font-size:13px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .dashboard-layout-v3 input:focus,
+    .dashboard-layout-v3 select:focus,
+    .dashboard-layout-v3 textarea:focus,
+    .dashboard-layout-v3 .panel-filter-toolbar-v3 input:focus,
+    .dashboard-layout-v3 .panel-filter-toolbar-v3 select:focus{
+      outline:none;
+      border-color:rgba(47,122,82,.55);
+      box-shadow:0 0 0 4px rgba(47,122,82,.12);
+    }
+
+    .dashboard-layout-v3 button,
+    .dashboard-layout-v3 .btn{
+      border-radius:12px;
+      font-weight:850;
+    }
+
+    .dashboard-layout-v3 .btn.primary,
+    .dashboard-layout-v3 .panel-action-refresh,
+    .dashboard-layout-v3 .field-button-v6--apply .btn,
+    .dashboard-layout-v3 .ace-panel-refresh-cloud-btn{
+      background:linear-gradient(135deg,var(--coord-brand-800),var(--coord-brand-700));
+      border-color:var(--coord-brand-800);
+      color:#fff;
+      box-shadow:0 10px 20px rgba(24,60,44,.12);
+    }
+
+    .dashboard-layout-v3 .panel-action-clear,
+    .dashboard-layout-v3 .field-button-v6--clear .btn{
+      background:linear-gradient(180deg,#fff,#f7faf8);
+      color:var(--coord-brand-900);
+      border:1px solid #dce5df;
+    }
+
+    .dashboard-layout-v3 .panel-workspace-v3{
+      padding-top:0;
+    }
+
+    .dashboard-layout-v3 .panel-view-head-v3{
+      padding:15px 18px;
+      margin-bottom:14px;
+      border:1px solid var(--coord-line);
+      border-radius:22px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,252,250,.99)),
+        radial-gradient(circle at top right,rgba(47,122,82,.08),transparent 32%);
+      box-shadow:var(--coord-shadow-soft);
+    }
+
+    .dashboard-layout-v3 .section-title-v3,
+    .dashboard-layout-v3 .section-title,
+    .dashboard-layout-v3 .panel-mini-title{
+      color:var(--coord-brand-900);
+      font-weight:950;
+    }
+
+    .dashboard-layout-v3 .panel-view-note-v3,
+    .dashboard-layout-v3 .muted{
+      color:#66727c;
+      font-weight:650;
+    }
+
+    .dashboard-layout-v3 .metric-card,
+    .dashboard-layout-v3 .summary-card,
+    .dashboard-layout-v3 .stat-card,
+    .dashboard-layout-v3 .kpi-card,
+    .dashboard-layout-v3 .dashboard-card,
+    .dashboard-layout-v3 .insight-card{
+      border:1px solid var(--coord-line);
+      border-radius:18px;
+      background:linear-gradient(180deg,#fff,#f8fbf9);
+      box-shadow:0 10px 22px rgba(24,60,44,.055);
+    }
+
+    .dashboard-layout-v3 .visit-list-item{
+      border:1px solid rgba(24,60,44,.10);
+      border-radius:16px;
+      background:linear-gradient(180deg,#fff,#fbfdfc);
+      box-shadow:0 8px 18px rgba(24,60,44,.05);
+    }
+
+    .dashboard-layout-v3 .visit-list-item.is-active-row{
+      border-color:rgba(47,122,82,.38);
+      background:linear-gradient(180deg,#eef8f2,#f8fbf9);
+      box-shadow:0 12px 24px rgba(24,60,44,.08);
+    }
+
+    .dashboard-layout-v3 .map-shell,
+    .dashboard-layout-v3 #heatMap,
+    .dashboard-layout-v3 .table-wrap,
+    .dashboard-layout-v3 .panel-scroll-box{
+      border-radius:18px;
+    }
+
+    .dashboard-layout-v3 table{
+      border-collapse:separate;
+      border-spacing:0;
+    }
+
+    .dashboard-layout-v3 th{
+      background:#edf2f7;
+      color:#243a2f;
+      font-weight:950;
+    }
+
+    .dashboard-layout-v3 td,
+    .dashboard-layout-v3 th{
+      border-color:#d8e2dc;
+    }
+
+    .dashboard-layout-v3 .floating-support-modal__dialog{
+      border-radius:24px;
+      border:1px solid var(--coord-line);
+      box-shadow:0 24px 54px rgba(9,48,31,.22);
+    }
+
+    .dashboard-layout-v3 .ace-panel-private-logout-btn{
+      background:linear-gradient(135deg,#243447,#0f172a);
+      box-shadow:0 10px 20px rgba(15,23,42,.18);
+    }
+
+    .dashboard-layout-v3 .ace-panel-login-overlay{
+      background:
+        radial-gradient(circle at top left,rgba(24,60,44,.28),transparent 24%),
+        linear-gradient(135deg,#082c1c 0%,#14532d 100%);
+    }
+
+    .dashboard-layout-v3 .ace-panel-login-card{
+      border:1px solid rgba(255,255,255,.70);
+      border-radius:28px;
+      background:linear-gradient(180deg,#fff,#f8fbf9);
+      box-shadow:0 28px 70px rgba(15,23,42,.28);
+    }
+
+    .dashboard-layout-v3 .ace-panel-login-brand{
+      background:#e8f7ee;
+      color:#14532d;
+      border:1px solid rgba(22,101,52,.12);
+    }
+
+    @media (max-width:1480px){
+      .dashboard-layout-v3 .topbar-v3__title-row{
+        grid-template-columns:46px minmax(0,1fr);
+      }
+
+      .dashboard-layout-v3 .topbar-v3__widgets{
+        grid-column:1 / -1;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+      }
+
+      .dashboard-layout-v3 .panel-filter-toolbar-v3{
+        grid-template-columns:repeat(4,minmax(0,1fr));
+      }
+
+      .dashboard-layout-v3 .field-search-v3--wide,
+      .dashboard-layout-v3 .field-search-v3{
+        grid-column:span 2;
+      }
+
+      .dashboard-layout-v3 .field-button-v6{
+        grid-column:span 1;
+      }
+    }
+
+    @media (max-width:1120px){
+      .dashboard-layout-v3 .panel-shell-v3{
+        grid-template-columns:1fr;
+        padding:10px;
+      }
+
+      .dashboard-layout-v3 .app-sidebar{
+        position:relative;
+        top:auto;
+        min-height:auto;
+        border-radius:24px;
+      }
+
+      .dashboard-layout-v3 .app-sidebar__nav{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .dashboard-layout-v3 .app-sidebar__footer{
+        margin-top:0;
+      }
+
+      .dashboard-layout-v3 .topbar-v3__title-row,
+      .dashboard-layout-v3 .topbar-v3__widgets,
+      .dashboard-layout-v3 .panel-filter-toolbar-v3{
+        grid-template-columns:1fr;
+      }
+
+      .dashboard-layout-v3 .field-search-v3--wide,
+      .dashboard-layout-v3 .field-search-v3,
+      .dashboard-layout-v3 .field-button-v6{
+        grid-column:auto;
+      }
+    }
+
+    @media (max-width:720px){
+      .dashboard-layout-v3 .panel-shell-v3{
+        padding:8px;
+      }
+
+      .dashboard-layout-v3 .app-sidebar{
+        padding:14px;
+      }
+
+      .dashboard-layout-v3 .app-sidebar__nav{
+        grid-template-columns:1fr;
+      }
+
+      .dashboard-layout-v3 .sidebar-tab{
+        min-height:56px;
+      }
+
+      .dashboard-layout-v3 .topbar-v3__title-row{
+        border-radius:22px;
+        padding:14px;
+      }
+
+      .dashboard-layout-v3 .topbar-v3__copy h1{
+        font-size:1.18rem;
+      }
+
+      .dashboard-layout-v3 .panel-view-head-v3{
+        flex-direction:column;
+        gap:8px;
+      }
+    }
+
+  
+    /* Tema padrão lab - login do painel */
+    .ace-panel-login-overlay {
+      background:
+        radial-gradient(circle at top left, rgba(88,170,118,.20), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(76,124,197,.12), transparent 28%),
+        linear-gradient(160deg,#143527,#18412e 46%,#10251b 100%) !important;
+    }
+    .ace-panel-login-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(207,217,211,.92) !important;
+      border-radius: 28px !important;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,248,246,.98)),
+        radial-gradient(circle at top right, rgba(47,122,82,.06), transparent 34%) !important;
+      color: #183226 !important;
+      box-shadow: 0 26px 56px rgba(10,32,22,.18) !important;
+    }
+    .ace-panel-login-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 5px;
+      background: linear-gradient(90deg,#2f7a52,#4c7cc5 62%,#c78615);
+    }
+    .ace-panel-login-brand {
+      background: linear-gradient(180deg,#eef8f1,#e5f3eb) !important;
+      color: #21563c !important;
+      border: 1px solid rgba(47,122,82,.18) !important;
+    }
+    .ace-panel-login-field input {
+      border: 1.5px solid rgba(24,60,44,.14) !important;
+      border-radius: 16px !important;
+      background: #ffffff !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.86) !important;
+    }
+    .ace-panel-login-field input:focus {
+      border-color: #4c7cc5 !important;
+      box-shadow: 0 0 0 4px rgba(76,124,197,.12) !important;
+    }
+    #acePanelLoginSubmit {
+      border: 1px solid #21563c !important;
+      border-radius: 16px !important;
+      background: linear-gradient(180deg,#2f7a52,#21563c) !important;
+      color: #fff !important;
+      box-shadow: 0 12px 28px rgba(24,60,44,.22) !important;
+    }
+
+
+    /* Coordenador V7 - layout fino do filtro */
+    .dashboard-page.dashboard-layout-v3{
+      --coord-filter-bottom-gap:34px;
+      --panel-workspace-gap:28px;
+    }
+    .dashboard-page.dashboard-layout-v3 .panel-shell-card,
+    .dashboard-page.dashboard-layout-v3 .panel-shell-card-v3{
+      position:relative !important;
+      top:auto !important;
+      z-index:10 !important;
+      margin-bottom:var(--coord-filter-bottom-gap) !important;
+    }
+    .dashboard-page.dashboard-layout-v3 .panel-workspace,
+    .dashboard-page.dashboard-layout-v3 .panel-workspace-v3{
+      position:relative !important;
+      z-index:1 !important;
+      clear:both !important;
+      padding-top:0 !important;
+      gap:var(--panel-workspace-gap) !important;
+    }
+    .dashboard-page.dashboard-layout-v3 .panel-view,
+    .dashboard-page.dashboard-layout-v3 .panel-view.is-active{
+      gap:var(--panel-workspace-gap) !important;
+      scroll-margin-top:calc(var(--panel-shell-height, 220px) + var(--coord-filter-bottom-gap)) !important;
+    }
+    .dashboard-page.dashboard-layout-v3 .panel-view-split .panel-view-fixed{
+      top:24px !important;
+    }
+    @media (max-width:1180px){
+      .dashboard-page.dashboard-layout-v3{
+        --coord-filter-bottom-gap:26px;
+        --panel-workspace-gap:22px;
+      }
+      .dashboard-page.dashboard-layout-v3 .panel-view-split .panel-view-fixed{
+        top:auto !important;
+      }
+    }
+
+    /* V16 - refinamento inspirado no lab.html, com cabeçalho mínimo */
+    .dashboard-page.dashboard-layout-v3{
+      --coord-lab-ink:#183c2c;
+      --coord-lab-border:rgba(24,60,44,.12);
+      --coord-lab-shadow:0 18px 42px rgba(24,60,44,.10);
+    }
+
+    .dashboard-layout-v3 .panel-main-v3{
+      gap:14px;
+    }
+
+    .dashboard-layout-v3 .topbar-v3{
+      gap:12px;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__title-row{
+      position:relative !important;
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) auto !important;
+      align-items:center !important;
+      gap:14px !important;
+      min-height:auto !important;
+      margin:0 !important;
+      padding:14px 16px !important;
+      overflow:hidden !important;
+      border:1px solid rgba(255,255,255,.16) !important;
+      border-radius:24px !important;
+      color:#fff !important;
+      background:
+        linear-gradient(120deg,rgba(10,43,29,.96),rgba(15,95,47,.96) 56%,rgba(23,107,55,.94)),
+        radial-gradient(circle at top right,rgba(255,255,255,.10),transparent 32%) !important;
+      box-shadow:0 18px 42px rgba(10,32,22,.18) !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__title-row::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0;
+      height:5px;
+      background:linear-gradient(90deg,#2f7a52,#4c7cc5 62%,#c78615);
+    }
+
+    .dashboard-layout-v3 .topbar-v3__menu-btn{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy{
+      min-width:0;
+      padding:0 !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy h1{
+      margin:0 !important;
+      color:#fff !important;
+      font-size:clamp(1.18rem,1.45vw,1.55rem) !important;
+      line-height:1.05 !important;
+      font-weight:950 !important;
+      letter-spacing:-.025em !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy p{
+      margin:3px 0 0 !important;
+      color:rgba(255,255,255,.78) !important;
+      font-size:12px !important;
+      line-height:1.2 !important;
+      font-weight:800 !important;
+      max-width:none !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__widgets{
+      display:flex !important;
+      justify-content:flex-end !important;
+      align-items:center !important;
+      gap:8px !important;
+      min-width:0 !important;
+      grid-column:auto !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3--ladder,
+    .dashboard-layout-v3 .header-widget-v3--sync,
+    .dashboard-layout-v3 .header-widget-v3--date{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3--profile{
+      min-height:0 !important;
+      padding:0 !important;
+      border:0 !important;
+      background:transparent !important;
+      box-shadow:none !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3--profile .header-widget-v3__icon{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__copy--logout{
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-end !important;
+      gap:10px !important;
+      width:auto !important;
+      min-width:0 !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__logout-stack{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .ace-panel-private-logout-btn{
+      width:auto !important;
+      min-height:38px !important;
+      padding:0 14px !important;
+      border:1px solid rgba(255,255,255,.18) !important;
+      border-radius:999px !important;
+      background:rgba(255,255,255,.14) !important;
+      color:#fff !important;
+      box-shadow:0 12px 28px rgba(10,32,22,.14) !important;
+      font-size:13px !important;
+      font-weight:950 !important;
+      white-space:nowrap !important;
+    }
+
+    .dashboard-layout-v3 .ace-panel-private-logout-btn:hover{
+      background:rgba(255,255,255,.20) !important;
+      transform:translateY(-1px);
+    }
+
+    .dashboard-layout-v3 .app-sidebar{
+      border-radius:26px !important;
+      border:1px solid rgba(255,255,255,.16) !important;
+      box-shadow:0 18px 42px rgba(10,32,22,.20) !important;
+    }
+
+    .dashboard-layout-v3 .app-sidebar__brand-card{
+      padding-bottom:13px !important;
+    }
+
+    .dashboard-layout-v3 .sidebar-tab{
+      border-radius:15px !important;
+      border:1px solid rgba(255,255,255,.12) !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04) !important;
+    }
+
+    .dashboard-layout-v3 .panel-shell-card-v3,
+    .dashboard-layout-v3 .panel-shell-card,
+    .dashboard-layout-v3 .panel-fixed-card,
+    .dashboard-layout-v3 .panel-placeholder-card,
+    .dashboard-layout-v3 .panel-report-actions-fixed,
+    .dashboard-layout-v3 .panel-report-screen-card,
+    .dashboard-layout-v3 .panel-strategy-card,
+    .dashboard-layout-v3 .panel-visits-table-card,
+    .dashboard-layout-v3 .panel-visit-inspection-card,
+    .dashboard-layout-v3 .card{
+      border:1px solid var(--coord-lab-border) !important;
+      border-radius:24px !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.99),rgba(248,252,250,.99)),
+        radial-gradient(circle at top right,rgba(47,122,82,.045),transparent 34%) !important;
+      box-shadow:0 14px 30px rgba(24,60,44,.07) !important;
+    }
+
+    .dashboard-layout-v3 .panel-filter-drawer summary{
+      min-height:34px;
+      display:flex;
+      align-items:center;
+    }
+
+    @media (max-width:1480px){
+      .dashboard-layout-v3 .topbar-v3__title-row{
+        grid-template-columns:minmax(0,1fr) auto !important;
+      }
+
+      .dashboard-layout-v3 .topbar-v3__widgets{
+        grid-column:auto !important;
+      }
+    }
+
+    @media (max-width:720px){
+      .dashboard-layout-v3 .topbar-v3__title-row{
+        grid-template-columns:1fr !important;
+        align-items:start !important;
+      }
+
+      .dashboard-layout-v3 .topbar-v3__widgets{
+        justify-content:flex-start !important;
+      }
+    }
+
+  </style>
+  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260505-coord-filter-gap-v8-1cm">
+
+
+  <style id="coord-filter-gap-1cm-final">
+    body.dashboard-page.dashboard-layout-v3{
+      --coord-panel-filter-gap:1cm;
+    }
+
+    body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+      position:relative !important;
+      top:auto !important;
+      z-index:2 !important;
+      width:100% !important;
+      max-width:100% !important;
+      margin-top:0 !important;
+      margin-right:auto !important;
+      margin-bottom:var(--coord-panel-filter-gap) !important;
+      margin-left:auto !important;
+      transform:none !important;
+    }
+
+    body.dashboard-page.dashboard-layout-v3 .panel-workspace.panel-workspace-v3{
+      position:relative !important;
+      z-index:1 !important;
+      clear:both !important;
+      margin-top:0 !important;
+      padding-top:0 !important;
+      display:grid !important;
+      gap:var(--coord-panel-filter-gap) !important;
+    }
+
+    body.dashboard-page.dashboard-layout-v3 .panel-workspace.panel-workspace-v3 > .panel-view,
+    body.dashboard-page.dashboard-layout-v3 .panel-workspace.panel-workspace-v3 > .panel-view.is-active{
+      margin-top:0 !important;
+      padding-top:0 !important;
+    }
+
+    body.dashboard-page.dashboard-layout-v3 .panel-view,
+    body.dashboard-page.dashboard-layout-v3 .panel-view.is-active,
+    body.dashboard-page.dashboard-layout-v3 .panel-view.panel-view-split,
+    body.dashboard-page.dashboard-layout-v3 .panel-view.panel-view-split.is-active{
+      gap:var(--coord-panel-filter-gap) !important;
+    }
+
+    body.dashboard-page.dashboard-layout-v3 .panel-view-split .panel-view-fixed{
+      top:calc(var(--coord-panel-filter-gap) + 14px) !important;
+    }
+
+    @media (min-width:721px){
+      body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+        margin-top:0 !important;
+        margin-bottom:var(--coord-panel-filter-gap) !important;
+      }
+    }
+
+    @media (min-width:1500px){
+      body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+        margin-top:0 !important;
+        margin-bottom:var(--coord-panel-filter-gap) !important;
+      }
+    }
+
+    @media (max-width:1320px) and (min-width:921px){
+      body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+        margin-top:0 !important;
+        margin-bottom:var(--coord-panel-filter-gap) !important;
+      }
+    }
+
+    @media (max-width:920px) and (min-width:721px){
+      body.dashboard-page.dashboard-layout-v3 .panel-shell-card.panel-shell-card-v3{
+        margin-top:0 !important;
+        margin-bottom:var(--coord-panel-filter-gap) !important;
+      }
+    }
+    /* V16 - refinamento inspirado no lab.html, com cabeçalho mínimo */
+    .dashboard-page.dashboard-layout-v3{
+      --coord-lab-ink:#183c2c;
+      --coord-lab-border:rgba(24,60,44,.12);
+      --coord-lab-shadow:0 18px 42px rgba(24,60,44,.10);
+    }
+
+    .dashboard-layout-v3 .panel-main-v3{
+      gap:14px;
+    }
+
+    .dashboard-layout-v3 .topbar-v3{
+      gap:12px;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__title-row{
+      position:relative !important;
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) auto !important;
+      align-items:center !important;
+      gap:14px !important;
+      min-height:auto !important;
+      margin:0 !important;
+      padding:14px 16px !important;
+      overflow:hidden !important;
+      border:1px solid rgba(255,255,255,.16) !important;
+      border-radius:24px !important;
+      color:#fff !important;
+      background:
+        linear-gradient(120deg,rgba(10,43,29,.96),rgba(15,95,47,.96) 56%,rgba(23,107,55,.94)),
+        radial-gradient(circle at top right,rgba(255,255,255,.10),transparent 32%) !important;
+      box-shadow:0 18px 42px rgba(10,32,22,.18) !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__title-row::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0;
+      height:5px;
+      background:linear-gradient(90deg,#2f7a52,#4c7cc5 62%,#c78615);
+    }
+
+    .dashboard-layout-v3 .topbar-v3__menu-btn{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy{
+      min-width:0;
+      padding:0 !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy h1{
+      margin:0 !important;
+      color:#fff !important;
+      font-size:clamp(1.18rem,1.45vw,1.55rem) !important;
+      line-height:1.05 !important;
+      font-weight:950 !important;
+      letter-spacing:-.025em !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__copy p{
+      margin:3px 0 0 !important;
+      color:rgba(255,255,255,.78) !important;
+      font-size:12px !important;
+      line-height:1.2 !important;
+      font-weight:800 !important;
+      max-width:none !important;
+    }
+
+    .dashboard-layout-v3 .topbar-v3__widgets{
+      display:flex !important;
+      justify-content:flex-end !important;
+      align-items:center !important;
+      gap:8px !important;
+      min-width:0 !important;
+      grid-column:auto !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3--ladder,
+    .dashboard-layout-v3 .header-widget-v3--sync,
+    .dashboard-layout-v3 .header-widget-v3--date{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3--profile{
+      min-height:0 !important;
+      padding:0 !important;
+      border:0 !important;
+      background:transparent !important;
+      box-shadow:none !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3--profile .header-widget-v3__icon{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__copy--logout{
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-end !important;
+      gap:10px !important;
+      width:auto !important;
+      min-width:0 !important;
+    }
+
+    .dashboard-layout-v3 .header-widget-v3__logout-stack{
+      display:none !important;
+    }
+
+    .dashboard-layout-v3 .ace-panel-private-logout-btn{
+      width:auto !important;
+      min-height:38px !important;
+      padding:0 14px !important;
+      border:1px solid rgba(255,255,255,.18) !important;
+      border-radius:999px !important;
+      background:rgba(255,255,255,.14) !important;
+      color:#fff !important;
+      box-shadow:0 12px 28px rgba(10,32,22,.14) !important;
+      font-size:13px !important;
+      font-weight:950 !important;
+      white-space:nowrap !important;
+    }
+
+    .dashboard-layout-v3 .ace-panel-private-logout-btn:hover{
+      background:rgba(255,255,255,.20) !important;
+      transform:translateY(-1px);
+    }
+
+    .dashboard-layout-v3 .app-sidebar{
+      border-radius:26px !important;
+      border:1px solid rgba(255,255,255,.16) !important;
+      box-shadow:0 18px 42px rgba(10,32,22,.20) !important;
+    }
+
+    .dashboard-layout-v3 .app-sidebar__brand-card{
+      padding-bottom:13px !important;
+    }
+
+    .dashboard-layout-v3 .sidebar-tab{
+      border-radius:15px !important;
+      border:1px solid rgba(255,255,255,.12) !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.04) !important;
+    }
+
+    .dashboard-layout-v3 .panel-shell-card-v3,
+    .dashboard-layout-v3 .panel-shell-card,
+    .dashboard-layout-v3 .panel-fixed-card,
+    .dashboard-layout-v3 .panel-placeholder-card,
+    .dashboard-layout-v3 .panel-report-actions-fixed,
+    .dashboard-layout-v3 .panel-report-screen-card,
+    .dashboard-layout-v3 .panel-strategy-card,
+    .dashboard-layout-v3 .panel-visits-table-card,
+    .dashboard-layout-v3 .panel-visit-inspection-card,
+    .dashboard-layout-v3 .card{
+      border:1px solid var(--coord-lab-border) !important;
+      border-radius:24px !important;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.99),rgba(248,252,250,.99)),
+        radial-gradient(circle at top right,rgba(47,122,82,.045),transparent 34%) !important;
+      box-shadow:0 14px 30px rgba(24,60,44,.07) !important;
+    }
+
+    .dashboard-layout-v3 .panel-filter-drawer summary{
+      min-height:34px;
+      display:flex;
+      align-items:center;
+    }
+
+    @media (max-width:1480px){
+      .dashboard-layout-v3 .topbar-v3__title-row{
+        grid-template-columns:minmax(0,1fr) auto !important;
+      }
+
+      .dashboard-layout-v3 .topbar-v3__widgets{
+        grid-column:auto !important;
+      }
+    }
+
+    @media (max-width:720px){
+      .dashboard-layout-v3 .topbar-v3__title-row{
+        grid-template-columns:1fr !important;
+        align-items:start !important;
+      }
+
+      .dashboard-layout-v3 .topbar-v3__widgets{
+        justify-content:flex-start !important;
+      }
+    }
+
+  </style>
+
+</head>
+<body class="dashboard-page dashboard-layout-v3 ace-page ace-page--dashboard">
+  <div class="page-shell panel-shell-v3 ace-shell">
+    <aside class="app-sidebar" aria-label="Navegação do painel">
+      <div class="app-sidebar__brand-card">
+        <div class="app-sidebar__brand-logo" aria-label="ACE">ACE</div>
+        <div class="app-sidebar__brand-copy">
+          <strong>Coordenação</strong>
+          <span>Painel municipal</span>
+        </div>
+      </div>
+
+      <nav class="app-sidebar__nav" aria-label="Navegação principal do Painel">
+        <button class="sidebar-tab active" type="button" data-panel-view="indicators" aria-selected="true">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">▦</span>
+          <span class="nav-copy"><span>Painel Executivo</span><small>Indicadores operacionais</small></span>
+        </button>
+        <button class="sidebar-tab" type="button" data-panel-view="statistics" aria-selected="false">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">∑</span>
+          <span class="nav-copy"><span>Estatísticas</span><small>Tendências e produção</small></span>
+        </button>
+        <button class="sidebar-tab" type="button" data-panel-view="map" aria-selected="false">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">⌖</span>
+          <span class="nav-copy"><span>Mapa Territorial</span><small>Territórios e áreas</small></span>
+        </button>
+        <button class="sidebar-tab" type="button" data-panel-view="visits" aria-selected="false">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">▥</span>
+          <span class="nav-copy"><span>Visitas</span><small>Registros e situação</small></span>
+        </button>
+        <button class="sidebar-tab" type="button" data-panel-view="reports" aria-selected="false">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">▤</span>
+          <span class="nav-copy"><span>Relatórios</span><small>Listagens e arquivos</small></span>
+        </button>
+        <button class="sidebar-tab sidebar-tab--ghost" id="sidebarAgentsBtn" type="button">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">◉</span>
+          <span class="nav-copy"><span>Agentes</span><small>Apoio e frequência</small></span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+
+        <button class="sidebar-tab sidebar-tab--ghost" id="sidebarCadastroBtn" type="button">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">▣</span>
+          <span class="nav-copy"><span>Cadastros</span><small>Base territorial</small></span>
+        </button>
+        <button class="sidebar-tab sidebar-tab--ghost" id="sidebarConfigBtn" type="button">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">⚙</span>
+          <span class="nav-copy"><span>Configurações</span><small>Sistema e acesso</small></span>
+        </button>
+        <button class="sidebar-tab sidebar-tab--ghost" id="sidebarSupportBtn" type="button">
+          <span class="sidebar-tab__icon nav-icon" aria-hidden="true">◔</span>
+          <span class="nav-copy"><span>Suporte</span><small>Ajuda e manutenção</small></span>
+        </button>
+      </nav>
+
+      <div class="app-sidebar__footer">
+        <div class="sidebar-status-card">
+          <div class="sidebar-status-card__row sidebar-status-card__row--head">
+            <span class="sidebar-status-card__dot"></span>
+            <strong>Sistema sincronizado</strong>
+          </div>
+          <div class="sidebar-status-card__row sidebar-status-card__row--meta">
+            <span>Última atualização</span>
+            <strong id="sidebarUpdatedAt">--</strong>
+          </div>
+          <div id="panelStatus" class="sync-banner">Pronto</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="panel-main-v3">
+      <header class="topbar-v3 ace-topbar">
+        <div class="topbar-v3__title-row">
+          <div class="topbar-v3__menu-btn" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+
+          <div class="topbar-v3__copy">
+            <h1>Painel do Coordenador</h1>
+            <p>Carmo/RJ</p>
+          </div>
+
+          <div class="topbar-v3__widgets">
+            <section class="header-widget-v3 header-widget-v3--ladder" id="panelLadderAlertWidget" title="Solicitações de escada em aberto">
+              <div class="header-widget-v3__icon">🔔</div>
+              <div class="header-widget-v3__copy">
+                <strong id="panelLadderAlertCount">0 solicitação</strong>
+                <span id="panelLadderAlertText">Escada ativa</span>
+              </div>
+            </section>
+
+            <section class="header-widget-v3 header-widget-v3--sync">
+              <div class="header-widget-v3__icon">✓</div>
+              <div class="header-widget-v3__copy">
+                <strong id="panelModeChip" class="chip chip-inline">Sincronizado</strong>
+                <span id="panelStatusChip" hidden>Aguardando leitura</span>
+              </div>
+            </section>
+
+            <section class="header-widget-v3 header-widget-v3--date">
+              <div class="header-widget-v3__icon">📅</div>
+              <div class="header-widget-v3__copy">
+                <strong id="headerDateLabel">--</strong>
+                <span id="headerDayLabel">--</span>
+              </div>
+            </section>
+
+            <section class="header-widget-v3 header-widget-v3--profile header-widget-v3--logout">
+              <div class="header-widget-v3__icon">👤</div>
+              <div class="header-widget-v3__copy header-widget-v3__copy--logout" id="panelLogoutButtonSlot">
+                <strong>Coordenação</strong>
+                <span>Vigilância em Saúde</span>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <section class="panel-shell-card panel-shell-card-v3 ace-card">
+          <details class="panel-filter-drawer">
+            <summary>Filtros do painel</summary>
+            <div class="panel-filter-toolbar panel-filter-toolbar-v3">
+            <div class="field field--period-start ace-field">
+              <label for="dateStart">Período inicial</label>
+              <input id="dateStart" type="date">
+            </div>
+            <div class="field field--period-end ace-field">
+              <label for="dateEnd">Período final</label>
+              <input id="dateEnd" type="date">
+            </div>
+            <div class="field ace-field">
+              <label for="agentFilter">Agente</label>
+              <select id="agentFilter"></select>
+            </div>
+            <div class="field ace-field">
+              <label for="bairroFilter">Bairro</label>
+              <select id="bairroFilter"></select>
+            </div>
+            <div class="field ace-field">
+              <label for="microareaFilter">Microárea</label>
+              <select id="microareaFilter"></select>
+            </div>
+            <div class="field ace-field">
+              <label for="quarteiraoFilter">Quarteirão</label>
+              <select id="quarteiraoFilter"></select>
+            </div>
+            <div class="field ace-field">
+              <label for="logradouroFilter">Rua / logradouro</label>
+              <select id="logradouroFilter"></select>
+            </div>
+            <div class="field ace-field">
+              <label for="situacaoFilter">Situação</label>
+              <select id="situacaoFilter">
+                <option value="">Todas</option>
+                <option value="Visitado">Aberto / visitado</option>
+                <option value="Fechado">Fechado / recusado</option>
+                <option value="Recuperado">Recuperado</option>
+              </select>
+            </div>
+            <div class="field ace-field">
+              <label for="focoFilter">Foco</label>
+              <select id="focoFilter">
+                <option value="">Todos</option>
+                <option value="com_foco">Com foco</option>
+                <option value="sem_foco">Sem foco</option>
+              </select>
+            </div>
+            <div class="field ace-field">
+              <label for="gpsFilter">GPS</label>
+              <select id="gpsFilter">
+                <option value="">Todos</option>
+                <option value="com_gps">Com GPS</option>
+                <option value="sem_gps">Sem GPS</option>
+              </select>
+            </div>
+            <div class="field field-search-v3 field-search-v3--wide ace-field">
+              <label for="searchFilter">Busca geral</label>
+              <input id="searchFilter" type="text" placeholder="Rua, bairro, morador, número, agente">
+            </div>
+            <div class="field field-button-v6 field-button-v6--apply ace-field ace-btn ace-btn--primary">
+              <label class="label-spacer" aria-hidden="true">Ação</label>
+              <button class="btn btn-primary panel-action-refresh ace-btn ace-btn--primary" id="loadDashboardBtn" type="button">Aplicar</button>
+            </div>
+            <div class="field field-button-v6 field-button-v6--clear ace-field ace-btn ace-btn--soft">
+              <label class="label-spacer" aria-hidden="true">Ação</label>
+              <button class="btn btn-warn panel-action-clear ace-btn ace-btn--soft" id="clearDrilldownBtn" type="button">Limpar</button>
+            </div>
+            <div class="field field-button-v6 field-button-v6--cloud ace-field ace-btn ace-btn--primary">
+              <label class="label-spacer" aria-hidden="true">Nuvem</label>
+              <div id="panelRefreshCloudButtonSlot" class="ace-panel-action-slot"></div>
+            </div>
+            </div>
+          </details>
+        </section>
+      </header>
+
+      <section class="panel-workspace panel-workspace-v3" aria-live="polite">
+        <div class="panel-view panel-view-split is-active" data-panel-view-content="indicators">
+          <div class="panel-view-fixed">
+            <section class="card panel-fixed-card panel-fixed-metrics-card ace-card">
+              <div id="panelPriorityBand" class="panel-priority-band" aria-live="polite"></div>
+              <h2 class="section-title ace-section-title">Visão geral operacional</h2>
+              <div id="panelMetricGrid" class="metric-grid"></div>
+              <div id="panelOperationalExtras" class="panel-operational-extras" aria-live="polite"></div>
+            </section>
+          </div>
+
+          <div class="panel-scroll-box" aria-label="Detalhamento dos indicadores operacionais">
+            <div class="panel-scroll-box-inner">
+              <div class="panel-operational-grid panel-operational-grid-2">
+                <section class="card ace-card">
+                  <h2 class="section-title ace-section-title">Tratamento por tipo de foco</h2>
+                  <div id="chartVisitsByDay" class="chart-list"></div>
+                </section>
+                <section class="card ace-card">
+                  <h2 class="section-title ace-section-title">Focos por tipo de depósito</h2>
+                  <div id="chartFocusByDeposit" class="chart-list"></div>
+                </section>
+              </div>
+
+              <div class="panel-operational-grid panel-operational-grid-4">
+                <section class="card ace-card">
+                  <h2 class="section-title ace-section-title">Comparativo por bairro</h2>
+                  <div id="compareBairros" class="ranking-list"></div>
+                </section>
+                <section class="card ace-card">
+                  <h2 class="section-title ace-section-title">Comparativo por microárea</h2>
+                  <div id="compareMicroareas" class="ranking-list"></div>
+                </section>
+                <section class="card ace-card">
+                  <h2 class="section-title ace-section-title">Comparativo por quarteirão</h2>
+                  <div id="compareQuarteiroes" class="ranking-list"></div>
+                </section>
+                <section class="card ace-card">
+                  <h2 class="section-title ace-section-title">Comparativo por logradouro</h2>
+                  <div id="compareLogradouros" class="ranking-list"></div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-view panel-view-split" data-panel-view-content="statistics" hidden>
+          <div class="panel-view-fixed">
+            <section class="card panel-fixed-card panel-statistics-card ace-card">
+              <div class="statistics-eyebrow">Análise por período</div>
+              <h2 class="section-title ace-section-title">Estatísticas comparativas</h2>
+              <p class="statistics-lead">Compara o período filtrado com o período anterior equivalente, usando os dados já carregados no painel.</p>
+              <div id="statsKpiGrid" class="statistics-kpi-grid"></div>
+              <div id="statsNarrative" class="statistics-narrative"></div>
+            </section>
+          </div>
+
+          <div class="panel-scroll-box panel-scroll-box-statistics" aria-label="Estatísticas e evolução operacional">
+            <div class="panel-scroll-box-inner">
+              <div class="panel-operational-grid panel-operational-grid-2 statistics-grid-main">
+                <section class="card statistics-card ace-card">
+                  <h2 class="section-title ace-section-title">Comparativo do período</h2>
+                  <div id="statsPeriodComparison" class="statistics-compare-table"></div>
+                </section>
+                <section class="card statistics-card ace-card">
+                  <h2 class="section-title ace-section-title">Evolução de positivos</h2>
+                  <div id="statsPositiveTrend" class="statistics-trend-list"></div>
+                </section>
+              </div>
+
+              <div class="panel-operational-grid panel-operational-grid-2 statistics-grid-main">
+                <section class="card statistics-card ace-card">
+                  <h2 class="section-title ace-section-title">Territórios que mais pioraram ou melhoraram</h2>
+                  <div id="statsTerritoryEvolution" class="statistics-compare-table"></div>
+                </section>
+                <section class="card statistics-card ace-card">
+                  <h2 class="section-title ace-section-title">Depósitos com foco — evolução</h2>
+                  <div id="statsDepositEvolution" class="statistics-compare-table"></div>
+                </section>
+              </div>
+
+              <div class="panel-side-grid statistics-grid-secondary">
+                <section class="card statistics-card ace-card">
+                  <h2 class="section-title ace-section-title">Leitura laboratorial</h2>
+                  <div id="statsLabEvolution" class="statistics-insight-list"></div>
+                </section>
+                <section class="card statistics-card ace-card">
+                  <h2 class="section-title ace-section-title">Leitura automática</h2>
+                  <div id="statsInsights" class="statistics-insight-list"></div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-view panel-view-split" data-panel-view-content="reports" hidden>
+          <div class="panel-view-fixed">
+            <section class="card panel-fixed-card panel-report-actions-fixed ace-card">
+              <h2 class="section-title ace-section-title">Relatórios</h2>
+              <div class="btn-row panel-action-grid panel-report-actions">
+                <button class="btn btn-gps panel-action-exec ace-btn ace-btn--primary" id="reportExecutiveBtn" type="button">Relatório executivo</button>
+                <button class="btn btn-soft ace-btn" id="reportDailyBtn" type="button">Resumo do dia</button>
+                <button class="btn btn-danger panel-action-agent ace-btn" id="reportIndividualBtn" type="button">Relatório individual</button>
+                <button class="btn btn-primary ace-btn ace-btn--primary" id="reportWaterTankBtn" type="button">Relatório caixas d'água</button>
+                <button class="btn btn-soft ace-btn" id="reportTubitosBtn" type="button">Relatório tubitos</button>
+              </div>
+            </section>
+          </div>
+
+          <div class="panel-scroll-box panel-scroll-box-report" aria-label="Síntese e leitura analítica do recorte">
+            <div class="panel-scroll-box-inner">
+              <section class="card panel-report-screen-card ace-card">
+                <h2 class="section-title ace-section-title">Síntese do recorte</h2>
+                <div id="reportOnScreen" class="report-article"></div>
+              </section>
+
+              <div class="panel-side-grid panel-report-analysis-grid">
+                <section class="card panel-strategy-card ace-card">
+                  <h2 class="section-title ace-section-title">Leitura rápida e drilldown</h2>
+                  <div id="directNote" class="direct-note"></div>
+                  <div class="panel-subsection">
+                    <h3 class="panel-mini-title ace-section-title">Drilldown operacional</h3>
+                    <div id="drilldownPanel" class="insight-list"></div>
+                  </div>
+                </section>
+
+                <section class="card panel-strategy-card ace-card">
+                  <h2 class="section-title ace-section-title">Território e encaminhamentos</h2>
+                  <div class="panel-subsection">
+                    <h3 class="panel-mini-title ace-section-title">Leitura territorial complementar</h3>
+                    <div id="criticalStreetList" class="insight-list"></div>
+                  </div>
+                  <div class="panel-subsection">
+                    <h3 class="panel-mini-title ace-section-title">Encaminhamentos operacionais</h3>
+                    <div id="decisionList" class="insight-list"></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-view" data-panel-view-content="visits" hidden>
+
+          <div class="panel-visits-grid">
+            <section class="card panel-visit-inspection-card ace-card">
+              <div id="visitInspectionPanel" class="insight-list"></div>
+            </section>
+
+            <section class="card consolidated-visits-card panel-visits-table-card ace-card">
+              <h2 class="section-title ace-section-title">Histórico consolidado do período</h2>
+              <div class="consolidated-visits-box consolidated-visits-list" id="dashboardTable"></div>
+            </section>
+          </div>
+        </div>
+
+
+        <div class="panel-view" data-panel-view-content="map" hidden>
+          <div class="panel-screen-head">
+            <div class="screen-head-copy">
+              <strong>Mapa territorial integrado</strong>
+              <span>Visualização territorial com quarteirões, visitas, calor de foco e interação sem sair do painel.</span>
+            </div>
+            <div class="screen-badge">🗺️</div>
+          </div>
+
+          <section class="card panel-map-card ace-card">
+            <h2 class="section-title ace-section-title">Mapa territorial integrado</h2>
+            <div id="territoryMapSummary" class="map-context-panel">Todo o mapa respeita o período e os filtros ativos.</div>
+            <div class="map-toggle-row" id="territoryMapControls">
+              <button type="button" class="map-toggle map-toggle-polygons is-on" data-map-toggle="polygons">Quarteirões</button>
+              <button type="button" class="map-toggle map-toggle-open is-on" data-map-toggle="visitOpen">Aberto/visitado</button>
+              <button type="button" class="map-toggle map-toggle-closed is-on" data-map-toggle="visitClosed">Fechado/recusado</button>
+              <button type="button" class="map-toggle map-toggle-recovered is-on" data-map-toggle="visitRecovered">Recuperado</button>
+              <button type="button" class="map-toggle map-toggle-agents is-on" data-map-toggle="agents">Agentes</button>
+              <button type="button" class="map-toggle map-toggle-ladder" data-map-toggle="ladderRequests">Escada</button>
+              <button type="button" class="map-toggle map-toggle-supervision is-on" data-map-toggle="supervision">Supervisão</button>
+              <button type="button" class="map-toggle map-toggle-lab-positive is-on" data-map-toggle="labPositive">Tubito Aedes +</button>
+              <button type="button" class="map-toggle map-toggle-heat is-on" data-map-toggle="heat">Calor de focos</button>
+            </div>
+            <div id="heatMap" class="map-shell"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+
+  <div class="floating-support-modal" id="supportModal" hidden>
+    <div class="floating-support-modal__backdrop" data-support-close="true"></div>
+    <div class="floating-support-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="supportModalTitle">
+      <button class="floating-support-modal__close" id="supportModalCloseBtn" type="button" aria-label="Fechar suporte">✕</button>
+      <div class="floating-support-modal__body">
+        <span class="floating-support-modal__eyebrow">Suporte</span>
+        <h3 id="supportModalTitle">Canal de atendimento</h3>
+        <p>Em caso de dúvida, entre em contato com o suporte da coordenação.</p>
+        <div class="floating-support-modal__phone">(22) 99999-0000</div>
+      </div>
+    </div>
+  </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script src="./assets/runtime-config.js?v=20260502-cadastros-v8"></script>
+  <script src="./assets/carmo-territorios-data.js?v=20260502-cadastros-v8"></script>
+  <script>
+    (function(){
+      function updatePanelStickyVars(){
+        var shell = document.querySelector('.panel-shell-card');
+        var topbar = document.querySelector('.topbar-v3');
+        if (shell) {
+          document.documentElement.style.setProperty('--panel-shell-height', Math.ceil(shell.getBoundingClientRect().height) + 'px');
+        }
+        if (topbar) {
+          document.documentElement.style.setProperty('--panel-topbar-height', Math.ceil(topbar.getBoundingClientRect().height) + 'px');
+        }
+      }
+      window.addEventListener('load', updatePanelStickyVars);
+      window.addEventListener('resize', updatePanelStickyVars);
+      document.addEventListener('DOMContentLoaded', function(){
+        updatePanelStickyVars();
+        setTimeout(updatePanelStickyVars, 120);
+      });
+    })();
+  </script>
+  <script src="./assets/ace-storage.js?v=20260502-cadastros-v8"></script>
+  <script src="./assets/painel-cloud-sync.js?v=20260505-status-counts-v12"></script>
+  <script src="./assets/painel-privacy-tools.js?v=20260502-cadastros-v8"></script>
+  <script src="./assets/painel-agents-tools.js?v=20260502-cadastros-v8"></script>
+  <script src="./assets/painel-liraa.js?v=20260505-liraa-operation-source-v15"></script>
+  <script src="./assets/painel-laboratorio.js?v=20260504-ace-standard-v3"></script>
+  <script src="./assets/painel-operacao.js?v=20260507-operation-send-v13"></script>
+  <script src="./assets/painel-status.js?v=20260505-status-counts-v12"></script>
+  <script src="./assets/painel-executivo.js?v=20260502-cadastros-v8"></script>
+  <script src="./assets/painel-cadastros.js?v=20260502-cadastros-v8"></script>
+
+  <script>
+    (function(){
+      function isMobilePanel(){
+        return window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+      }
+
+      function ajustarFiltroMobilePainel(){
+        var drawer = document.querySelector('.panel-filter-drawer');
+        if (!drawer) return;
+
+        if (isMobilePanel()) {
+          drawer.removeAttribute('open');
+        } else {
+          drawer.setAttribute('open', '');
+        }
+      }
+
+      function fecharFiltroMobileAoClicarFora(event){
+        var drawer = document.querySelector('.panel-filter-drawer');
+        if (!drawer || !drawer.hasAttribute('open') || !isMobilePanel()) return;
+        if (drawer.contains(event.target)) return;
+        drawer.removeAttribute('open');
+      }
+
+      window.addEventListener('load', ajustarFiltroMobilePainel);
+      window.addEventListener('resize', ajustarFiltroMobilePainel);
+      document.addEventListener('DOMContentLoaded', ajustarFiltroMobilePainel);
+      document.addEventListener('click', fecharFiltroMobileAoClicarFora, true);
+      document.addEventListener('keydown', function(event){
+        if (event.key === 'Escape') {
+          var drawer = document.querySelector('.panel-filter-drawer');
+          if (drawer && isMobilePanel()) drawer.removeAttribute('open');
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#21563c">
+  <title>Supervisão de Campo</title>
+  <meta name="ace-api-url" content="https://script.google.com/macros/s/AKfycbyevPoSgnnlyJXhaphkPCjEvFBMq1gdqTbrZ521JdXukkq2_PUPjOGuG0gmEAoZjYeX6w/exec">
+
+  <link rel="stylesheet" href="./assets/supervisao-theme.css?v=20260504-ace-standard-v3">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIINfQ+H8Y2KQ7Q4Tj0/8B6rLJHc3UMGvXc="
+        crossorigin="">
+
+  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260505-agent-secretaria-cards-v15">
+</head>
+<body class="super-page ace-page ace-page--super">
+  <noscript>Ative o JavaScript para usar o Painel da Supervisão.</noscript>
+
+  <div class="super-shell ace-shell">
+    <header class="super-topbar ace-topbar">
+      <div>
+        <span>Supervisão de Campo</span>
+        <h1>Painel do supervisor</h1>
+        <p id="superStatusText">Carregando...</p>
+      </div>
+      <button id="superRefreshBtn" class="super-refresh ace-btn ace-btn--soft" type="button" aria-label="Atualizar dados">↻</button>
+    </header>
+
+    <main class="super-main">
+      <section class="super-view is-active" data-view="chamados" id="viewChamados">
+        <div class="super-title-row">
+          <div>
+            <h2>Fila de atendimento</h2>
+            <p>Supervisão, escada e chamados ativos por prioridade</p>
+          </div>
+          <strong id="superSyncBadge">Nuvem</strong>
+        </div>
+
+        <div class="super-operation-list super-queue-stats" id="superQueueStats"></div>
+        <div class="super-list" id="superQueueList"></div>
+      </section>
+
+      <section class="super-view" data-view="mapa" id="viewMapa" hidden>
+        <div class="super-title-row">
+          <div>
+            <h2>Mapa operacional</h2>
+            <p>Chamados, agentes, escada, focos e minha posição</p>
+          </div>
+        </div>
+
+        <div class="super-filter-row">
+          <button class="active" type="button" data-map-filter="chamados">Chamados</button>
+          <button type="button" data-map-filter="agentes">Agentes</button>
+          <button type="button" data-map-filter="focos">Focos</button>
+          <button type="button" data-map-filter="escada">Escada</button>
+          <button type="button" data-map-filter="todos">Todos</button>
+          <button type="button" id="superMyLocationBtn">Minha posição</button>
+        </div>
+
+        <div class="super-map-wrap">
+          <div id="superMap" class="super-map"></div>
+          <div id="superMapFallback" class="super-empty" hidden>Mapa indisponível. Use os botões de localização nas listas.</div>
+        </div>
+      </section>
+
+      <section class="super-view" data-view="supervisao" id="viewSupervisao" hidden>
+        <div class="super-title-row">
+          <div>
+            <h2>Solicitações de supervisão</h2>
+            <p>Pedidos enviados pelos agentes com localização</p>
+          </div>
+          <strong id="superRequestBadge">0</strong>
+        </div>
+
+        <div class="super-list" id="superRequestList"></div>
+      </section>
+
+      <section class="super-view" data-view="escada" id="viewEscada" hidden>
+        <div class="super-title-row">
+          <div>
+            <h2>Solicitações de escada</h2>
+            <p>Pedidos ativos com localização</p>
+          </div>
+          <strong id="superLadderBadge">0</strong>
+        </div>
+
+        <div class="super-list" id="superLadderList"></div>
+      </section>
+
+      <section class="super-view" data-view="agentes" id="viewAgentes" hidden>
+        <div class="super-title-row">
+          <div>
+            <h2>Agentes em campo</h2>
+            <p>Produção, última localização e GPS recente</p>
+          </div>
+          <strong id="superAgentsBadge">0</strong>
+        </div>
+
+        <div class="super-list" id="superAgentsList"></div>
+      </section>
+
+      <section class="super-view" data-view="resumo" id="viewResumo" hidden>
+        <div class="super-title-row">
+          <div>
+            <h2>Resumo do dia</h2>
+            <p id="superDateLabel">Hoje</p>
+          </div>
+        </div>
+
+        <div class="super-kpis" id="superKpis"></div>
+
+        <section class="super-card super-operation-card ace-card">
+          <div class="super-card-title ace-section-title">
+            <h3>Produção por modalidade</h3>
+          </div>
+          <div class="super-operation-list" id="superOperationList"></div>
+        </section>
+
+        <section class="super-card ace-card">
+          <div class="super-card-title ace-section-title">
+            <h3>Encerramentos antecipados</h3>
+            <span id="superEarlyCloseBadge">0</span>
+          </div>
+          <div class="super-list" id="superEarlyCloseList"></div>
+        </section>
+
+        <section class="super-card ace-card">
+          <div class="super-card-title ace-section-title">
+            <h3>Prioridades</h3>
+            <span id="superPriorityCount">0</span>
+          </div>
+          <div class="super-list" id="superPriorityList"></div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="super-nav" aria-label="Navegação da supervisão">
+      <button class="active" type="button" data-tab="chamados"><span>!</span>Chamados</button>
+      <button type="button" data-tab="mapa"><span>⌖</span>Mapa</button>
+      <button type="button" data-tab="supervisao"><span>▣</span>Supervisão</button>
+      <button type="button" data-tab="agentes"><span>◎</span>Agentes</button>
+      <button type="button" data-tab="resumo"><span>▦</span>Resumo</button>
+    </nav>
+  </div>
+
+  <script src="./assets/runtime-config.js?v=20260502-super-botoes-v13"></script>
+  <script>
+    (function () {
+      var apiUrl = 'https://script.google.com/macros/s/AKfycbyevPoSgnnlyJXhaphkPCjEvFBMq1gdqTbrZ521JdXukkq2_PUPjOGuG0gmEAoZjYeX6w/exec';
+      var cfg = window.ACS_RUNTIME_CONFIG || {};
+      var current = String(cfg.API_URL || cfg.SHEETS_WEBAPP_URL || '').trim();
+      if ((!current || current.indexOf('COLE_AQUI') !== -1) && apiUrl) {
+        window.ACS_RUNTIME_CONFIG = Object.assign({}, cfg, {
+          API_URL: apiUrl,
+          SHEETS_WEBAPP_URL: apiUrl,
+          SUPER_FALLBACK_CONFIG: true
+        });
+      }
+    }());
+  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script src="./assets/supervisao-app.js?v=20260502-security-v1"></script>
+</body>
+</html>

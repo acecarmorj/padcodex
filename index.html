@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b4f2f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ACE Campo">
+  <link rel="manifest" href="./manifest.webmanifest?v=20260517-galaxy-tab-a11-offline-v52">
+  <title>ACE Campo | Carmo/RJ</title>
+  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260517-galaxy-tab-a11-offline-v52">
+
+  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260517-galaxy-tab-a11-offline-v52">
+  <style id="index-layout-fix-v48">
+    /* Correção somente de layout do index.html: cabeçalho compacto, barra verde, sair vermelho e abas legíveis. */
+    @media (max-width: 900px) {
+      .field-page .topbar.topbar-v43 {
+        margin-bottom: 8px !important;
+        min-height: 0 !important;
+      }
+
+      .field-page .topbar.topbar-v43,
+      .field-page .ace-topbar {
+        background: #ffffff !important;
+        border-color: #d7e0da !important;
+        color: #1f2933 !important;
+        box-shadow: 0 10px 22px rgba(20, 35, 28, .12) !important;
+      }
+
+      .field-page .topbar-v43 .topbar-row {
+        background: #0b4f2f !important;
+        color: #ffffff !important;
+      }
+
+      .field-page .topbar-v43 .brand-copy h1 {
+        color: #ffffff !important;
+      }
+
+      .field-page .nav-tabs.nav-tabs-v43 {
+        background: #0b4f2f !important;
+        border-top: 1px solid #083f25 !important;
+      }
+
+
+      .field-page .topbar-v43 .topbar-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 6px !important;
+        padding: 8px 10px 6px !important;
+        align-items: stretch !important;
+      }
+
+      .field-page .topbar-v43 .topbar-main {
+        display: block !important;
+        min-width: 0 !important;
+      }
+
+      .field-page .topbar-v43 .brand-copy {
+        min-width: 0 !important;
+      }
+
+      .field-page .topbar-v43 .brand-copy h1 {
+        max-width: 100% !important;
+        margin: 0 !important;
+        font-size: 1rem !important;
+        line-height: 1.08 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      .field-page .topbar-v43 .brand-copy p,
+      .field-page .topbar-v43 .brand-mark {
+        display: none !important;
+      }
+
+      .field-page .topbar-v43 .topbar-actions {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, .9fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, .86fr) !important;
+        gap: 6px !important;
+        align-items: stretch !important;
+        justify-content: stretch !important;
+        flex-wrap: nowrap !important;
+      }
+
+      .field-page .topbar-v43 .topbar-actions > *,
+      .field-page .topbar-v43 .operation-mode-badge,
+      .field-page .topbar-v43 .chip,
+      .field-page .topbar-v43 .header-sync-btn,
+      .field-page .topbar-v43 .chip-logout,
+      .field-page .topbar-v43 #syncChip,
+      .field-page .topbar-v43 #headerSyncBtn,
+      .field-page .topbar-v43 #logoutBtn {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 0 6px !important;
+        border-radius: 9px !important;
+        justify-content: center !important;
+        justify-self: stretch !important;
+        text-align: center !important;
+        font-size: .68rem !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        box-sizing: border-box !important;
+      }
+
+      .field-page .topbar-v43 .operation-mode-badge {
+        display: flex !important;
+        gap: 3px !important;
+      }
+
+      .field-page .topbar-v43 .operation-mode-badge,
+      .field-page .topbar-v43 #syncChip {
+        background: #ffffff !important;
+        border-color: rgba(255,255,255,.75) !important;
+        color: #123a28 !important;
+      }
+
+      .field-page .topbar-v43 #headerSyncBtn {
+        background: #083f25 !important;
+        border-color: #083f25 !important;
+        color: #ffffff !important;
+      }
+
+
+      .field-page .topbar-v43 .operation-mode-badge span,
+      .field-page .topbar-v43 .operation-mode-badge strong {
+        display: inline !important;
+        min-width: 0 !important;
+        font-size: .68rem !important;
+        line-height: 1 !important;
+      }
+
+      .field-page .topbar-v43 #logoutBtn {
+        color: #ffffff !important;
+        background: #c62828 !important;
+        border-color: #a91f1f !important;
+        font-size: .78rem !important;
+        font-weight: 900 !important;
+        letter-spacing: .01em !important;
+      }
+
+      .field-page .nav-tabs.nav-tabs-v43 {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+        padding: 8px 10px 8px !important;
+        background: #0b4f2f !important;
+        border-top: 1px solid #083f25 !important;
+      }
+
+      .field-page .nav-tabs-v43 .tab-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 8px !important;
+        border-radius: 10px !important;
+        font-size: .82rem !important;
+        background: #ffffff !important;
+        border-color: #d6dfd9 !important;
+        color: #6f7d88 !important;
+      }
+
+      .field-page .nav-tabs-v43 .tab-btn *,
+      .field-page .nav-tabs-v43 .tab-btn .tab-btn__label {
+        color: #6f7d88 !important;
+      }
+
+      .field-page .nav-tabs-v43 .tab-btn.active,
+      .field-page .nav-tabs-v43 .tab-btn[aria-selected="true"],
+      .field-page .nav-tabs-v43 .tab-btn.is-active {
+        background: #128044 !important;
+        border-color: #128044 !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 16px rgba(11, 79, 47, .20) !important;
+      }
+
+      .field-page .nav-tabs-v43 .tab-btn.active *,
+      .field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] *,
+      .field-page .nav-tabs-v43 .tab-btn.is-active *,
+      .field-page .nav-tabs-v43 .tab-btn.active .tab-btn__label,
+      .field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] .tab-btn__label,
+      .field-page .nav-tabs-v43 .tab-btn.is-active .tab-btn__label {
+        color: #ffffff !important;
+      }
+
+
+      .field-page main,
+      .field-page .screen {
+        padding-inline: 10px !important;
+      }
+
+      .field-page #screen-painel .screen-head {
+        margin-bottom: 10px !important;
+        padding: 10px 12px !important;
+        border-radius: 14px !important;
+      }
+
+      .field-page #screen-painel .hero-grid,
+      .field-page #screen-painel .metric-grid,
+      .field-page #syncCenterGrid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+
+      .field-page #screen-painel .hero-card,
+      .field-page #screen-painel .metric-card,
+      .field-page #syncCenterGrid .metric-card {
+        min-height: 64px !important;
+        padding: 9px 10px !important;
+        border-radius: 12px !important;
+      }
+
+      .field-page #screen-painel .hero-card small,
+      .field-page #screen-painel .metric-card small,
+      .field-page #syncCenterGrid .metric-card small {
+        margin-bottom: 4px !important;
+        font-size: .58rem !important;
+        line-height: 1.05 !important;
+        letter-spacing: .04em !important;
+      }
+
+      .field-page #screen-painel .hero-card strong,
+      .field-page #screen-painel .metric-card strong,
+      .field-page #syncCenterGrid .metric-card strong {
+        font-size: 1.28rem !important;
+        line-height: 1.05 !important;
+      }
+
+      .field-page #screen-painel .hero-card span {
+        margin-top: 4px !important;
+        font-size: .66rem !important;
+        line-height: 1.15 !important;
+      }
+
+      .field-page #screen-painel .card {
+        padding: 12px !important;
+        border-radius: 16px !important;
+      }
+
+      .field-page #screen-painel .section-title {
+        margin-bottom: 8px !important;
+        font-size: .95rem !important;
+        line-height: 1.15 !important;
+      }
+
+      .field-page #screen-painel .grid.two {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      .field-page #localDepositSummary,
+      .field-page #localRecommendations,
+      .field-page #syncQueueList {
+        gap: 8px !important;
+        min-height: 0 !important;
+        padding: 8px !important;
+        border-radius: 14px !important;
+      }
+
+      .field-page #screen-painel .ranking-card,
+      .field-page #screen-painel .insight-card,
+      .field-page #screen-painel .history-card,
+      .field-page #screen-painel .mail-report-card,
+      .field-page #screen-painel .empty-state {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+      }
+
+      .field-page #screen-painel .sync-export-actions {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+      }
+
+      .field-page #screen-painel .sync-export-btn {
+        min-height: 54px !important;
+        padding: 9px 12px !important;
+        border-radius: 12px !important;
+      }
+    }
+
+    @media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) {
+      .field-page #screen-painel .hero-grid,
+      .field-page #screen-painel .metric-grid,
+      .field-page #syncCenterGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+
+      .field-page #screen-painel .hero-card,
+      .field-page #screen-painel .metric-card,
+      .field-page #syncCenterGrid .metric-card {
+        min-height: 54px !important;
+        padding: 7px 8px !important;
+      }
+
+      .field-page #screen-painel .hero-card strong,
+      .field-page #screen-painel .metric-card strong,
+      .field-page #syncCenterGrid .metric-card strong {
+        font-size: 1.1rem !important;
+      }
+
+      .field-page #screen-painel .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+    }
+  </style>
+
+  <style id="index-layout-fix-v49">
+    /* Correção final somente no index.html: cores do cabeçalho e abas em qualquer largura. */
+    body.field-page .topbar.topbar-v43,
+    body.field-page header.topbar.topbar-v43,
+    body.field-page .ace-topbar {
+      background: #0b4f2f !important;
+      border-bottom: 1px solid #083f25 !important;
+      box-shadow: 0 14px 30px rgba(7, 48, 28, .18) !important;
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 .topbar-row {
+      background: #0b4f2f !important;
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 .brand-copy h1,
+    body.field-page .topbar-v43 .brand-copy p,
+    body.field-page .topbar-v43 .brand-copy *,
+    body.field-page .topbar-v43 .topbar-main,
+    body.field-page .topbar-v43 .topbar-main * {
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 .topbar-actions > *,
+    body.field-page .topbar-v43 .chip,
+    body.field-page .topbar-v43 .operation-mode-badge,
+    body.field-page .topbar-v43 #syncChip {
+      background: #ffffff !important;
+      border-color: #cfd9d3 !important;
+      color: #6f7d88 !important;
+      text-shadow: none !important;
+    }
+
+    body.field-page .topbar-v43 .topbar-actions > * *,
+    body.field-page .topbar-v43 .chip *,
+    body.field-page .topbar-v43 .operation-mode-badge *,
+    body.field-page .topbar-v43 #syncChip * {
+      color: #6f7d88 !important;
+    }
+
+    body.field-page .topbar-v43 #headerSyncBtn,
+    body.field-page .topbar-v43 .header-sync-btn {
+      background: #0f6f3d !important;
+      border-color: #0f6f3d !important;
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 #headerSyncBtn *,
+    body.field-page .topbar-v43 .header-sync-btn * {
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 #logoutBtn,
+    body.field-page .topbar-v43 .chip-logout {
+      background: #c62828 !important;
+      border-color: #a91f1f !important;
+      color: #ffffff !important;
+      font-weight: 900 !important;
+    }
+
+    body.field-page .topbar-v43 #logoutBtn *,
+    body.field-page .topbar-v43 .chip-logout * {
+      color: #ffffff !important;
+    }
+
+    body.field-page .nav-tabs.nav-tabs-v43 {
+      background: #0b4f2f !important;
+      color: #ffffff !important;
+      border-top: 1px solid #083f25 !important;
+      border-bottom: 1px solid #083f25 !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn,
+    body.field-page .nav-tabs-v43 button.tab-btn {
+      background: #ffffff !important;
+      border-color: #d6dfd9 !important;
+      color: #9aa4ad !important;
+      text-shadow: none !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn *,
+    body.field-page .nav-tabs-v43 .tab-btn .tab-btn__label,
+    body.field-page .nav-tabs-v43 button.tab-btn *,
+    body.field-page .nav-tabs-v43 button.tab-btn .tab-btn__label {
+      color: #9aa4ad !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn.active,
+    body.field-page .nav-tabs-v43 .tab-btn.is-active,
+    body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"],
+    body.field-page .nav-tabs-v43 button.tab-btn.active,
+    body.field-page .nav-tabs-v43 button.tab-btn.is-active,
+    body.field-page .nav-tabs-v43 button.tab-btn[aria-selected="true"] {
+      background: #0f6f3d !important;
+      border-color: #0f6f3d !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 16px rgba(7, 48, 28, .18) !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn.active *,
+    body.field-page .nav-tabs-v43 .tab-btn.is-active *,
+    body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] *,
+    body.field-page .nav-tabs-v43 .tab-btn.active .tab-btn__label,
+    body.field-page .nav-tabs-v43 .tab-btn.is-active .tab-btn__label,
+    body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] .tab-btn__label,
+    body.field-page .nav-tabs-v43 button.tab-btn.active *,
+    body.field-page .nav-tabs-v43 button.tab-btn.is-active *,
+    body.field-page .nav-tabs-v43 button.tab-btn[aria-selected="true"] * {
+      color: #ffffff !important;
+    }
+
+    @media (min-width: 901px) {
+      body.field-page .topbar-v43 .topbar-row {
+        padding-top: 16px !important;
+        padding-bottom: 12px !important;
+      }
+
+      body.field-page .nav-tabs.nav-tabs-v43 {
+        padding-top: 10px !important;
+        padding-bottom: 12px !important;
+      }
+    }
+  </style>
+
+
+  <style id="index-layout-fix-v50">
+    /* Ajuste fino somente no index.html: designer do cabeçalho, abas e painel. */
+    body.field-page {
+      background:
+        radial-gradient(circle at 20% 0%, rgba(15, 111, 61, .10), transparent 28rem),
+        linear-gradient(180deg, #eef6f1 0%, #f7faf8 18rem, #f5f8f6 100%) !important;
+      color: #1f2933 !important;
+    }
+
+    body.field-page .page-shell,
+    body.field-page .ace-shell {
+      background: transparent !important;
+    }
+
+    body.field-page .topbar.topbar-v43,
+    body.field-page header.topbar.topbar-v43,
+    body.field-page .ace-topbar {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 40 !important;
+      overflow: hidden !important;
+      background: #073b24 !important;
+      border: 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, .12) !important;
+      box-shadow: 0 14px 28px rgba(7, 59, 36, .22) !important;
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 .topbar-row {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 14px !important;
+      align-items: center !important;
+      max-width: 1180px !important;
+      margin: 0 auto !important;
+      padding: 12px 18px 10px !important;
+      background: #073b24 !important;
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 .topbar-main,
+    body.field-page .topbar-v43 .brand-copy {
+      min-width: 0 !important;
+    }
+
+    body.field-page .topbar-v43 .brand-copy h1 {
+      margin: 0 !important;
+      color: #ffffff !important;
+      font-size: clamp(1rem, 1.55vw, 1.35rem) !important;
+      font-weight: 900 !important;
+      line-height: 1.05 !important;
+      letter-spacing: -.02em !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    body.field-page .topbar-v43 .brand-copy p,
+    body.field-page .topbar-v43 .brand-copy span {
+      margin: 3px 0 0 !important;
+      color: rgba(255, 255, 255, .78) !important;
+      font-size: .74rem !important;
+      font-weight: 700 !important;
+      line-height: 1.1 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    body.field-page .topbar-v43 .chip-row,
+    body.field-page .topbar-v43 .topbar-actions {
+      display: grid !important;
+      grid-auto-flow: column !important;
+      grid-auto-columns: minmax(88px, auto) !important;
+      gap: 8px !important;
+      align-items: center !important;
+      justify-content: end !important;
+      margin: 0 !important;
+      width: auto !important;
+    }
+
+    body.field-page .topbar-v43 .topbar-actions > *,
+    body.field-page .topbar-v43 .chip,
+    body.field-page .topbar-v43 .operation-mode-badge,
+    body.field-page .topbar-v43 #syncChip,
+    body.field-page .topbar-v43 #headerSyncBtn,
+    body.field-page .topbar-v43 #logoutBtn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 88px !important;
+      width: auto !important;
+      height: 34px !important;
+      min-height: 34px !important;
+      max-height: 34px !important;
+      padding: 0 14px !important;
+      border-radius: 10px !important;
+      border: 1px solid rgba(255, 255, 255, .72) !important;
+      background: #ffffff !important;
+      color: #9aa4ad !important;
+      font-size: .78rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      text-align: center !important;
+      text-shadow: none !important;
+      white-space: nowrap !important;
+      box-sizing: border-box !important;
+    }
+
+    body.field-page .topbar-v43 .topbar-actions > * *,
+    body.field-page .topbar-v43 .chip *,
+    body.field-page .topbar-v43 .operation-mode-badge *,
+    body.field-page .topbar-v43 #syncChip * {
+      color: #9aa4ad !important;
+      font-size: inherit !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+    }
+
+    body.field-page .topbar-v43 .operation-mode-badge {
+      gap: 4px !important;
+    }
+
+    body.field-page .topbar-v43 .operation-mode-badge span,
+    body.field-page .topbar-v43 .operation-mode-badge strong {
+      display: inline !important;
+      min-width: 0 !important;
+    }
+
+    body.field-page .topbar-v43 #headerSyncBtn,
+    body.field-page .topbar-v43 .header-sync-btn {
+      background: #0f6f3d !important;
+      border-color: #0f6f3d !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 18px rgba(15, 111, 61, .28) !important;
+    }
+
+    body.field-page .topbar-v43 #headerSyncBtn *,
+    body.field-page .topbar-v43 .header-sync-btn * {
+      color: #ffffff !important;
+    }
+
+    body.field-page .topbar-v43 #logoutBtn,
+    body.field-page .topbar-v43 .chip-logout {
+      background: #c62828 !important;
+      border-color: #b42323 !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 18px rgba(198, 40, 40, .22) !important;
+    }
+
+    body.field-page .topbar-v43 #logoutBtn *,
+    body.field-page .topbar-v43 .chip-logout * {
+      color: #ffffff !important;
+    }
+
+    body.field-page .nav-tabs.nav-tabs-v43 {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      max-width: 1180px !important;
+      margin: 0 auto !important;
+      padding: 8px 18px 12px !important;
+      background: #073b24 !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, .10) !important;
+      box-shadow: none !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn,
+    body.field-page .nav-tabs-v43 button.tab-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      padding: 0 14px !important;
+      border-radius: 11px !important;
+      border: 1px solid #dce4df !important;
+      background: #ffffff !important;
+      color: #9aa4ad !important;
+      font-size: .86rem !important;
+      font-weight: 900 !important;
+      letter-spacing: .01em !important;
+      line-height: 1 !important;
+      text-shadow: none !important;
+      box-shadow: none !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn *,
+    body.field-page .nav-tabs-v43 .tab-btn .tab-btn__label,
+    body.field-page .nav-tabs-v43 button.tab-btn *,
+    body.field-page .nav-tabs-v43 button.tab-btn .tab-btn__label {
+      color: #9aa4ad !important;
+      font-weight: 900 !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn.active,
+    body.field-page .nav-tabs-v43 .tab-btn.is-active,
+    body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"],
+    body.field-page .nav-tabs-v43 button.tab-btn.active,
+    body.field-page .nav-tabs-v43 button.tab-btn.is-active,
+    body.field-page .nav-tabs-v43 button.tab-btn[aria-selected="true"] {
+      background: #0f6f3d !important;
+      border-color: #0f6f3d !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 18px rgba(15, 111, 61, .26) !important;
+    }
+
+    body.field-page .nav-tabs-v43 .tab-btn.active *,
+    body.field-page .nav-tabs-v43 .tab-btn.is-active *,
+    body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] *,
+    body.field-page .nav-tabs-v43 .tab-btn.active .tab-btn__label,
+    body.field-page .nav-tabs-v43 .tab-btn.is-active .tab-btn__label,
+    body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] .tab-btn__label {
+      color: #ffffff !important;
+    }
+
+    body.field-page main {
+      max-width: 1180px !important;
+      margin: 0 auto !important;
+      padding: 14px 18px 32px !important;
+    }
+
+    body.field-page .card,
+    body.field-page .ace-card {
+      border: 1px solid rgba(21, 83, 51, .12) !important;
+      box-shadow: 0 10px 24px rgba(20, 35, 28, .08) !important;
+    }
+
+    body.field-page #screen-painel .screen-head {
+      align-items: center !important;
+      margin: 0 0 12px !important;
+      padding: 12px 16px !important;
+      border-radius: 18px !important;
+      border: 1px solid rgba(21, 83, 51, .12) !important;
+      background: rgba(255, 255, 255, .92) !important;
+      box-shadow: 0 8px 22px rgba(20, 35, 28, .07) !important;
+    }
+
+    body.field-page #screen-painel .screen-head-copy strong {
+      color: #16212b !important;
+      font-size: clamp(1.05rem, 1.55vw, 1.45rem) !important;
+      line-height: 1.1 !important;
+      letter-spacing: -.02em !important;
+    }
+
+    body.field-page #screen-painel .screen-head-copy span {
+      margin-top: 3px !important;
+      color: #6f7d88 !important;
+      font-size: .84rem !important;
+      line-height: 1.2 !important;
+    }
+
+    body.field-page #screen-painel .screen-badge {
+      width: 42px !important;
+      height: 42px !important;
+      min-width: 42px !important;
+      border-radius: 12px !important;
+      background: #f5faf7 !important;
+      border: 1px solid rgba(15, 111, 61, .14) !important;
+      box-shadow: none !important;
+    }
+
+    body.field-page #screen-painel .hero-grid,
+    body.field-page #screen-painel .metric-grid,
+    body.field-page #syncCenterGrid {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      margin-bottom: 12px !important;
+    }
+
+    body.field-page #screen-painel .hero-card,
+    body.field-page #screen-painel .metric-card,
+    body.field-page #syncCenterGrid .metric-card {
+      min-height: 78px !important;
+      padding: 12px 14px !important;
+      border-radius: 16px !important;
+      background: rgba(255, 255, 255, .94) !important;
+      border: 1px solid rgba(21, 83, 51, .12) !important;
+      box-shadow: 0 8px 20px rgba(20, 35, 28, .07) !important;
+      overflow: hidden !important;
+    }
+
+    body.field-page #screen-painel .hero-card small,
+    body.field-page #screen-painel .metric-card small,
+    body.field-page #syncCenterGrid .metric-card small {
+      margin: 0 0 6px !important;
+      color: #4a5560 !important;
+      font-size: .62rem !important;
+      font-weight: 900 !important;
+      letter-spacing: .075em !important;
+      line-height: 1.05 !important;
+      text-transform: uppercase !important;
+    }
+
+    body.field-page #screen-painel .hero-card strong,
+    body.field-page #screen-painel .metric-card strong,
+    body.field-page #syncCenterGrid .metric-card strong {
+      color: #20784a !important;
+      font-size: clamp(1.45rem, 2.2vw, 2rem) !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      letter-spacing: -.03em !important;
+    }
+
+    body.field-page #screen-painel .hero-card span,
+    body.field-page #screen-painel .metric-card span,
+    body.field-page #syncCenterGrid .metric-card span {
+      margin-top: 5px !important;
+      color: #5d6873 !important;
+      font-size: .76rem !important;
+      line-height: 1.2 !important;
+    }
+
+    body.field-page #screen-painel .card {
+      margin-bottom: 12px !important;
+      padding: 14px !important;
+      border-radius: 18px !important;
+      background: rgba(255, 255, 255, .94) !important;
+    }
+
+    body.field-page #screen-painel .section-title {
+      margin: 0 0 10px !important;
+      color: #17212b !important;
+      font-size: 1.02rem !important;
+      font-weight: 900 !important;
+      line-height: 1.15 !important;
+      letter-spacing: -.01em !important;
+    }
+
+    body.field-page #screen-painel .grid.two {
+      gap: 12px !important;
+      margin-bottom: 0 !important;
+    }
+
+    body.field-page #localMetricGrid {
+      margin-bottom: 0 !important;
+    }
+
+    body.field-page #localDepositSummary,
+    body.field-page #localRecommendations,
+    body.field-page #syncQueueList {
+      gap: 8px !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    body.field-page #screen-painel .ranking-card,
+    body.field-page #screen-painel .insight-card,
+    body.field-page #screen-painel .history-card,
+    body.field-page #screen-painel .mail-report-card,
+    body.field-page #screen-painel .empty-state {
+      padding: 10px 12px !important;
+      border-radius: 14px !important;
+      border-color: rgba(21, 83, 51, .12) !important;
+      box-shadow: none !important;
+    }
+
+    body.field-page #screen-painel .panel-card-note {
+      margin: 0 0 10px !important;
+      color: #4f5b66 !important;
+      font-size: .86rem !important;
+      line-height: 1.35 !important;
+    }
+
+    body.field-page #screen-painel .btn-row,
+    body.field-page #screen-painel .dashboard-day-actions {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+    }
+
+    body.field-page #screen-painel .btn,
+    body.field-page #screen-painel .ace-btn {
+      min-height: 40px !important;
+      border-radius: 12px !important;
+      font-weight: 900 !important;
+    }
+
+    body.field-page #screen-painel .table-wrap,
+    body.field-page #screen-painel .visit-table-wrap {
+      border-radius: 14px !important;
+      border-color: rgba(21, 83, 51, .12) !important;
+      box-shadow: none !important;
+    }
+
+    @media (max-width: 900px) {
+      body.field-page .topbar-v43 .topbar-row {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        padding: 8px 10px 7px !important;
+      }
+
+      body.field-page .topbar-v43 .brand-copy h1 {
+        font-size: 1rem !important;
+      }
+
+      body.field-page .topbar-v43 .brand-copy p {
+        display: block !important;
+        font-size: .66rem !important;
+      }
+
+      body.field-page .topbar-v43 .chip-row,
+      body.field-page .topbar-v43 .topbar-actions {
+        width: 100% !important;
+        grid-auto-flow: initial !important;
+        grid-auto-columns: initial !important;
+        grid-template-columns: minmax(0, .95fr) minmax(0, 1fr) minmax(0, .78fr) minmax(0, .82fr) !important;
+        gap: 6px !important;
+        justify-content: stretch !important;
+      }
+
+      body.field-page .topbar-v43 .topbar-actions > *,
+      body.field-page .topbar-v43 .chip,
+      body.field-page .topbar-v43 .operation-mode-badge,
+      body.field-page .topbar-v43 #syncChip,
+      body.field-page .topbar-v43 #headerSyncBtn,
+      body.field-page .topbar-v43 #logoutBtn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 0 5px !important;
+        border-radius: 9px !important;
+        font-size: .66rem !important;
+      }
+
+      body.field-page .nav-tabs.nav-tabs-v43 {
+        gap: 6px !important;
+        padding: 7px 10px 9px !important;
+      }
+
+      body.field-page .nav-tabs-v43 .tab-btn,
+      body.field-page .nav-tabs-v43 button.tab-btn {
+        height: 34px !important;
+        min-height: 34px !important;
+        border-radius: 9px !important;
+        font-size: .78rem !important;
+      }
+
+      body.field-page main {
+        padding: 10px 10px 28px !important;
+      }
+
+      body.field-page #screen-painel .screen-head {
+        padding: 10px 12px !important;
+        border-radius: 15px !important;
+      }
+
+      body.field-page #screen-painel .screen-badge {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+      }
+
+      body.field-page #screen-painel .hero-grid,
+      body.field-page #screen-painel .metric-grid,
+      body.field-page #syncCenterGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+
+      body.field-page #screen-painel .hero-card,
+      body.field-page #screen-painel .metric-card,
+      body.field-page #syncCenterGrid .metric-card {
+        min-height: 64px !important;
+        padding: 9px 10px !important;
+        border-radius: 13px !important;
+      }
+
+      body.field-page #screen-painel .hero-card small,
+      body.field-page #screen-painel .metric-card small,
+      body.field-page #syncCenterGrid .metric-card small {
+        margin-bottom: 4px !important;
+        font-size: .56rem !important;
+        letter-spacing: .06em !important;
+      }
+
+      body.field-page #screen-painel .hero-card strong,
+      body.field-page #screen-painel .metric-card strong,
+      body.field-page #syncCenterGrid .metric-card strong {
+        font-size: 1.28rem !important;
+      }
+
+      body.field-page #screen-painel .hero-card span,
+      body.field-page #screen-painel .metric-card span,
+      body.field-page #syncCenterGrid .metric-card span {
+        margin-top: 4px !important;
+        font-size: .66rem !important;
+      }
+
+      body.field-page #screen-painel .card {
+        padding: 11px !important;
+        border-radius: 15px !important;
+      }
+
+      body.field-page #screen-painel .section-title {
+        margin-bottom: 8px !important;
+        font-size: .95rem !important;
+      }
+
+      body.field-page #screen-painel .grid.two {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      body.field-page #screen-painel .btn-row,
+      body.field-page #screen-painel .dashboard-day-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+
+      body.field-page #screen-painel .btn,
+      body.field-page #screen-painel .ace-btn {
+        min-height: 38px !important;
+        border-radius: 10px !important;
+      }
+    }
+
+    @media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) {
+      body.field-page #screen-painel .hero-grid,
+      body.field-page #screen-painel .metric-grid,
+      body.field-page #syncCenterGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+
+      body.field-page #screen-painel .hero-card,
+      body.field-page #screen-painel .metric-card,
+      body.field-page #syncCenterGrid .metric-card {
+        min-height: 58px !important;
+        padding: 8px !important;
+      }
+
+      body.field-page #screen-painel .hero-card strong,
+      body.field-page #screen-painel .metric-card strong,
+      body.field-page #syncCenterGrid .metric-card strong {
+        font-size: 1.18rem !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      body.field-page .topbar-v43 .brand-copy p {
+        display: none !important;
+      }
+
+      body.field-page .topbar-v43 .topbar-actions > *,
+      body.field-page .topbar-v43 .chip,
+      body.field-page .topbar-v43 .operation-mode-badge,
+      body.field-page .topbar-v43 #syncChip,
+      body.field-page .topbar-v43 #headerSyncBtn,
+      body.field-page .topbar-v43 #logoutBtn {
+        font-size: .61rem !important;
+      }
+    }
+  </style>
+
+
+  <style id="index-tablet-design-v51">
+    /* v51: refinamento visual do app de campo em tablet. */
+    :root {
+      --ace-v51-green-dark: #073b24;
+      --ace-v51-green: #0f6f3d;
+      --ace-v51-green-strong: #0b7a3b;
+      --ace-v51-red: #c62828;
+      --ace-v51-silver: #9aa4ad;
+      --ace-v51-bg: #f3f8f5;
+      --ace-v51-card-border: rgba(21, 83, 51, .12);
+    }
+
+    html body.field-page {
+      background:
+        radial-gradient(circle at 18% 0%, rgba(15, 111, 61, .10), transparent 28rem),
+        linear-gradient(180deg, #eef6f1 0%, #f7faf8 16rem, var(--ace-v51-bg) 100%) !important;
+      color: #1f2933 !important;
+    }
+
+    html body.field-page .page-shell,
+    html body.field-page .ace-shell {
+      background: transparent !important;
+    }
+
+    html body.field-page .topbar.topbar-v43,
+    html body.field-page header.topbar.topbar-v43,
+    html body.field-page .ace-topbar {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 60 !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      background: var(--ace-v51-green-dark) !important;
+      border: 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, .10) !important;
+      box-shadow: 0 10px 22px rgba(7, 59, 36, .18) !important;
+      color: #ffffff !important;
+    }
+
+    html body.field-page .topbar-v43 .topbar-row {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      gap: 14px !important;
+      align-items: center !important;
+      max-width: 1180px !important;
+      margin: 0 auto !important;
+      padding: 10px 18px 8px !important;
+      background: var(--ace-v51-green-dark) !important;
+      color: #ffffff !important;
+    }
+
+    html body.field-page .topbar-v43 .topbar-main,
+    html body.field-page .topbar-v43 .brand-copy {
+      min-width: 0 !important;
+    }
+
+    html body.field-page .topbar-v43 .brand-copy h1 {
+      margin: 0 !important;
+      color: #ffffff !important;
+      font-size: clamp(.98rem, 1.35vw, 1.25rem) !important;
+      font-weight: 900 !important;
+      line-height: 1.05 !important;
+      letter-spacing: -.02em !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    html body.field-page .topbar-v43 .brand-copy p,
+    html body.field-page .topbar-v43 .brand-copy span {
+      margin: 3px 0 0 !important;
+      color: rgba(255, 255, 255, .76) !important;
+      font-size: .72rem !important;
+      font-weight: 700 !important;
+      line-height: 1.1 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    html body.field-page .topbar-v43 .chip-row,
+    html body.field-page .topbar-v43 .topbar-actions {
+      display: grid !important;
+      grid-auto-flow: column !important;
+      grid-auto-columns: minmax(82px, auto) !important;
+      gap: 8px !important;
+      align-items: center !important;
+      justify-content: end !important;
+      margin: 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+    }
+
+    html body.field-page .topbar-v43 .topbar-actions > *,
+    html body.field-page .topbar-v43 .chip,
+    html body.field-page .topbar-v43 .operation-mode-badge,
+    html body.field-page .topbar-v43 #syncChip,
+    html body.field-page .topbar-v43 #headerSyncBtn,
+    html body.field-page .topbar-v43 #logoutBtn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 82px !important;
+      width: auto !important;
+      height: 33px !important;
+      min-height: 33px !important;
+      max-height: 33px !important;
+      padding: 0 12px !important;
+      border-radius: 10px !important;
+      border: 1px solid rgba(255, 255, 255, .72) !important;
+      background: #ffffff !important;
+      color: var(--ace-v51-silver) !important;
+      font-size: .76rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      text-align: center !important;
+      text-shadow: none !important;
+      white-space: nowrap !important;
+      box-shadow: none !important;
+      box-sizing: border-box !important;
+    }
+
+    html body.field-page .topbar-v43 .topbar-actions > * *,
+    html body.field-page .topbar-v43 .chip *,
+    html body.field-page .topbar-v43 .operation-mode-badge *,
+    html body.field-page .topbar-v43 #syncChip * {
+      color: var(--ace-v51-silver) !important;
+      font-size: inherit !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+      text-shadow: none !important;
+    }
+
+    html body.field-page .topbar-v43 .operation-mode-badge {
+      gap: 4px !important;
+    }
+
+    html body.field-page .topbar-v43 .operation-mode-badge span,
+    html body.field-page .topbar-v43 .operation-mode-badge strong {
+      display: inline !important;
+      min-width: 0 !important;
+    }
+
+    html body.field-page .topbar-v43 #syncChip.is-ok,
+    html body.field-page .topbar-v43 .chip.is-ok,
+    html body.field-page .topbar-v43 #headerSyncBtn,
+    html body.field-page .topbar-v43 .header-sync-btn {
+      background: var(--ace-v51-green) !important;
+      border-color: var(--ace-v51-green) !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 14px rgba(15, 111, 61, .24) !important;
+    }
+
+    html body.field-page .topbar-v43 #syncChip.is-ok *,
+    html body.field-page .topbar-v43 .chip.is-ok *,
+    html body.field-page .topbar-v43 #headerSyncBtn *,
+    html body.field-page .topbar-v43 .header-sync-btn * {
+      color: #ffffff !important;
+    }
+
+    html body.field-page .topbar-v43 #syncChip.is-warn,
+    html body.field-page .topbar-v43 .chip.is-warn {
+      background: #d97706 !important;
+      border-color: #d97706 !important;
+      color: #ffffff !important;
+    }
+
+    html body.field-page .topbar-v43 #syncChip.is-danger,
+    html body.field-page .topbar-v43 .chip.is-danger,
+    html body.field-page .topbar-v43 #logoutBtn,
+    html body.field-page .topbar-v43 .chip-logout {
+      background: var(--ace-v51-red) !important;
+      border-color: #b42323 !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 14px rgba(198, 40, 40, .22) !important;
+    }
+
+    html body.field-page .topbar-v43 #syncChip.is-warn *,
+    html body.field-page .topbar-v43 .chip.is-warn *,
+    html body.field-page .topbar-v43 #syncChip.is-danger *,
+    html body.field-page .topbar-v43 .chip.is-danger *,
+    html body.field-page .topbar-v43 #logoutBtn *,
+    html body.field-page .topbar-v43 .chip-logout * {
+      color: #ffffff !important;
+    }
+
+    html body.field-page .nav-tabs.nav-tabs-v43 {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 9px !important;
+      max-width: 1180px !important;
+      margin: 0 auto !important;
+      padding: 7px 18px 11px !important;
+      background: var(--ace-v51-green-dark) !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, .10) !important;
+      box-shadow: none !important;
+    }
+
+    html body.field-page .nav-tabs-v43 .tab-btn,
+    html body.field-page .nav-tabs-v43 button.tab-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      height: 36px !important;
+      min-height: 36px !important;
+      padding: 0 12px !important;
+      border-radius: 11px !important;
+      border: 1px solid #dce4df !important;
+      background: #ffffff !important;
+      color: var(--ace-v51-silver) !important;
+      font-size: .84rem !important;
+      font-weight: 900 !important;
+      letter-spacing: .01em !important;
+      line-height: 1 !important;
+      text-shadow: none !important;
+      box-shadow: none !important;
+    }
+
+    html body.field-page .nav-tabs-v43 .tab-btn *,
+    html body.field-page .nav-tabs-v43 .tab-btn .tab-btn__label,
+    html body.field-page .nav-tabs-v43 button.tab-btn *,
+    html body.field-page .nav-tabs-v43 button.tab-btn .tab-btn__label {
+      color: var(--ace-v51-silver) !important;
+      font-weight: 900 !important;
+      text-shadow: none !important;
+    }
+
+    html body.field-page .nav-tabs-v43 .tab-btn.active,
+    html body.field-page .nav-tabs-v43 .tab-btn.is-active,
+    html body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"],
+    html body.field-page .nav-tabs-v43 button.tab-btn.active,
+    html body.field-page .nav-tabs-v43 button.tab-btn.is-active,
+    html body.field-page .nav-tabs-v43 button.tab-btn[aria-selected="true"] {
+      background: var(--ace-v51-green-strong) !important;
+      border-color: var(--ace-v51-green-strong) !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 16px rgba(11, 122, 59, .20) !important;
+    }
+
+    html body.field-page .nav-tabs-v43 .tab-btn.active *,
+    html body.field-page .nav-tabs-v43 .tab-btn.active .tab-btn__label,
+    html body.field-page .nav-tabs-v43 .tab-btn.is-active *,
+    html body.field-page .nav-tabs-v43 .tab-btn.is-active .tab-btn__label,
+    html body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] *,
+    html body.field-page .nav-tabs-v43 .tab-btn[aria-selected="true"] .tab-btn__label,
+    html body.field-page .nav-tabs-v43 button.tab-btn.active *,
+    html body.field-page .nav-tabs-v43 button.tab-btn.active .tab-btn__label,
+    html body.field-page .nav-tabs-v43 button.tab-btn.is-active *,
+    html body.field-page .nav-tabs-v43 button.tab-btn.is-active .tab-btn__label,
+    html body.field-page .nav-tabs-v43 button.tab-btn[aria-selected="true"] *,
+    html body.field-page .nav-tabs-v43 button.tab-btn[aria-selected="true"] .tab-btn__label {
+      color: #ffffff !important;
+    }
+
+    html body.field-page main {
+      max-width: 1180px !important;
+      margin: 0 auto !important;
+      padding: 14px 18px 34px !important;
+    }
+
+    html body.field-page .screen {
+      padding-inline: 0 !important;
+    }
+
+    html body.field-page .card,
+    html body.field-page .ace-card {
+      border-color: var(--ace-v51-card-border) !important;
+      border-radius: 16px !important;
+      background: rgba(255, 255, 255, .96) !important;
+      box-shadow: 0 8px 20px rgba(20, 35, 28, .06) !important;
+    }
+
+    html body.field-page #screen-painel .screen-head {
+      margin: 0 0 12px !important;
+      padding: 11px 14px !important;
+      border-radius: 16px !important;
+      border: 1px solid var(--ace-v51-card-border) !important;
+      background: rgba(255, 255, 255, .95) !important;
+      box-shadow: 0 8px 20px rgba(20, 35, 28, .06) !important;
+    }
+
+    html body.field-page #screen-painel .screen-head h2,
+    html body.field-page #screen-painel .screen-head .section-title {
+      margin: 0 !important;
+      font-size: clamp(1rem, 1.6vw, 1.25rem) !important;
+      line-height: 1.1 !important;
+    }
+
+    html body.field-page #screen-painel .screen-head p {
+      margin: 4px 0 0 !important;
+      font-size: .78rem !important;
+      line-height: 1.25 !important;
+      color: #647067 !important;
+    }
+
+    html body.field-page #screen-painel .screen-badge {
+      width: 42px !important;
+      height: 42px !important;
+      min-width: 42px !important;
+      border-radius: 12px !important;
+      background: #f5faf7 !important;
+      border: 1px solid rgba(15, 111, 61, .14) !important;
+      box-shadow: none !important;
+    }
+
+    html body.field-page #screen-painel .hero-grid,
+    html body.field-page #screen-painel .metric-grid,
+    html body.field-page #syncCenterGrid {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      margin-bottom: 12px !important;
+    }
+
+    html body.field-page #screen-painel .hero-card,
+    html body.field-page #screen-painel .metric-card,
+    html body.field-page #syncCenterGrid .metric-card {
+      min-height: 72px !important;
+      padding: 10px 12px !important;
+      border-radius: 15px !important;
+      background: rgba(255, 255, 255, .96) !important;
+      border: 1px solid var(--ace-v51-card-border) !important;
+      box-shadow: 0 7px 16px rgba(20, 35, 28, .055) !important;
+      overflow: hidden !important;
+    }
+
+    html body.field-page #screen-painel .hero-card small,
+    html body.field-page #screen-painel .metric-card small,
+    html body.field-page #syncCenterGrid .metric-card small {
+      margin: 0 0 5px !important;
+      color: #4a5560 !important;
+      font-size: .60rem !important;
+      font-weight: 900 !important;
+      letter-spacing: .07em !important;
+      line-height: 1.05 !important;
+      text-transform: uppercase !important;
+    }
+
+    html body.field-page #screen-painel .hero-card strong,
+    html body.field-page #screen-painel .metric-card strong,
+    html body.field-page #syncCenterGrid .metric-card strong {
+      color: #20784a !important;
+      font-size: clamp(1.34rem, 2vw, 1.86rem) !important;
+      font-weight: 900 !important;
+      line-height: .98 !important;
+      letter-spacing: -.03em !important;
+    }
+
+    html body.field-page #screen-painel .hero-card span,
+    html body.field-page #screen-painel .metric-card span,
+    html body.field-page #syncCenterGrid .metric-card span {
+      display: block !important;
+      margin-top: 5px !important;
+      color: #69756c !important;
+      font-size: .70rem !important;
+      font-weight: 700 !important;
+      line-height: 1.15 !important;
+    }
+
+    html body.field-page #screen-painel .card,
+    html body.field-page #screen-painel .ace-card {
+      padding: 13px !important;
+      border-radius: 16px !important;
+    }
+
+    html body.field-page #screen-painel .section-title,
+    html body.field-page #screen-painel .ace-section-title {
+      margin-bottom: 9px !important;
+      color: #163d2b !important;
+      font-size: 1rem !important;
+      line-height: 1.15 !important;
+    }
+
+    html body.field-page #screen-painel .grid,
+    html body.field-page #screen-painel .grid.two {
+      gap: 12px !important;
+    }
+
+    html body.field-page #screen-painel .grid.two {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    }
+
+    html body.field-page #screen-painel .btn-row,
+    html body.field-page #screen-painel .dashboard-day-actions {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 9px !important;
+    }
+
+    html body.field-page #screen-painel .btn,
+    html body.field-page #screen-painel .ace-btn {
+      min-height: 38px !important;
+      border-radius: 11px !important;
+      font-weight: 900 !important;
+      box-shadow: none !important;
+    }
+
+    html body.field-page #screen-painel .table-wrap,
+    html body.field-page #screen-painel .visit-table-wrap {
+      border-radius: 14px !important;
+      border-color: var(--ace-v51-card-border) !important;
+      box-shadow: none !important;
+    }
+
+    @media (max-width: 900px) {
+      html body.field-page .topbar-v43 .topbar-row {
+        grid-template-columns: 1fr !important;
+        gap: 7px !important;
+        padding: 8px 10px 7px !important;
+      }
+
+      html body.field-page .topbar-v43 .brand-copy h1 {
+        font-size: .98rem !important;
+      }
+
+      html body.field-page .topbar-v43 .brand-copy p {
+        display: block !important;
+        font-size: .64rem !important;
+      }
+
+      html body.field-page .topbar-v43 .chip-row,
+      html body.field-page .topbar-v43 .topbar-actions {
+        width: 100% !important;
+        grid-auto-flow: initial !important;
+        grid-auto-columns: initial !important;
+        grid-template-columns: minmax(0, .92fr) minmax(0, 1fr) minmax(0, .76fr) minmax(0, .78fr) !important;
+        gap: 6px !important;
+        justify-content: stretch !important;
+      }
+
+      html body.field-page .topbar-v43 .topbar-actions > *,
+      html body.field-page .topbar-v43 .chip,
+      html body.field-page .topbar-v43 .operation-mode-badge,
+      html body.field-page .topbar-v43 #syncChip,
+      html body.field-page .topbar-v43 #headerSyncBtn,
+      html body.field-page .topbar-v43 #logoutBtn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        padding: 0 5px !important;
+        border-radius: 9px !important;
+        font-size: .64rem !important;
+      }
+
+      html body.field-page .nav-tabs.nav-tabs-v43 {
+        gap: 6px !important;
+        padding: 7px 10px 9px !important;
+      }
+
+      html body.field-page .nav-tabs-v43 .tab-btn,
+      html body.field-page .nav-tabs-v43 button.tab-btn {
+        height: 34px !important;
+        min-height: 34px !important;
+        border-radius: 9px !important;
+        font-size: .78rem !important;
+      }
+
+      html body.field-page main {
+        padding: 10px 10px 28px !important;
+      }
+
+      html body.field-page #screen-painel .screen-head {
+        padding: 10px 12px !important;
+        border-radius: 15px !important;
+      }
+
+      html body.field-page #screen-painel .screen-badge {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+      }
+
+      html body.field-page #screen-painel .hero-grid,
+      html body.field-page #screen-painel .metric-grid,
+      html body.field-page #syncCenterGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+
+      html body.field-page #screen-painel .hero-card,
+      html body.field-page #screen-painel .metric-card,
+      html body.field-page #syncCenterGrid .metric-card {
+        min-height: 62px !important;
+        padding: 8px 9px !important;
+        border-radius: 13px !important;
+      }
+
+      html body.field-page #screen-painel .hero-card small,
+      html body.field-page #screen-painel .metric-card small,
+      html body.field-page #syncCenterGrid .metric-card small {
+        margin-bottom: 4px !important;
+        font-size: .55rem !important;
+        letter-spacing: .055em !important;
+      }
+
+      html body.field-page #screen-painel .hero-card strong,
+      html body.field-page #screen-painel .metric-card strong,
+      html body.field-page #syncCenterGrid .metric-card strong {
+        font-size: 1.18rem !important;
+      }
+
+      html body.field-page #screen-painel .hero-card span,
+      html body.field-page #screen-painel .metric-card span,
+      html body.field-page #syncCenterGrid .metric-card span {
+        margin-top: 4px !important;
+        font-size: .62rem !important;
+      }
+
+      html body.field-page #screen-painel .card,
+      html body.field-page #screen-painel .ace-card {
+        padding: 10px !important;
+        border-radius: 14px !important;
+      }
+
+      html body.field-page #screen-painel .section-title,
+      html body.field-page #screen-painel .ace-section-title {
+        margin-bottom: 8px !important;
+        font-size: .94rem !important;
+      }
+
+      html body.field-page #screen-painel .grid.two {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      html body.field-page #screen-painel .btn-row,
+      html body.field-page #screen-painel .dashboard-day-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+      }
+    }
+
+    @media (min-width: 700px) and (max-width: 900px) and (orientation: portrait) {
+      html body.field-page #screen-painel .hero-grid,
+      html body.field-page #screen-painel .metric-grid,
+      html body.field-page #syncCenterGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+
+      html body.field-page #screen-painel .hero-card,
+      html body.field-page #screen-painel .metric-card,
+      html body.field-page #syncCenterGrid .metric-card {
+        min-height: 56px !important;
+        padding: 8px !important;
+      }
+
+      html body.field-page #screen-painel .hero-card strong,
+      html body.field-page #screen-painel .metric-card strong,
+      html body.field-page #syncCenterGrid .metric-card strong {
+        font-size: 1.12rem !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      html body.field-page .topbar-v43 .brand-copy p {
+        display: none !important;
+      }
+
+      html body.field-page .topbar-v43 .topbar-actions > *,
+      html body.field-page .topbar-v43 .chip,
+      html body.field-page .topbar-v43 .operation-mode-badge,
+      html body.field-page .topbar-v43 #syncChip,
+      html body.field-page .topbar-v43 #headerSyncBtn,
+      html body.field-page .topbar-v43 #logoutBtn {
+        font-size: .60rem !important;
+      }
+    }
+  </style>
+  <style id="index-galaxy-tab-a11-offline-v52">
+    /* v52: painel do agente ajustado para Galaxy Tab A11 8.7" e trabalho 100% offline. */
+    html body.field-page {
+      --ace-a11-touch: 48px;
+      --ace-a11-radius: 8px;
+      --ace-a11-border: rgba(24, 78, 50, .16);
+      --ace-a11-soft: #f7faf8;
+      --ace-a11-ink: #153326;
+      --ace-a11-muted: #5f6f66;
+      --ace-a11-green: #0f6f3d;
+      --ace-a11-warn: #8a5a00;
+      --ace-a11-danger: #9b2f2f;
+      --ace-a11-blue: #255f9d;
+    }
+
+    html body.field-page #screen-painel {
+      max-width: 980px !important;
+      margin: 0 auto !important;
+    }
+
+    html body.field-page #screen-painel:not(.active) {
+      display: none !important;
+    }
+
+    html body.field-page #screen-painel.active {
+      display: block !important;
+    }
+
+    html body.field-page #screen-painel .screen-head {
+      border-radius: var(--ace-a11-radius) !important;
+    }
+
+    html body.field-page #screen-painel .screen-head-copy span {
+      color: var(--ace-a11-muted) !important;
+    }
+
+    html body.field-page #screen-painel .screen-badge {
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      border-radius: var(--ace-a11-radius) !important;
+      color: #0f5132 !important;
+      font-size: .72rem !important;
+      font-weight: 900 !important;
+      letter-spacing: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-command {
+      position: sticky !important;
+      top: calc(98px + env(safe-area-inset-top)) !important;
+      z-index: 18 !important;
+      display: grid !important;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, .9fr) !important;
+      gap: 10px !important;
+      align-items: stretch !important;
+      margin: 0 0 10px !important;
+      padding: 10px !important;
+      border: 1px solid var(--ace-a11-border) !important;
+      border-left: 6px solid var(--ace-a11-green) !important;
+      border-radius: var(--ace-a11-radius) !important;
+      background: rgba(255, 255, 255, .98) !important;
+      box-shadow: 0 8px 18px rgba(20, 35, 28, .10) !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-command.is-warn {
+      border-left-color: #c47a00 !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-command.is-danger {
+      border-left-color: var(--ace-a11-danger) !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-main {
+      display: grid !important;
+      gap: 2px !important;
+      min-width: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-main small,
+    html body.field-page #screen-painel .panel-next-kicker,
+    html body.field-page #screen-painel .panel-section-kicker {
+      margin: 0 !important;
+      color: var(--ace-a11-muted) !important;
+      font-size: .68rem !important;
+      font-weight: 900 !important;
+      letter-spacing: 0 !important;
+      line-height: 1.1 !important;
+      text-transform: uppercase !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-main strong {
+      color: var(--ace-a11-ink) !important;
+      font-size: 1rem !important;
+      line-height: 1.15 !important;
+      letter-spacing: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-main span {
+      color: var(--ace-a11-muted) !important;
+      font-size: .82rem !important;
+      font-weight: 700 !important;
+      line-height: 1.25 !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-stats {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 6px !important;
+      align-items: stretch !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-stat {
+      display: grid !important;
+      place-items: center !important;
+      min-height: 52px !important;
+      padding: 6px !important;
+      border: 1px solid rgba(24, 78, 50, .12) !important;
+      border-radius: var(--ace-a11-radius) !important;
+      background: var(--ace-a11-soft) !important;
+      text-align: center !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-stat b {
+      color: var(--ace-a11-green) !important;
+      font-size: 1.1rem !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      letter-spacing: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-offline-stat small {
+      display: block !important;
+      margin-top: 3px !important;
+      color: var(--ace-a11-muted) !important;
+      font-size: .62rem !important;
+      font-weight: 900 !important;
+      letter-spacing: 0 !important;
+      line-height: 1.05 !important;
+      text-transform: uppercase !important;
+    }
+
+    html body.field-page #screen-painel .offline-ready-card,
+    html body.field-page #screen-painel .panel-next-action-card,
+    html body.field-page #screen-painel .card,
+    html body.field-page #screen-painel .ace-card {
+      border-radius: var(--ace-a11-radius) !important;
+      border-color: var(--ace-a11-border) !important;
+      box-shadow: 0 6px 14px rgba(20, 35, 28, .06) !important;
+    }
+
+    html body.field-page #screen-painel .offline-ready-card {
+      padding: 10px !important;
+      margin-bottom: 10px !important;
+    }
+
+    html body.field-page #screen-painel .offline-ready-checks {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 6px !important;
+      max-height: 180px !important;
+      overflow: auto !important;
+    }
+
+    html body.field-page #screen-painel .offline-ready-check {
+      border-radius: var(--ace-a11-radius) !important;
+      min-height: 42px !important;
+      padding: 7px !important;
+    }
+
+    html body.field-page #screen-painel .offline-ready-actions .btn,
+    html body.field-page #screen-painel .dashboard-day-actions .btn,
+    html body.field-page #screen-painel .panel-next-actions .btn,
+    html body.field-page #screen-painel .sync-export-btn {
+      min-height: var(--ace-a11-touch) !important;
+      border-radius: var(--ace-a11-radius) !important;
+      font-size: .86rem !important;
+      font-weight: 900 !important;
+      letter-spacing: 0 !important;
+      white-space: normal !important;
+      line-height: 1.12 !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-action-card {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr) !important;
+      gap: 12px !important;
+      align-items: stretch !important;
+      margin-bottom: 10px !important;
+      background: #ffffff !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-main {
+      min-width: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-main strong {
+      display: block !important;
+      margin-top: 4px !important;
+      color: var(--ace-a11-ink) !important;
+      font-size: 1.08rem !important;
+      line-height: 1.15 !important;
+      letter-spacing: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-main p {
+      margin: 6px 0 0 !important;
+      color: var(--ace-a11-muted) !important;
+      font-size: .86rem !important;
+      font-weight: 700 !important;
+      line-height: 1.32 !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-checklist {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 6px !important;
+      margin-top: 10px !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-check {
+      min-height: 38px !important;
+      padding: 7px 8px !important;
+      border: 1px solid rgba(24, 78, 50, .12) !important;
+      border-radius: var(--ace-a11-radius) !important;
+      background: #f7faf8 !important;
+      color: var(--ace-a11-ink) !important;
+      font-size: .75rem !important;
+      font-weight: 900 !important;
+      line-height: 1.15 !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-check.is-warn {
+      background: #fff8e8 !important;
+      border-color: rgba(196, 122, 0, .28) !important;
+      color: var(--ace-a11-warn) !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-check.is-danger {
+      background: #fff1f1 !important;
+      border-color: rgba(155, 47, 47, .26) !important;
+      color: var(--ace-a11-danger) !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-actions {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 8px !important;
+      align-content: center !important;
+    }
+
+    html body.field-page #screen-painel .panel-next-actions .btn-secondary {
+      background: #f7faf8 !important;
+    }
+
+    html body.field-page #screen-painel .hero-grid {
+      margin-bottom: 10px !important;
+    }
+
+    html body.field-page #screen-painel .hero-card,
+    html body.field-page #screen-painel .metric-card,
+    html body.field-page #syncCenterGrid .metric-card {
+      border-radius: var(--ace-a11-radius) !important;
+      min-height: 72px !important;
+      padding: 10px !important;
+    }
+
+    html body.field-page #screen-painel .hero-card small,
+    html body.field-page #screen-painel .metric-card small,
+    html body.field-page #syncCenterGrid .metric-card small {
+      letter-spacing: 0 !important;
+    }
+
+    html body.field-page #screen-painel .hero-card strong,
+    html body.field-page #screen-painel .metric-card strong,
+    html body.field-page #syncCenterGrid .metric-card strong {
+      letter-spacing: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-card-list {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+    }
+
+    html body.field-page #screen-painel .panel-list-card {
+      display: grid !important;
+      gap: 7px !important;
+      min-height: 92px !important;
+      padding: 10px !important;
+      border: 1px solid rgba(24, 78, 50, .14) !important;
+      border-radius: var(--ace-a11-radius) !important;
+      background: #ffffff !important;
+    }
+
+    html body.field-page #screen-painel .panel-list-card strong {
+      color: var(--ace-a11-ink) !important;
+      font-size: .92rem !important;
+      line-height: 1.15 !important;
+      letter-spacing: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-list-card span,
+    html body.field-page #screen-painel .panel-list-card small {
+      color: var(--ace-a11-muted) !important;
+      font-size: .74rem !important;
+      font-weight: 700 !important;
+      line-height: 1.2 !important;
+    }
+
+    html body.field-page #screen-painel .panel-list-card .meta-pills {
+      margin-top: 0 !important;
+    }
+
+    html body.field-page #screen-painel .panel-list-card-actions {
+      display: flex !important;
+      gap: 6px !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      margin-top: 2px !important;
+    }
+
+    html body.field-page #screen-painel .panel-list-card-actions .btn {
+      min-height: 40px !important;
+      padding: 0 12px !important;
+      border-radius: var(--ace-a11-radius) !important;
+    }
+
+    html body.field-page #screen-painel .panel-table-fallback {
+      margin-top: 8px !important;
+    }
+
+    @media (max-width: 900px) {
+      html body.field-page #screen-painel {
+        max-width: 100% !important;
+      }
+
+      html body.field-page .topbar-v43 .topbar-actions > *,
+      html body.field-page .topbar-v43 .chip,
+      html body.field-page .topbar-v43 .operation-mode-badge,
+      html body.field-page .topbar-v43 #syncChip,
+      html body.field-page .topbar-v43 #headerSyncBtn,
+      html body.field-page .topbar-v43 #logoutBtn {
+        min-height: 42px !important;
+        height: 42px !important;
+        max-height: none !important;
+        border-radius: var(--ace-a11-radius) !important;
+        font-size: .72rem !important;
+        letter-spacing: 0 !important;
+      }
+
+      html body.field-page .nav-tabs-v43 .tab-btn,
+      html body.field-page .nav-tabs-v43 button.tab-btn {
+        min-height: var(--ace-a11-touch) !important;
+        height: var(--ace-a11-touch) !important;
+        border-radius: var(--ace-a11-radius) !important;
+      }
+
+      html body.field-page #screen-painel .panel-offline-command {
+        top: calc(114px + env(safe-area-inset-top)) !important;
+        grid-template-columns: 1fr !important;
+      }
+
+      html body.field-page #screen-painel .panel-next-action-card {
+        grid-template-columns: 1fr !important;
+      }
+
+      html body.field-page #screen-painel .panel-next-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      html body.field-page #screen-painel .panel-table-fallback {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 700px) {
+      html body.field-page #screen-painel .hero-grid,
+      html body.field-page #screen-painel .metric-grid,
+      html body.field-page #syncCenterGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      html body.field-page #screen-painel .panel-card-list,
+      html body.field-page #screen-painel .offline-ready-checks,
+      html body.field-page #screen-painel .panel-next-checklist {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
+
+</head>
+<body class="field-page ace-page ace-page--field">
+  <div id="loginScreen" class="login-shell">
+    <div class="login-card ace-card ace-login-card">
+      <h1>ACE Campo</h1>
+      <p></p>
+
+      <div class="field ace-field">
+        <label for="loginCpf">CPF</label>
+        <input id="loginCpf" type="text" inputmode="numeric" autocomplete="username" placeholder="Digite seu CPF">
+        <select id="loginAgent" hidden aria-hidden="true"></select>
+      </div>
+
+      <div class="field ace-field">
+        <label for="loginPassword">Senha</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha">
+      </div>
+
+      <div class="login-actions">
+        <button class="btn btn-primary ace-btn ace-btn--primary" id="loginBtn">▶️ Entrar</button>
+      </div>
+
+      <div id="loginMessage" class="field-help" style="margin-top:14px;text-align:center"></div>
+    </div>
+  </div>
+
+  <div id="appShell" class="page-shell hidden ace-shell">
+    <header class="topbar topbar-v43 ace-topbar">
+      <div class="topbar-row">
+        <div class="topbar-main">
+          <div class="brand-copy">
+            <h1>ACE Campo | Campo</h1>
+            <p id="headerSubtitle">Pronto para uso em campo</p>
+          </div>
+        </div>
+        <div class="chip-row topbar-actions">
+          <div id="syncChip" class="chip chip-queue ace-chip">Fila: 0</div>
+          <button id="headerSyncBtn" class="chip header-sync-btn ace-chip" type="button">Sinc</button>
+          <button id="logoutBtn" class="chip chip-logout ace-chip" type="button" aria-label="Sair" title="Sair">Sair</button>
+        </div>
+      </div>
+
+      <nav class="nav-tabs nav-tabs-v43">
+        <button class="tab-btn active" data-screen="visita" type="button"><span class="tab-btn__label">Visita</span></button>
+        <button class="tab-btn" data-screen="painel" type="button"><span class="tab-btn__label">Painel</span></button>
+        <button class="tab-btn" data-screen="imoveis" type="button"><span class="tab-btn__label">Imóveis</span></button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="screen-visita" class="screen visit-screen active">
+        <div class="visit-wizard" id="visitWizard">
+          <div id="visitWizardSteps" class="visit-wizard-steps" aria-label="Fluxo guiado da visita"></div>
+        </div>
+
+        <div class="card visit-card visit-property-card ace-card" data-visit-step="1">
+          <h2 class="section-title ace-section-title">Etapa 1 · Selecionar imóvel</h2>
+          
+
+          <div class="card property-browser-card visit-property-browser-card ace-card">
+            <h3 class="section-title section-title--compact ace-section-title">Consulta de imóveis</h3>
+            <div class="grid two property-query-grid">
+              <div class="field ace-field">
+                <label for="propertySearch">Pesquisa</label>
+                <input id="propertySearch" type="text" placeholder="Nome, rua, nº, bairro, MA/Q ou referência">
+              </div>
+              <div class="field ace-field">
+                <label for="propertySort">Ordenação</label>
+                <select id="propertySort">
+                  <option value="distance">Mais próximos</option>
+                  <option value="bairro">Bairro / rua</option>
+                  <option value="recent">Mais recentes</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-actions property-query-actions">
+              <div id="propertyQuerySummary" class="property-query-summary" aria-live="polite">
+                <strong>Resultados</strong>
+                <span>0 imóvel(is) encontrado(s)</span>
+              </div>
+              <button class="btn btn-secondary ace-btn ace-btn--soft" id="refreshPropertiesBtn" type="button">Atualizar</button>
+              <button class="btn btn-soft ace-btn ace-btn--soft" id="captureGpsBtn" type="button">GPS</button>
+            </div>
+            <div id="propertyList" class="property-list" style="margin-top:16px"></div>
+          </div>
+
+          <div id="selectedPropertyCard" class="selected-card visit-selected-card">
+            <h3>Nenhum imóvel selecionado</h3>
+            <p>Escolha um imóvel acima para continuar a visita.</p>
+          </div>
+        </div>
+
+        <div class="card visit-card visit-data-card ace-card" data-visit-steps="2,4">
+          <div class="visit-step-panel" data-visit-step="2">
+            <h2 class="section-title ace-section-title">Etapa 2 · Situação</h2>
+            <div class="field ace-field">
+              <label>Situação do imóvel</label>
+              <div id="situacaoChoices" class="choice-grid"></div>
+            </div>
+
+            <div id="visitClosedReasonWrap" class="field visit-closed-reason ace-field" style="margin-top:16px" hidden>
+              <label for="visitClosedReason">Motivo do fechado</label>
+              <select id="visitClosedReason"></select>
+            </div>
+
+            <div class="grid two" style="margin-top:16px">
+              <div class="field ace-field">
+                <label for="visitDate">Data</label>
+                <input id="visitDate" type="date" readonly aria-readonly="true" tabindex="-1">
+                <div class="field-help">Preenchida automaticamente pelo sistema.</div>
+              </div>
+              <div class="field ace-field">
+                <label for="visitTime">Hora</label>
+                <input id="visitTime" type="time" readonly aria-readonly="true" tabindex="-1">
+                <div class="field-help">Preenchida automaticamente pelo sistema.</div>
+              </div>
+            </div>
+
+            <div class="grid two" style="margin-top:16px">
+              <div class="field ace-field">
+                <label for="visitAttendedBy">Quem atendeu</label>
+                <input id="visitAttendedBy" type="text" placeholder="Morador/responsável">
+                <div class="field-help">Preencha se for diferente do cadastro.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="visit-step-panel" data-visit-step="4">
+            <h2 class="section-title ace-section-title">Etapa 4 · Caixa</h2>
+            <div class="grid two visit-water-access-grid">
+              <div class="field ace-field">
+                <label>Acessou?</label>
+                <div id="waterAccessChoices" class="choice-grid"></div>
+              </div>
+            </div>
+
+            <div id="visitWaterAccessReasonWrap" class="field visit-water-reason ace-field" style="margin-top:16px" hidden>
+              <label for="visitWaterAccessReason">Motivo de não acessar a caixa d'água</label>
+              <select id="visitWaterAccessReason"></select>
+              <div class="field-help">Informe por que a caixa d'água não foi acessada nesta visita.</div>
+            </div>
+
+            <div id="visitLadderSupportWrap" class="field visit-water-reason visit-ladder-support ace-field" style="margin-top:16px" hidden>
+              <label>Solicitar apoio com escada?</label>
+              <div id="visitLadderSupportChoices" class="choice-grid"></div>
+              <div class="field-help">Use quando o motivo do não acesso for “Necessita escada”. A solicitação aparecerá no painel da coordenação.</div>
+            </div>
+
+            <div id="visitLadderSupportNoReasonWrap" class="field visit-water-reason visit-ladder-support-no-reason ace-field" style="margin-top:16px" hidden>
+              <label for="visitLadderSupportNoReason">Motivo de não solicitar escada agora</label>
+              <select id="visitLadderSupportNoReason"></select>
+              <div class="field-help">Obrigatório quando escolher “Não solicitar agora”.</div>
+            </div>
+
+            <div id="visitWaterTankConditionWrap" class="field visit-water-reason ace-field" style="margin-top:16px" hidden>
+              <label for="visitWaterTankCondition">Situação da caixa d'água</label>
+              <select id="visitWaterTankCondition"></select>
+              <div class="field-help">Informe se está tampada, telada ou aberta.</div>
+            </div>
+
+            <div id="visitWaterTreatmentWrap" class="field visit-water-reason ace-field" style="margin-top:16px" hidden>
+              <label>Foi feito tratamento na caixa d'água?</label>
+              <div id="waterTreatmentChoices" class="choice-grid"></div>
+            </div>
+
+            <div id="visitWaterLegalAlert" class="visit-water-alert" style="margin-top:16px" hidden></div>
+          </div>
+        </div>
+
+        <div class="card visit-card visit-deposit-card ace-card" data-visit-step="3">
+          <h2 class="section-title ace-section-title">Etapa 3 · Depósitos</h2>
+          <div class="visit-step-gate">
+            <div class="field visit-step-gate-field ace-field">
+              <label>Achados da visita</label>
+              <div class="visit-step-gate-compact">
+                <div>
+                  <span>Depósito?</span>
+                  <div id="depositFoundChoices" class="choice-grid"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="depositGrid" class="deposit-grid"></div>
+          <div id="visitFocusAutoSummary" class="field visit-focus-total ace-field" style="margin-top:16px"></div>
+          <input id="visitTubitosQty" type="number" min="0" value="0" hidden>
+        </div>
+
+        <div class="card visit-card visit-treatment-card ace-card" data-visit-step="3">
+          <h2 class="section-title ace-section-title">Observações</h2>
+          <select id="visitLarvicida" hidden></select>
+          <input id="visitLarvicidaQty" type="number" min="0" value="0" hidden>
+
+          <select id="visitAdulticida" hidden></select>
+          <input id="visitAdulticidaQty" type="number" min="0" value="0" hidden>
+
+          <div class="field ace-field" style="margin-top:16px">
+            <label for="visitObs">Observações</label>
+            <textarea id="visitObs" placeholder="Orientações, retorno ou detalhes importantes."></textarea>
+          </div>
+
+        </div>
+
+        
+        <div class="card visit-card visit-summary-card ace-card" data-visit-step="5">
+          <h2 class="section-title ace-section-title">Etapa 5 · Salvar</h2>
+          <div id="visitSummary" class="insight-grid visit-summary-grid"></div>
+          <div id="visitOutputAnchor"></div>
+          <div class="btn-row visit-final-actions" style="margin-top:16px">
+            <button class="btn btn-soft ace-btn ace-btn--soft" id="cancelEditBtn" type="button">Cancelar</button>
+            <button class="btn btn-primary ace-btn ace-btn--primary" id="saveVisitBtn" type="button">Salvar visita</button>
+          </div>
+        </div>
+
+        <details class="card visit-card visit-foldout visit-history-panel ace-card" data-visit-step="5">
+          <summary>Histórico do endereço</summary>
+            <div id="selectedHistory" class="history-list visit-scroll-list"></div>
+        </details>
+
+      </section>
+
+      <section id="screen-imoveis" class="screen properties-screen">
+        <div class="card property-form-card property-form-card--solo ace-card">
+          <div class="property-form-head property-form-head--refined">
+            <div class="property-form-title-wrap">
+              <h2 class="section-title ace-section-title">Cadastro de imóvel</h2>
+              <p class="property-form-intro">Cadastro rápido para uso em campo.</p>
+            </div>
+            <span class="property-form-badge">Campo</span>
+          </div>
+
+          <div class="property-form-section property-form-section--responsavel">
+            <div class="property-form-section__heading">
+              <h3>Responsável</h3>
+            </div>
+            <div class="property-form-grid property-form-grid--top">
+              <div class="field property-field-morador ace-field">
+                <label for="propMorador">Morador</label>
+                <input id="propMorador" type="text" placeholder="Nome do morador">
+              </div>
+              <div class="field property-field-telefone ace-field">
+                <label for="propTelefone">Telefone</label>
+                <input id="propTelefone" type="text" placeholder="Telefone/WhatsApp">
+              </div>
+            </div>
+          </div>
+
+          <div class="property-form-section property-form-section--endereco">
+            <div class="property-form-section__heading">
+              <h3>Endereço</h3>
+            </div>
+            <div class="property-form-grid property-form-grid--address">
+              <div class="field property-field-bairro ace-field">
+                <label for="propBairro">Bairro</label>
+                <select id="propBairro"></select>
+              </div>
+              <div class="field property-field-logradouro ace-field">
+                <label for="propLogradouro">Logradouro</label>
+                <input id="propLogradouro" type="text" placeholder="Rua/avenida/estrada">
+              </div>
+              <div class="field property-field-numero ace-field">
+                <label for="propNumero">Número</label>
+                <input id="propNumero" type="text" inputmode="text" autocomplete="off" placeholder="Ex.: 267 ou 267-S03">
+              </div>
+            </div>
+          </div>
+
+          <div class="property-form-section property-form-section--territorio">
+            <div class="property-form-section__heading">
+              <h3>Território</h3>
+            </div>
+            <div class="property-form-grid property-form-grid--territory-top">
+              <div class="field property-field-tipo ace-field">
+                <label for="propTipo">Tipo</label>
+                <select id="propTipo"></select>
+              </div>
+              <div class="field property-field-complemento ace-field">
+                <label for="propComplemento">Complemento</label>
+                <select id="propComplemento"></select>
+              </div>
+              <div class="field property-field-referencia ace-field">
+                <label for="propReferencia">Referência</label>
+                <input id="propReferencia" type="text" placeholder="Referência útil">
+              </div>
+              <div class="field property-field-microarea ace-field">
+                <label for="propMicroarea">Microárea</label>
+                <select id="propMicroarea">
+                  <option value="">Selecione a microárea</option>
+                </select>
+              </div>
+              <div class="field property-field-quarteirao ace-field">
+                <label for="propQuarteirao">Quarteirão</label>
+                <select id="propQuarteirao">
+                  <option value="">Selecione primeiro a microárea</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="property-form-section property-form-section--obs">
+            <div class="property-form-section__heading">
+              <h3>Observações</h3>
+            </div>
+            <div class="property-form-grid property-form-grid--obs">
+              <div class="field property-field-obs ace-field">
+                <label for="propObs">Observações</label>
+                <textarea id="propObs" placeholder="Detalhes úteis para próximas visitas."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row property-form-actions property-form-actions--refined" style="margin-top:18px">
+            <button class="btn btn-gps btn-gps-soft ace-btn" id="captureGpsPropertyBtn" type="button">GPS</button>
+            <button class="btn btn-primary btn-save-property ace-btn ace-btn--primary" id="savePropertyBtn" type="button">Salvar imóvel</button>
+            <button class="btn btn-secondary ace-btn ace-btn--soft" id="visitSavedPropertyBtn" type="button">Visitar</button>
+            <button class="btn btn-danger btn-clear-property ace-btn" id="clearPropertyBtn" type="button">Limpar</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-painel" class="screen">
+        <div class="screen-head">
+          <div class="screen-head-copy">
+            <strong>Painel do agente</strong>
+            <span>Comando offline, fila local e próxima ação.</span>
+          </div>
+          <div class="screen-badge">OFF</div>
+        </div>
+
+        <div id="panelOfflineCommand" class="panel-offline-command is-pending" aria-live="polite">
+          <div class="panel-offline-main">
+            <small>Prontidão do tablet</small>
+            <strong id="panelOfflineTitle">Verificando preparo offline</strong>
+            <span id="panelOfflineText">Conferindo fila local, plano do dia e armazenamento.</span>
+          </div>
+          <div class="panel-offline-stats">
+            <span class="panel-offline-stat"><b id="panelOfflineQueue">0</b><small>pendentes</small></span>
+            <span class="panel-offline-stat"><b id="panelOfflineNetwork">--</b><small>rede</small></span>
+            <span class="panel-offline-stat"><b id="panelOfflinePlan">--</b><small>plano</small></span>
+            <span class="panel-offline-stat"><b id="panelOfflineSent">0</b><small>enviados</small></span>
+          </div>
+        </div>
+
+        <section id="panelNextActionCard" class="card ace-card panel-next-action-card" aria-live="polite">
+          <div class="panel-next-main">
+            <small class="panel-next-kicker">Próxima ação</small>
+            <strong id="panelNextTitle">Continuar rotina de campo</strong>
+            <p id="panelNextText">Escolha o próximo imóvel, registre a visita e mantenha a fila local protegida.</p>
+            <div id="panelNextChecklist" class="panel-next-checklist"></div>
+          </div>
+          <div class="panel-next-actions">
+            <button class="btn btn-primary ace-btn ace-btn--primary" id="panelNextPrimaryBtn" type="button" data-panel-action="visit">Continuar visita</button>
+            <button class="btn btn-secondary ace-btn ace-btn--soft" id="panelNextSecondaryBtn" type="button" data-panel-action="properties">Ver imóveis</button>
+          </div>
+        </section>
+
+        <div class="hero-grid">
+          <div class="hero-card">
+            <small>Visitas hoje</small>
+            <strong id="heroVisits">0</strong>
+            <span id="heroVisitsNote">Sem registros.</span>
+          </div>
+          <div class="hero-card is-focus">
+            <small>Focos</small>
+            <strong id="heroFocuses">0</strong>
+            <span id="heroFocusesNote">Taxa de infestação 0%.</span>
+          </div>
+          <div class="hero-card is-accent">
+            <small>GPS</small>
+            <strong id="heroGps">0%</strong>
+            <span id="heroGpsNote">Cobertura do dia.</span>
+          </div>
+          <div class="hero-card is-warn">
+            <small>Retornos</small>
+            <strong id="heroReturns">0</strong>
+            <span id="heroReturnsNote">Nova passagem.</span>
+          </div>
+        </div>
+
+        <div id="offlineReadinessCard" class="offline-ready-card is-pending" aria-live="polite">
+          <div class="offline-ready-card__head">
+            <div>
+              <strong id="offlineReadyTitle">Preparando uso offline</strong>
+              <span id="offlineReadyText">Conferindo dados para trabalhar sem internet.</span>
+            </div>
+            <span id="offlineReadyBadge" class="offline-ready-badge is-pending">Verificando</span>
+          </div>
+          <div id="offlineReadyMeta" class="offline-ready-meta"></div>
+          <div id="offlineReadyChecks" class="offline-ready-checks"></div>
+          <div class="offline-ready-actions">
+            <button class="btn btn-secondary ace-btn ace-btn--soft" id="offlineReadyRecheckBtn" type="button">Verificar</button>
+            <button class="btn btn-primary ace-btn ace-btn--primary" id="offlineReadyStartBtn" type="button">Começar</button>
+          </div>
+          <p class="offline-ready-warning">Não use aba anônima e não limpe os dados antes de sincronizar.</p>
+        </div>
+
+        <div class="card ace-card">
+          <h2 class="section-title ace-section-title">Detalhes do dia</h2>
+          <div id="localMetricGrid" class="metric-grid"></div>
+        </div>
+
+        <div class="grid two">
+          <div class="card ace-card">
+            <h2 class="section-title ace-section-title">Depósitos</h2>
+            <div id="localDepositSummary" class="ranking-list"></div>
+          </div>
+          <div class="card ace-card">
+            <h2 class="section-title ace-section-title">Recomendações</h2>
+            <div id="localRecommendations" class="insight-list"></div>
+          </div>
+        </div>
+
+        <div class="card ace-card">
+          <h2 class="section-title ace-section-title">Ações offline</h2>
+          <p id="syncDayStatus" class="panel-card-note sync-day-status">Última sincronização: ainda não realizada. Pendentes no aparelho: 0. Enviados hoje: 0.</p>
+          <div class="btn-row dashboard-day-actions">
+            <button class="btn btn-secondary ace-btn ace-btn--soft" id="syncNowBtn" type="button">Sincronizar agora</button>
+            <button class="btn btn-secondary ace-btn ace-btn--soft" id="requestSupervisionBtn" type="button">Supervisão</button>
+            <button class="btn btn-primary ace-btn ace-btn--primary" id="dailyReportBtn" type="button">Relatório</button>
+            <button class="btn btn-danger ace-btn" id="closeDayBtn" type="button">Encerrar dia</button>
+          </div>
+        </div>
+
+        <div class="card panel-tubitos-card ace-card">
+          <h2 class="section-title ace-section-title">Tubitos</h2>
+          <p class="panel-card-note">Confira os códigos para anotação nos tubitos.</p>
+          <div id="recentTubitosCards" class="panel-card-list"></div>
+          <div class="table-wrap visit-table-wrap panel-tubitos-table panel-table-fallback">
+            <table>
+              <thead>
+                <tr>
+                  <th>Visita</th>
+                  <th>Imóvel</th>
+                  <th>Tubitos</th>
+                </tr>
+              </thead>
+              <tbody id="recentTubitosTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card panel-agent-visits-card ace-card">
+          <h2 class="section-title ace-section-title">Últimas visitas</h2>
+          <div id="todayVisitsCards" class="panel-card-list"></div>
+          <div class="table-wrap visit-table-wrap panel-agent-visits-table panel-table-fallback">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Operação</th>
+                  <th>Endereço</th>
+                  <th>Foco</th>
+                  <th>Dep. foco</th>
+                  <th>Caixa</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="todayVisitsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="syncStatus" class="sync-banner is-hidden" aria-hidden="true"></div>
+
+    <script src="./assets/runtime-config.js?v=20260517-galaxy-tab-a11-offline-v52"></script>
+    <script src="./assets/carmo-territorios-data.js?v=20260503-property-flow-v14"></script>
+    <script src="./assets/ruas-carmo-data.js?v=20260503-property-flow-v14"></script>
+  <script src="./assets/ace-storage.js?v=20260503-property-flow-v14"></script>
+  <script src="./assets/index-core.js?v=20260517-galaxy-tab-a11-offline-v52"></script>
+  <script src="./assets/index-render.js?v=20260517-galaxy-tab-a11-offline-v52"></script>
+  <script src="./assets/index-actions.js?v=20260517-galaxy-tab-a11-offline-v52"></script>
+  <script src="./assets/lgpd-hardening.js?v=20260503-property-flow-v14"></script>
+  <script src="./assets/operation-mode.js?v=20260517-galaxy-tab-a11-offline-v52"></script>
+  <script src="./assets/liraa-mode.js?v=20260517-galaxy-tab-a11-offline-v52"></script>
+</body>
+</html>
