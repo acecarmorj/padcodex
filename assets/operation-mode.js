@@ -10,7 +10,7 @@
     PE: { start: '08:00', closeAfter: '13:00', allowEarlyWithJustification: true },
     LIRAA: { start: '08:00', closeAfter: '16:00', allowEarlyWithJustification: true }
   };
-  var MODULE_VERSION = '20260515-index-tablet-v51-design-final';
+  var MODULE_VERSION = '20260517-tablet-v53-final';
   var PLAN_REFRESH_INTERVAL_MS = 60 * 1000;
   var PLAN_REFRESH_MIN_GAP_MS = 25 * 1000;
   var PLAN_OFFLINE_DATE_GRACE_MS = 36 * 60 * 60 * 1000;

@@ -230,7 +230,7 @@
         var actionsWrap = actionsCard.closest('.card');
         if (actionsWrap) {
           actionsWrap.insertAdjacentHTML('afterend', '' +
-            '<section class="card ace-card panel-sync-card">' +
+            '<section class="card">' +
               '<h2 class="section-title">Backup e fila offline</h2>' +
               '<div id="syncCenterGrid" class="grid four"></div>' +
               '<div class="btn-row sync-export-actions" style="margin-top:16px">' +
@@ -434,50 +434,14 @@
     if (typeof app.renderSyncDayStatus === 'function') {
       app.renderSyncDayStatus();
     }
-    if (typeof app.renderPanelOfflineCommand === 'function') {
-      app.renderPanelOfflineCommand();
-    }
-  };
-
-  app.runPanelAction = function (action) {
-    var command = String(action || '').trim();
-    if (command === 'sync') {
-      app.syncNow();
-      return;
-    }
-    if (command === 'backup') {
-      if (typeof app.exportLocalBackupJson === 'function') {
-        app.exportLocalBackupJson();
+    if (app.state && app.state.selectedScreen === 'painel') {
+      if (typeof app.renderPanelOfflineCommand === 'function') {
+        app.renderPanelOfflineCommand();
       }
-      return;
-    }
-    if (command === 'report') {
-      app.generateDailyReport();
-      return;
-    }
-    if (command === 'properties') {
-      app.showScreen('imoveis');
-      return;
-    }
-    if (command === 'pending-property') {
-      app.selectNextProperty(true);
-      return;
-    }
-    if (command === 'next-property') {
-      app.selectNextProperty(false);
-      return;
-    }
-    if (command === 'offline-check') {
-      if (typeof app.clearOfflineReadinessDismissal === 'function') {
-        app.clearOfflineReadinessDismissal();
+      if (typeof app.renderPanelNextAction === 'function') {
+        app.renderPanelNextAction();
       }
-      if (typeof app.renderOfflineReadinessCard === 'function') {
-        app.renderOfflineReadinessCard();
-      }
-      app.showScreen('painel');
-      return;
     }
-    app.showScreen('visita');
   };
 
   app.renderSyncDayStatus = function () {
@@ -4893,6 +4857,49 @@
     });
   };
 
+  app.runPanelAction = function (action) {
+    var command = String(action || '').trim();
+    if (command === 'start-visit') {
+      if (typeof app.startSelectedPropertyVisit === 'function') {
+        app.startSelectedPropertyVisit();
+      } else {
+        app.showScreen('visita');
+      }
+      return;
+    }
+    if (command === 'visit') {
+      if (app.getSelectedProperty && app.getSelectedProperty()) {
+        app.startSelectedPropertyVisit();
+      } else {
+        app.selectNextProperty(false);
+      }
+      return;
+    }
+    if (command === 'next') {
+      app.selectNextProperty(false);
+      return;
+    }
+    if (command === 'pending') {
+      app.selectNextProperty(true);
+      return;
+    }
+    if (command === 'properties') {
+      app.showScreen('imoveis');
+      return;
+    }
+    if (command === 'sync') {
+      app.syncNow();
+      return;
+    }
+    if (command === 'check-offline') {
+      if (typeof app.renderOfflineReadinessCard === 'function') { app.renderOfflineReadinessCard(); }
+      if (typeof app.renderPanelOfflineCommand === 'function') { app.renderPanelOfflineCommand(); }
+      app.showMessage('Verificação offline atualizada.', 'accent');
+      return;
+    }
+    app.showScreen('painel');
+  };
+
   app.bindEvents = function () {
     app.bindCpfInputMask('loginCpf');
     document.getElementById('loginBtn').addEventListener('click', app.tryLogin);
@@ -4923,14 +4930,6 @@
     }
     document.getElementById('dailyReportBtn').addEventListener('click', app.generateDailyReport);
     document.getElementById('closeDayBtn').addEventListener('click', app.closeDay);
-    ['panelNextPrimaryBtn', 'panelNextSecondaryBtn'].forEach(function (id) {
-      var panelButton = document.getElementById(id);
-      if (panelButton) {
-        panelButton.addEventListener('click', function () {
-          app.runPanelAction(panelButton.getAttribute('data-panel-action'));
-        });
-      }
-    });
     if (document.getElementById('offlineReadyRecheckBtn')) {
       document.getElementById('offlineReadyRecheckBtn').addEventListener('click', function () {
         if (typeof app.renderOfflineReadinessCard === 'function') { app.renderOfflineReadinessCard(); }
@@ -4949,6 +4948,13 @@
         app.showScreen('visita');
       });
     }
+    ['panelNextPrimaryBtn', 'panelNextSecondaryBtn'].forEach(function (id) {
+      var button = document.getElementById(id);
+      if (!button) { return; }
+      button.addEventListener('click', function () {
+        app.runPanelAction(button.getAttribute('data-panel-action'));
+      });
+    });
     if (document.getElementById('nextPropertyBtn')) {
       document.getElementById('nextPropertyBtn').addEventListener('click', function () { app.selectNextProperty(false); });
     }

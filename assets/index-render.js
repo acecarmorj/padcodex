@@ -241,159 +241,188 @@
     });
   };
 
-  app.renderPanelOfflineCommand = function () {
+  app.renderPanelOfflineCommandFromStatus = function (status) {
     var node = document.getElementById('panelOfflineCommand');
-    var titleNode = document.getElementById('panelOfflineTitle');
-    var textNode = document.getElementById('panelOfflineText');
-    var queueNode = document.getElementById('panelOfflineQueue');
-    var networkNode = document.getElementById('panelOfflineNetwork');
-    var planNode = document.getElementById('panelOfflinePlan');
-    var sentNode = document.getElementById('panelOfflineSent');
-    if (!node || !titleNode || !textNode) {
+    var health = app.getServiceHealth ? app.getServiceHealth() : {};
+    var pending = (status && status.pending) || {};
+    var operation = (status && status.operation) || {};
+    var checks = (status && status.checks) || [];
+    var failed = (status && status.errors) || checks.filter(function (check) {
+      return check && check.critical !== false && check.status !== 'ok';
+    });
+    var statusName = status && status.status ? status.status : 'pending';
+    var pendingTotal = Number(pending.total || health.queueTotal || health.queue || 0);
+    var networkLabel = (typeof navigator !== 'undefined' && navigator.onLine === false) || health.offline ? 'OFF' : 'ON';
+    var planLabel = operation.confirmed ? 'OK' : (operation.hasSpecialPlan ? 'AJUST' : 'FALTA');
+    var sentToday = Number(health.sentToday || 0);
+    var title = 'Preparando uso offline';
+    var text = 'Conferindo fila local, plano do dia e armazenamento.';
+    var nodeClass = 'panel-offline-command is-warn';
+
+    function setText(id, value) {
+      var target = document.getElementById(id);
+      if (target) {
+        target.textContent = value;
+      }
+    }
+
+    if (!node) {
       return;
     }
-    var health = app.getServiceHealth ? app.getServiceHealth() : { queueTotal: 0, offline: false, sentToday: 0 };
-    var pendingTotal = Number(health.queueTotal || health.queue || 0);
-    var operationInfo = typeof app.getOperationReadinessInfo === 'function'
-      ? app.getOperationReadinessInfo()
-      : { confirmed: false, label: 'VD' };
-    var hasPlan = !!operationInfo.confirmed;
-    var networkText = health.offline ? 'OFF' : 'ON';
-    var title = 'Tablet pronto para campo offline';
-    var text = 'Registre visitas normalmente. Tudo fica salvo neste tablet até a próxima sincronização.';
-    var tone = 'ok';
 
-    if (!hasPlan) {
-      title = 'Plano do dia ainda não confirmado';
-      text = 'Antes de sair, abra com internet para receber operação, território e base local.';
-      tone = 'danger';
-    } else if (health.offline) {
-      title = pendingTotal ? 'Offline com fila protegida' : 'Offline pronto para registrar';
+    if (statusName === 'ok') {
+      title = 'Tablet pronto para trabalhar offline';
       text = pendingTotal
-        ? 'Há dados somente neste tablet. Não limpe o navegador; sincronize quando a internet voltar.'
-        : 'Sem internet agora, mas o app está pronto para registrar novas visitas.';
-      tone = pendingTotal ? 'warn' : 'ok';
-    } else if (pendingTotal || health.pendingSync) {
-      title = 'Há dados locais aguardando envio';
-      text = 'Sincronize quando estiver em local com internet estável. O backup local continua disponível.';
-      tone = 'warn';
+        ? 'Há itens na fila local, mas o aparelho está pronto para continuar sem internet.'
+        : 'Login, cache e bases locais confirmados para uso no campo.';
+      nodeClass = 'panel-offline-command';
+    } else if (statusName === 'error') {
+      title = failed.length
+        ? 'Falta confirmar: ' + failed.slice(0, 2).map(function (check) { return check.label || 'item'; }).join(', ')
+        : 'Verifique antes de sair para campo';
+      text = 'Corrija os itens marcados no diagnóstico abaixo e verifique novamente antes de sair.';
+      nodeClass = 'panel-offline-command is-danger';
+    } else {
+      title = 'Finalizando preparo offline';
+      text = 'Aguarde alguns segundos enquanto o tablet confirma os dados locais.';
     }
 
-    node.className = 'panel-offline-command is-' + tone;
-    titleNode.textContent = title;
-    textNode.textContent = text;
-    if (queueNode) { queueNode.textContent = String(pendingTotal); }
-    if (networkNode) { networkNode.textContent = networkText; }
-    if (planNode) { planNode.textContent = hasPlan ? (operationInfo.label || 'OK') : 'Falta'; }
-    if (sentNode) { sentNode.textContent = String(health.sentToday || 0); }
+    node.className = nodeClass;
+    setText('panelOfflineTitle', title);
+    setText('panelOfflineText', text);
+    setText('panelOfflineQueue', String(pendingTotal));
+    setText('panelOfflineNetwork', networkLabel);
+    setText('panelOfflinePlan', planLabel);
+    setText('panelOfflineSent', String(sentToday));
+  };
+
+  app.renderPanelOfflineCommand = function () {
+    var node = document.getElementById('panelOfflineCommand');
+    var token;
+    if (!node) {
+      return;
+    }
+
+    app.renderPanelOfflineCommandFromStatus({ status: 'pending', pending: app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : null });
+    if (typeof app.getOfflineReadinessStatus !== 'function') {
+      return;
+    }
+
+    token = String(Date.now()) + '-' + Math.random();
+    app._panelOfflineCommandToken = token;
+    app.getOfflineReadinessStatus().then(function (status) {
+      if (app._panelOfflineCommandToken !== token) {
+        return;
+      }
+      app.renderPanelOfflineCommandFromStatus(status);
+    }).catch(function () {
+      if (app._panelOfflineCommandToken !== token) {
+        return;
+      }
+      app.renderPanelOfflineCommandFromStatus({
+        status: 'error',
+        checks: [{ label: 'diagnóstico offline', status: 'error', critical: true }]
+      });
+    });
   };
 
   app.buildPanelNextAction = function () {
-    var snapshot = app.buildLocalSnapshot();
+    var snapshot = app.buildLocalSnapshot ? app.buildLocalSnapshot() : { totals: {} };
     var totals = snapshot.totals || {};
-    var health = app.getServiceHealth ? app.getServiceHealth() : { queueTotal: 0, offline: false };
-    var pendingTotal = Number(health.queueTotal || health.queue || 0);
-    var properties = app.readProperties ? app.readProperties() : [];
+    var health = app.getServiceHealth ? app.getServiceHealth() : {};
     var selected = app.getSelectedProperty ? app.getSelectedProperty() : null;
-    var operationInfo = typeof app.getOperationReadinessInfo === 'function'
-      ? app.getOperationReadinessInfo()
-      : { confirmed: false, label: 'VD' };
-    var checks = [
-      { label: pendingTotal ? (pendingTotal + ' pendente(s) no tablet') : 'Fila local limpa', kind: pendingTotal ? 'warn' : 'ok' },
-      { label: health.offline ? 'Sem internet agora' : 'Internet disponível', kind: health.offline ? 'warn' : 'ok' },
-      { label: operationInfo.confirmed ? 'Plano do dia carregado' : 'Plano do dia pendente', kind: operationInfo.confirmed ? 'ok' : 'danger' },
-      { label: (totals.gpsCoverage || 0) + '% com GPS', kind: Number(totals.gpsCoverage || 0) >= 80 ? 'ok' : 'warn' }
-    ];
-    var action = {
-      title: 'Continuar rotina de campo',
-      text: 'Escolha o próximo imóvel, registre a visita e mantenha a fila local protegida.',
-      primaryLabel: 'Continuar visita',
-      primaryAction: 'visit',
-      secondaryLabel: 'Ver imóveis',
-      secondaryAction: 'properties',
-      checks: checks
+    var prioritized = [];
+    var pendingRows = [];
+    var checklist = [];
+    var title;
+    var text;
+    var primary = { label: 'Próximo imóvel', action: 'next' };
+    var secondary = { label: 'Ver imóveis', action: 'properties' };
+
+    try {
+      prioritized = app.getPrioritizedProperties ? app.getPrioritizedProperties() : [];
+      pendingRows = prioritized.filter(function (row) { return row && row.pending; });
+    } catch (error) {
+      prioritized = [];
+      pendingRows = [];
+    }
+
+    if (selected) {
+      title = 'Continuar imóvel selecionado';
+      text = ([selected.logradouro, selected.numero].filter(Boolean).join(', ') || selected.morador || 'Imóvel selecionado') + '. Confira o cartão e inicie a visita.';
+      primary = { label: 'Iniciar visita', action: 'start-visit' };
+      secondary = { label: 'Trocar imóvel', action: 'properties' };
+    } else if (pendingRows.length) {
+      title = 'Retomar pendências primeiro';
+      text = 'Há imóvel fechado ou recusa para nova abordagem. O tablet pode sugerir o retorno mais próximo.';
+      primary = { label: 'Ver retorno', action: 'pending' };
+    } else if (prioritized.length) {
+      title = 'Escolher próximo imóvel';
+      text = 'Use a fila local para carregar o próximo endereço e registrar a visita mesmo sem internet.';
+    } else {
+      title = 'Cadastrar primeiro imóvel';
+      text = 'A base local ainda não encontrou imóveis disponíveis. Cadastre o endereço antes de iniciar a visita.';
+      primary = { label: 'Cadastrar imóvel', action: 'properties' };
+      secondary = { label: 'Checar offline', action: 'check-offline' };
+    }
+
+    checklist.push({
+      label: Number(health.queueTotal || health.queue || 0) ? (Number(health.queueTotal || health.queue || 0) + ' pendente(s)') : 'Fila local limpa',
+      kind: Number(health.queueTotal || health.queue || 0) ? 'warn' : 'ok'
+    });
+    checklist.push({
+      label: pendingRows.length ? (pendingRows.length + ' retorno(s)') : 'Sem retorno aberto',
+      kind: pendingRows.length ? 'warn' : 'ok'
+    });
+    checklist.push({
+      label: 'GPS ' + String(totals.gpsCoverage || 0) + '%',
+      kind: Number(totals.gpsCoverage || 0) >= 80 ? 'ok' : 'warn'
+    });
+    checklist.push({
+      label: health.offline ? 'Modo offline' : 'Rede disponível',
+      kind: health.offline ? 'danger' : 'ok'
+    });
+
+    return {
+      title: title,
+      text: text,
+      primary: primary,
+      secondary: secondary,
+      checklist: checklist
     };
-
-    if (!operationInfo.confirmed) {
-      action.title = 'Preparar o tablet antes de sair';
-      action.text = 'O painel ainda não confirmou plano operacional e território para uso offline.';
-      action.primaryLabel = 'Verificar offline';
-      action.primaryAction = 'offline-check';
-      action.secondaryLabel = 'Ver imóveis';
-      action.secondaryAction = 'properties';
-      return action;
-    }
-
-    if (!properties.length) {
-      action.title = 'Base local vazia';
-      action.text = 'Cadastre ou carregue imóveis antes de iniciar a rota no Galaxy Tab A11.';
-      action.primaryLabel = 'Abrir imóveis';
-      action.primaryAction = 'properties';
-      action.secondaryLabel = 'Backup local';
-      action.secondaryAction = 'backup';
-      return action;
-    }
-
-    if (health.offline && pendingTotal) {
-      action.title = 'Continue offline com segurança';
-      action.text = 'Os registros estão no tablet. Exporte backup se for entregar o aparelho antes de sincronizar.';
-      action.primaryLabel = 'Exportar backup';
-      action.primaryAction = 'backup';
-      action.secondaryLabel = 'Nova visita';
-      action.secondaryAction = selected ? 'visit' : 'next-property';
-      return action;
-    }
-
-    if (!health.offline && pendingTotal) {
-      action.title = 'Enviar fila local quando possível';
-      action.text = 'Há produção salva no tablet. Sincronize em internet estável antes de encerrar o dia.';
-      action.primaryLabel = 'Sincronizar agora';
-      action.primaryAction = 'sync';
-      action.secondaryLabel = 'Backup local';
-      action.secondaryAction = 'backup';
-      return action;
-    }
-
-    if (Number(totals.returns || 0) > 0) {
-      action.title = 'Resolver retornos pendentes';
-      action.text = 'Existem imóveis fechados ou recusas. Priorize a nova passagem por microárea e quarteirão.';
-      action.primaryLabel = 'Carregar pendência';
-      action.primaryAction = 'pending-property';
-      action.secondaryLabel = 'Nova visita';
-      action.secondaryAction = selected ? 'visit' : 'next-property';
-      return action;
-    }
-
-    action.primaryLabel = selected ? 'Continuar visita' : 'Próximo imóvel';
-    action.primaryAction = selected ? 'visit' : 'next-property';
-    action.secondaryLabel = 'Relatório do dia';
-    action.secondaryAction = 'report';
-    return action;
   };
 
   app.renderPanelNextAction = function () {
+    var card = document.getElementById('panelNextActionCard');
     var titleNode = document.getElementById('panelNextTitle');
     var textNode = document.getElementById('panelNextText');
     var checklistNode = document.getElementById('panelNextChecklist');
     var primaryBtn = document.getElementById('panelNextPrimaryBtn');
     var secondaryBtn = document.getElementById('panelNextSecondaryBtn');
-    if (!titleNode || !textNode || !primaryBtn || !secondaryBtn) {
+    var info;
+    if (!card || !titleNode || !textNode) {
       return;
     }
-    var action = app.buildPanelNextAction ? app.buildPanelNextAction() : null;
-    action = action || {};
-    titleNode.textContent = action.title || 'Continuar rotina de campo';
-    textNode.textContent = action.text || '';
+
+    info = app.buildPanelNextAction();
+    titleNode.textContent = info.title;
+    textNode.textContent = info.text;
     if (checklistNode) {
-      checklistNode.innerHTML = (action.checks || []).map(function (check) {
-        var kind = check.kind === 'danger' ? ' is-danger' : (check.kind === 'warn' ? ' is-warn' : '');
-        return '<span class="panel-next-check' + kind + '">' + app.escapeHtml(check.label || '') + '</span>';
+      checklistNode.innerHTML = info.checklist.map(function (item) {
+        var kind = item.kind === 'danger' ? ' is-danger' : (item.kind === 'warn' ? ' is-warn' : '');
+        return '<span class="panel-next-check' + kind + '">' + app.escapeHtml(item.label) + '</span>';
       }).join('');
     }
-    primaryBtn.textContent = action.primaryLabel || 'Continuar';
-    primaryBtn.setAttribute('data-panel-action', action.primaryAction || 'visit');
-    secondaryBtn.textContent = action.secondaryLabel || 'Ver imóveis';
-    secondaryBtn.setAttribute('data-panel-action', action.secondaryAction || 'properties');
+    if (primaryBtn) {
+      primaryBtn.textContent = info.primary.label;
+      primaryBtn.setAttribute('data-panel-action', info.primary.action);
+      primaryBtn.title = info.primary.label;
+    }
+    if (secondaryBtn) {
+      secondaryBtn.textContent = info.secondary.label;
+      secondaryBtn.setAttribute('data-panel-action', info.secondary.action);
+      secondaryBtn.title = info.secondary.label;
+    }
   };
 
   app.renderHero = function () {
@@ -1527,12 +1556,47 @@
     app.renderPropertyFieldGuide();
   };
 
+  function renderPanelEmptyCard(node, title, text) {
+    if (!node) { return; }
+    node.innerHTML = '' +
+      '<div class="panel-list-card panel-list-card-empty">' +
+        '<strong>' + app.escapeHtml(title || 'Nenhum registro') + '</strong>' +
+        '<span>' + app.escapeHtml(text || '') + '</span>' +
+      '</div>';
+  }
+
+  function getVisitAddressLabel(visit) {
+    var address = [visit.logradouro, visit.numero].filter(Boolean).join(', ');
+    return address || 'Imóvel sem endereço';
+  }
+
+  function getVisitTerritoryLabel(visit) {
+    return [visit.bairro, visit.microarea, visit.quarteirao].filter(Boolean).join(' • ');
+  }
+
+  function getTubitoCodeLines(visit) {
+    var tubitos = typeof app.getTubitosForVisit === 'function' ? app.getTubitosForVisit(visit) : [];
+    var groupedCodes = {};
+    tubitos.forEach(function (row) {
+      var depositCode = row.depositoCodigo || 'Sem depósito';
+      groupedCodes[depositCode] = groupedCodes[depositCode] || [];
+      if (row.numeroTubito) { groupedCodes[depositCode].push(row.numeroTubito); }
+    });
+    return Object.keys(groupedCodes).map(function (depositCode) {
+      var label = app.DEPOSITS[depositCode] ? (depositCode + ' - ' + app.DEPOSITS[depositCode]) : depositCode;
+      return label + ': ' + groupedCodes[depositCode].join(', ');
+    });
+  }
+
   app.renderRecentTubitosTable = function () {
-    var node = document.getElementById('recentTubitosTable');
-    var cardsNode = document.getElementById('recentTubitosCards');
-    if (!node && !cardsNode) { return; }
+    var tableNode = document.getElementById('recentTubitosTable');
+    var cardNode = document.getElementById('recentTubitosCards');
     var agent = app.state.currentAgent || null;
-    var rows = app.readVisits().filter(function (visit) {
+    var rows;
+
+    if (!tableNode && !cardNode) { return; }
+
+    rows = app.readVisits().filter(function (visit) {
       if (agent && !app.visitBelongsToAgent(visit, agent)) { return false; }
       if (Number(visit.tubitosQty || 0) <= 0) { return false; }
       var tubitos = typeof app.getTubitosForVisit === 'function' ? app.getTubitosForVisit(visit) : [];
@@ -1540,118 +1604,95 @@
     }).sort(app.compareVisitDesc).slice(0, 8);
 
     if (!rows.length) {
-      if (node) {
-        node.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#66727c">Nenhum tubito gerado nas visitas do dia.</td></tr>';
+      if (tableNode) {
+        tableNode.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#66727c">Nenhum tubito gerado nas visitas do dia.</td></tr>';
       }
-      if (cardsNode) {
-        cardsNode.innerHTML = '<div class="empty-state">Nenhum tubito gerado nas visitas do dia.</div>';
-      }
+      renderPanelEmptyCard(cardNode, 'Nenhum tubito gerado', 'Quando houver tubitos, os códigos aparecerão aqui para conferência em campo.');
       return;
     }
 
-    var prepared = rows.map(function (visit, index) {
-      var tubitos = typeof app.getTubitosForVisit === 'function' ? app.getTubitosForVisit(visit) : [];
-      var groupedCodes = {};
-      tubitos.forEach(function (row) {
-        var depositCode = row.depositoCodigo || 'Sem depósito';
-        groupedCodes[depositCode] = groupedCodes[depositCode] || [];
-        if (row.numeroTubito) { groupedCodes[depositCode].push(row.numeroTubito); }
-      });
-      var codes = Object.keys(groupedCodes).map(function (depositCode) {
-        var label = app.DEPOSITS[depositCode] ? (depositCode + ' - ' + app.DEPOSITS[depositCode]) : depositCode;
-        return label + ': ' + groupedCodes[depositCode].join(', ');
-      });
-      var address = [visit.logradouro, visit.numero].filter(Boolean).join(', ');
-      var detail = [visit.bairro, visit.microarea, visit.quarteirao].filter(Boolean).join(' • ');
-      var tubitoText = codes.length ? codes.join(', ') : ((app.formatTubitoDepositSummary(visit) || visit.tubitosQty + ' tubito(s)') + ' sem numeração local');
-      return {
-        index: index,
-        visit: visit,
-        address: address || 'Imóvel sem endereço',
-        detail: detail,
-        tubitoText: tubitoText
-      };
-    });
-
-    if (node) {
-      node.innerHTML = prepared.map(function (row) {
-        var visit = row.visit;
+    if (cardNode) {
+      cardNode.innerHTML = rows.map(function (visit, index) {
+        var codes = getTubitoCodeLines(visit);
+        var summary = codes.length ? codes.join(', ') : ((app.formatTubitoDepositSummary(visit) || visit.tubitosQty + ' tubito(s)') + ' sem numeração local');
+        var detail = getVisitTerritoryLabel(visit);
         return '' +
-          '<tr>' +
-            '<td><strong>Visita ' + app.escapeHtml(String(row.index + 1)) + '</strong><br><span style="color:#66727c">' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + visit.hora) + '</span></td>' +
-            '<td><strong>' + app.escapeHtml(row.address) + '</strong>' + (row.detail ? '<br><span style="color:#66727c">' + app.escapeHtml(row.detail) + '</span>' : '') + '</td>' +
-            '<td><span class="tubito-code-list">' + app.escapeHtml(row.tubitoText) + '</span></td>' +
-          '</tr>';
+          '<article class="panel-list-card">' +
+            '<strong>Visita ' + app.escapeHtml(String(index + 1)) + ' • ' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + (visit.hora || '')) + '</strong>' +
+            '<span>' + app.escapeHtml(getVisitAddressLabel(visit)) + '</span>' +
+            (detail ? '<small>' + app.escapeHtml(detail) + '</small>' : '') +
+            '<div class="meta-pills"><span>' + app.escapeHtml(summary) + '</span></div>' +
+          '</article>';
       }).join('');
     }
 
-    if (cardsNode) {
-      cardsNode.innerHTML = prepared.map(function (row) {
-        var visit = row.visit;
+    if (tableNode) {
+      tableNode.innerHTML = rows.map(function (visit, index) {
+        var codes = getTubitoCodeLines(visit);
+        var detail = getVisitTerritoryLabel(visit);
         return '' +
-          '<article class="panel-list-card panel-tubito-list-card">' +
-            '<small>Visita ' + app.escapeHtml(String(row.index + 1)) + ' • ' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + visit.hora) + '</small>' +
-            '<strong>' + app.escapeHtml(row.address) + '</strong>' +
-            (row.detail ? '<span>' + app.escapeHtml(row.detail) + '</span>' : '') +
-            '<span class="tubito-code-list">' + app.escapeHtml(row.tubitoText) + '</span>' +
-          '</article>';
+          '<tr>' +
+            '<td><strong>Visita ' + app.escapeHtml(String(index + 1)) + '</strong><br><span style="color:#66727c">' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + (visit.hora || '')) + '</span></td>' +
+            '<td><strong>' + app.escapeHtml(getVisitAddressLabel(visit)) + '</strong>' + (detail ? '<br><span style="color:#66727c">' + app.escapeHtml(detail) + '</span>' : '') + '</td>' +
+            '<td><span class="tubito-code-list">' + app.escapeHtml(codes.length ? codes.join(', ') : ((app.formatTubitoDepositSummary(visit) || visit.tubitosQty + ' tubito(s)') + ' sem numeração local')) + '</span></td>' +
+          '</tr>';
       }).join('');
     }
   };
 
   app.renderTodayVisitsTable = function () {
-    var node = document.getElementById('todayVisitsTable');
-    var cardsNode = document.getElementById('todayVisitsCards');
+    var tableNode = document.getElementById('todayVisitsTable');
+    var cardNode = document.getElementById('todayVisitsCards');
     var agent = app.state.currentAgent || null;
-    var rows = app.readVisits().filter(function (visit) {
+    var rows;
+
+    if (!tableNode && !cardNode) { return; }
+
+    rows = app.readVisits().filter(function (visit) {
       return !agent || app.visitBelongsToAgent(visit, agent);
     }).sort(app.compareVisitDesc).slice(0, 25);
+
     if (!rows.length) {
-      if (node) {
-        node.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#66727c">Nenhuma visita sua registrada ainda. Selecione um imóvel e toque em Iniciar visita.</td></tr>';
+      if (tableNode) {
+        tableNode.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#66727c">Nenhuma visita sua registrada ainda. Selecione um imóvel e toque em Iniciar visita.</td></tr>';
       }
-      if (cardsNode) {
-        cardsNode.innerHTML = '<div class="empty-state">Nenhuma visita sua registrada ainda. Selecione um imóvel e toque em Iniciar visita.</div>';
-      }
+      renderPanelEmptyCard(cardNode, 'Nenhuma visita registrada', 'Selecione um imóvel e toque em Iniciar visita para começar o trabalho.');
       return;
     }
-    if (node) {
-      node.innerHTML = rows.map(function (visit) {
+
+    if (cardNode) {
+      cardNode.innerHTML = rows.map(function (visit) {
+        var waterText = app.buildWaterAccessText(visit);
+        var operationLabel = app.getOperationModeLabel ? app.getOperationModeLabel(visit.operationMode || 'VD') : (visit.operationMode || 'VD');
+        var detail = [visit.bairro, visit.agente].filter(Boolean).join(' • ');
+        return '' +
+          '<article class="panel-list-card">' +
+            '<strong>' + app.escapeHtml(getVisitAddressLabel(visit)) + '</strong>' +
+            '<span>' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + (visit.hora || '') + ' • ' + operationLabel) + '</span>' +
+            (detail ? '<small>' + app.escapeHtml(detail) + '</small>' : '') +
+            '<div class="meta-pills">' +
+              '<span>Foco: ' + app.escapeHtml((visit.focusFound || 'Não') + ' • ' + String(visit.focusQty || 0)) + '</span>' +
+              '<span>Dep. foco: ' + app.escapeHtml(String(visit.depositFocusTotal || 0)) + '</span>' +
+              '<span>Caixa: ' + app.escapeHtml(waterText || '—') + '</span>' +
+            '</div>' +
+            '<div class="panel-list-card-actions"><button class="btn btn-soft" type="button" data-visit-edit="' + app.escapeHtml(visit.uid) + '">Editar</button></div>' +
+          '</article>';
+      }).join('');
+    }
+
+    if (tableNode) {
+      tableNode.innerHTML = rows.map(function (visit) {
         var waterText = app.buildWaterAccessText(visit);
         return '' +
           '<tr>' +
-            '<td>' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + visit.hora) + '</td>' +
+            '<td>' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + (visit.hora || '')) + '</td>' +
             '<td>' + app.escapeHtml(app.getOperationModeLabel ? app.getOperationModeLabel(visit.operationMode || 'VD') : (visit.operationMode || 'VD')) + '</td>' +
-            '<td><strong>' + app.escapeHtml(visit.logradouro + ', ' + visit.numero) + '</strong><br><span style="color:#66727c">' + app.escapeHtml(visit.bairro + ' • ' + visit.agente) + '</span></td>' +
-            '<td>' + app.escapeHtml(visit.focusFound + ' • ' + visit.focusQty) + '</td>' +
-            '<td>' + app.escapeHtml(String(visit.depositFocusTotal)) + '</td>' +
-            '<td>' + app.escapeHtml(waterText) + '</td>' +
+            '<td><strong>' + app.escapeHtml(getVisitAddressLabel(visit)) + '</strong><br><span style="color:#66727c">' + app.escapeHtml([visit.bairro, visit.agente].filter(Boolean).join(' • ')) + '</span></td>' +
+            '<td>' + app.escapeHtml((visit.focusFound || 'Não') + ' • ' + String(visit.focusQty || 0)) + '</td>' +
+            '<td>' + app.escapeHtml(String(visit.depositFocusTotal || 0)) + '</td>' +
+            '<td>' + app.escapeHtml(waterText || '—') + '</td>' +
             '<td><button class="btn btn-soft" type="button" data-visit-edit="' + app.escapeHtml(visit.uid) + '">Editar</button></td>' +
           '</tr>';
-      }).join('');
-    }
-    if (cardsNode) {
-      cardsNode.innerHTML = rows.slice(0, 12).map(function (visit) {
-        var waterText = app.buildWaterAccessText(visit);
-        var address = [visit.logradouro, visit.numero].filter(Boolean).join(', ') || 'Imóvel sem endereço';
-        var tags = [];
-        tags.push('<span class="tag">' + app.escapeHtml(app.getOperationModeLabel ? app.getOperationModeLabel(visit.operationMode || 'VD') : (visit.operationMode || 'VD')) + '</span>');
-        tags.push('<span class="tag">' + app.escapeHtml(app.getVisitStatusLabel ? app.getVisitStatusLabel(visit.situacao) : visit.situacao) + '</span>');
-        if (visit.focusFound === 'Sim' || Number(visit.depositFocusTotal || 0) > 0) {
-          tags.push('<span class="status-pill is-danger">' + app.escapeHtml(String(visit.depositFocusTotal || visit.focusQty || 0)) + ' foco(s)</span>');
-        }
-        if (visit.synced === false) {
-          tags.push('<span class="status-pill is-warn">No tablet</span>');
-        }
-        return '' +
-          '<article class="panel-list-card panel-visit-list-card">' +
-            '<small>' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + visit.hora) + '</small>' +
-            '<strong>' + app.escapeHtml(address) + '</strong>' +
-            '<span>' + app.escapeHtml([visit.bairro, visit.agente].filter(Boolean).join(' • ') || 'Sem bairro informado') + '</span>' +
-            '<div class="meta-pills">' + tags.join('') + '</div>' +
-            '<span>Caixa: ' + app.escapeHtml(waterText) + '</span>' +
-            '<div class="panel-list-card-actions"><button class="btn btn-soft" type="button" data-visit-edit="' + app.escapeHtml(visit.uid) + '">Editar</button></div>' +
-          '</article>';
       }).join('');
     }
   };
@@ -1721,6 +1762,9 @@
             (check.detail ? '<small>' + app.escapeHtml(check.detail) + '</small>' : '') +
           '</div>';
       }).join('');
+      if (typeof app.renderPanelOfflineCommandFromStatus === 'function') {
+        app.renderPanelOfflineCommandFromStatus(status);
+      }
     }).catch(function () {
       if (app._offlineReadinessRenderToken !== token) {
         return;
@@ -1732,6 +1776,12 @@
       textNode.textContent = 'Não foi possível confirmar o preparo offline deste aparelho. Mantenha a internet ligada e toque em Verificar novamente.';
       if (startBtn) { startBtn.disabled = true; }
       checksNode.innerHTML = '<div class="offline-ready-loading">Falha ao executar o diagnóstico offline.</div>';
+      if (typeof app.renderPanelOfflineCommandFromStatus === 'function') {
+        app.renderPanelOfflineCommandFromStatus({
+          status: 'error',
+          checks: [{ label: 'diagnóstico offline', status: 'error', critical: true }]
+        });
+      }
     });
   };
 
@@ -1739,8 +1789,8 @@
     var snapshot = app.buildLocalSnapshot();
     var totals = snapshot.totals;
 
-    app.renderPanelOfflineCommand();
     app.renderPanelFieldGuide();
+    app.renderPanelOfflineCommand();
     app.renderPanelNextAction();
     app.renderOfflineReadinessCard();
     if (typeof app.renderSyncDayStatus === 'function') {
@@ -1751,10 +1801,17 @@
     document.getElementById('localMetricGrid').innerHTML = [
       app.makeMetricCard('Abertos', totals.opened, 'ok'),
       app.makeMetricCard('Fechados', totals.closed, 'warn'),
+      app.makeMetricCard('Total', totals.totalProperties, 'accent'),
       app.makeMetricCard('Recuperados', totals.recovered, 'accent'),
+      app.makeMetricCard('Trabalhados', totals.visitedProperties, 'accent'),
+      app.makeMetricCard('Pendências', totals.pending, 'danger'),
       app.makeMetricCard('Tubitos', totals.tubitos, 'warn'),
+      app.makeMetricCard('Total de depósitos', totals.deposits, 'warn'),
       app.makeMetricCard('Depósitos com foco', totals.depositsWithFocus, 'danger'),
-      app.makeMetricCard('BPI aplicado (g)', totals.bpiGrams || 0, 'warn')
+      app.makeMetricCard('Depósitos tratados', totals.depositsTreated || 0, 'ok'),
+      app.makeMetricCard('BPI aplicado (g)', totals.bpiGrams || 0, 'warn'),
+      app.makeMetricCard('Depósitos eliminados', totals.depositsEliminated || Number(totals.deposits || 0) || 0, 'ok'),
+      app.makeMetricCard('Índice de infestação', totals.infestationRate + '%', 'accent')
     ].join('');
 
     var rankingNode = document.getElementById('localDepositSummary');
@@ -1824,16 +1881,13 @@
     var closingDay = !!app.state.closeDayInFlight;
     if (closeDayBtn) {
       var closePolicy = app.getCloseDayPolicy ? app.getCloseDayPolicy() : { allowed: true, label: 'VD', closeAfter: '' };
-      var closeHealth = app.getServiceHealth ? app.getServiceHealth() : { offline: false };
       closeDayBtn.disabled = closingDay;
-      closeDayBtn.textContent = closingDay ? 'Encerrando...' : (closeHealth.offline ? 'Preparar encerramento' : 'Encerrar dia');
+      closeDayBtn.textContent = closingDay ? 'Encerrando...' : 'Encerrar dia';
       closeDayBtn.title = closingDay
         ? 'Enviando e limpando a rotina do dia.'
-        : (closeHealth.offline
-          ? 'Sem internet: confira fila local e exporte backup antes de entregar o tablet.'
-          : (closePolicy.allowed
+        : (closePolicy.allowed
           ? 'Envia pendências, limpa a rotina local e volta para o login.'
-          : 'Envia pendências, limpa a rotina local e volta para o login.'));
+          : 'Envia pendências, limpa a rotina local e volta para o login.');
     }
   };
 
