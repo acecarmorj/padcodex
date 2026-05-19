@@ -371,62 +371,6 @@
     root.location.href = buildReloadUrl('hardReload');
   }
 
-  function requestJsonp(url) {
-    return new Promise(function (resolve, reject) {
-      var callbackName = '__ACE_PANEL_API_CHECK_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-      var script = documentRef.createElement('script');
-      var finished = false;
-
-      function cleanup() {
-        try {
-          delete root[callbackName];
-        } catch (error) {
-          root[callbackName] = undefined;
-        }
-
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      }
-
-      var timer = root.setTimeout(function () {
-        if (finished) {
-          return;
-        }
-
-        finished = true;
-        cleanup();
-        reject(new Error('Tempo esgotado ao verificar a API.'));
-      }, 15000);
-
-      root[callbackName] = function (payload) {
-        if (finished) {
-          return;
-        }
-
-        finished = true;
-        root.clearTimeout(timer);
-        cleanup();
-        resolve(payload);
-      };
-
-      script.async = true;
-      script.onerror = function () {
-        if (finished) {
-          return;
-        }
-
-        finished = true;
-        root.clearTimeout(timer);
-        cleanup();
-        reject(new Error('Falha ao consultar a API.'));
-      };
-
-      script.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'callback=' + encodeURIComponent(callbackName);
-      documentRef.head.appendChild(script);
-    });
-  }
-
   function checkApiStatus() {
     var session = getPanelSessionInfo();
 
@@ -1556,4 +1500,3 @@
     bootAgentsFallback();
   }
 }());
-

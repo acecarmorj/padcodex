@@ -9,7 +9,7 @@
    */
   window.ACS_RUNTIME_CONFIG = Object.assign({}, window.ACS_RUNTIME_CONFIG || {}, {
 
-    BUILD_VERSION: '20260517-007-v57',
+    BUILD_VERSION: '20260519-v60-post-private',
     API_URL: API_URL,
     SHEETS_WEBAPP_URL: API_URL,
     API_TOKEN: '',
@@ -17,6 +17,8 @@
     ACE_LAB_ACCESS_KEY: '',
     MAP_CENTER: [-21.9325, -42.6075],
     MAP_ZOOM: 13,
-    FRONTEND_PATCH: 'painel-007-trilha-agentes-v57'
+    ONLINE_PANEL_IDLE_TIMEOUT_MINUTES: 20,
+    PANEL_007_IDLE_TIMEOUT_MINUTES: 20,
+    FRONTEND_PATCH: 'v60-post-private-jsonp-public'
   });
 }());

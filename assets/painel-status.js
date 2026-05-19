@@ -66,13 +66,12 @@
   function requestJsonp(action, params) {
     return new Promise(function (resolve, reject) {
       if (!apiReady()) { reject(new Error('API_URL nao configurada.')); return; }
+      if (text(action || 'status') !== 'status') {
+        reject(new Error('JSONP permitido somente para status público.'));
+        return;
+      }
       var cb = '__ACE_SYSTEM_STATUS_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
       var mergedParams = Object.assign({}, params || {});
-      var sessionToken = getPanelSessionToken();
-      if (sessionToken && !mergedParams.sessionToken && !mergedParams.session_token) {
-        mergedParams.sessionToken = sessionToken;
-        mergedParams.access_module = mergedParams.access_module || 'coordenacao';
-      }
       var url = getApiUrl() + '?action=' + encodeURIComponent(action || 'status') + '&format=jsonp&t=' + encodeURIComponent(String(Date.now()));
       Object.keys(mergedParams || {}).forEach(function (key) {
         if (mergedParams[key] !== '' && mergedParams[key] != null) {
@@ -101,6 +100,30 @@
       };
       script.src = url + '&callback=' + encodeURIComponent(cb);
       documentRef.head.appendChild(script);
+    });
+  }
+  function postJson(action, params) {
+    if (!apiReady()) {
+      return Promise.reject(new Error('API_URL nao configurada.'));
+    }
+    return fetch(getApiUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({
+        action: action,
+        sessionToken: getPanelSessionToken(),
+        access_module: 'coordenacao'
+      }, params || {}))
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error('API nao confirmou a operacao.');
+      }
+      return response.json();
+    }).then(function (payload) {
+      if (!payload || payload.ok === false) {
+        throw new Error(payload && payload.error ? payload.error : 'Resposta invalida.');
+      }
+      return unwrap(payload);
     });
   }
   function ensureStyles() {
@@ -204,7 +227,7 @@
     render();
     return requestJsonp('status').then(function (payload) {
       state.status = payload;
-      return requestJsonp('operation_schedule', { date: todayLocal() }).catch(function (err) {
+      return postJson('operation_schedule', { date: todayLocal() }).catch(function (err) {
         state.lastError = err && err.message ? err.message : '';
         return null;
       });

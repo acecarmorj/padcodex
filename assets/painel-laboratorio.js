@@ -607,7 +607,8 @@
     });
   }
 
-  function loadCloudTubitos() {
+
+function loadCloudTubitos() {
     if ($('labStandaloneRoot') && !requireLabSession()) {
       return Promise.reject(new Error('Login autorizado obrigatorio.'));
     }
@@ -764,7 +765,7 @@
       "@media(max-width:920px){.lab-shell{grid-template-columns:1fr}.lab-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-table{max-height:none}}",
       "@media(max-width:720px){.lab-detail-grid{grid-template-columns:1fr}.lab-login-shell{margin-top:18px}.lab-login-card{border-radius:24px;padding:20px}.lab-login-card::before{margin:-20px -20px 18px}.lab-session-bar{align-items:flex-start;flex-direction:column}.lab-session-bar button{width:100%;min-height:48px}.lab-action-button{width:100%;min-height:50px}}",
       "/* ACE Laboratório tablet A11 v56 */",
-      ":root{--lab-touch:46px;--lab-radius:16px;--lab-shadow-soft:0 10px 22px rgba(24,60,44,.07)}",
+      ":root{--lab-touch:52px;--lab-radius:16px;--lab-shadow-soft:0 10px 22px rgba(24,60,44,.07)}",
       ".lab-login-shell,.lab-shell{width:100%;max-width:1040px;margin-left:auto;margin-right:auto;padding-left:0!important;padding-right:0!important}",
       ".lab-shell{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.82fr);gap:12px;align-items:start}",
       ".lab-card{border-radius:18px;padding:13px;box-shadow:var(--lab-shadow-soft);background:linear-gradient(180deg,#fff,#f8fbf9)}",
@@ -779,7 +780,7 @@
       ".lab-session-bar{position:sticky;top:64px;z-index:35;margin:0 0 10px;padding:9px 11px;border-radius:15px;box-shadow:0 8px 18px rgba(24,60,44,.08);background:linear-gradient(180deg,#ecfdf5,#e4f4eb)}",
       ".lab-session-stack>span:first-child{font-size:.86rem;line-height:1.2}",
       ".lab-session-meta{font-size:.72rem;padding:3px 8px}",
-      ".lab-session-bar button,#labLogoutBtn{min-height:38px;border-radius:11px;padding:0 14px;background:#c62828!important;color:#fff!important;font-weight:950;box-shadow:0 8px 18px rgba(198,40,40,.20)}",
+      ".lab-session-bar button,#labLogoutBtn{min-height:46px;border-radius:13px;padding:0 16px;background:#c62828!important;color:#fff!important;font-weight:950;box-shadow:0 8px 18px rgba(198,40,40,.20)}",
       ".lab-head{gap:9px;margin-bottom:9px}",
       ".lab-head strong{font-size:1rem}",
       ".lab-head span{font-size:.78rem;line-height:1.25}",
@@ -806,6 +807,7 @@
       ".lab-detail-card strong,.lab-detail-card span{font-size:.82rem;line-height:1.22}",
       ".lab-status{margin-top:8px;border-radius:13px;padding:9px 10px;font-size:.82rem;line-height:1.25}",
       "@media(max-width:980px){.lab-shell{grid-template-columns:1fr;gap:10px}.lab-table{max-height:none}.lab-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.lab-form{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lab-form label:last-of-type,.lab-form button,.lab-status{grid-column:1/-1}.lab-card{padding:12px}.lab-card::before{margin:-12px -12px 12px}.lab-session-bar{top:60px}.lab-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}",
+      "@media(max-width:860px){.lab-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-form{grid-template-columns:1fr}.lab-form label:last-of-type,.lab-form button,.lab-status{grid-column:auto}.lab-detail-grid{grid-template-columns:1fr}.lab-head-actions{grid-template-columns:1fr}.lab-action-button{width:100%}.lab-table{gap:9px}.lab-row{min-height:64px}}",
       "@media(max-width:760px){.lab-session-bar{top:55px;align-items:stretch;display:grid;grid-template-columns:minmax(0,1fr) 86px}.lab-session-bar button{width:100%}.lab-head{display:grid;grid-template-columns:1fr;align-items:stretch}.lab-head-actions{width:100%;min-width:0}.lab-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-form{grid-template-columns:1fr}.lab-form label:last-of-type,.lab-form button,.lab-status{grid-column:auto}.lab-detail-grid{grid-template-columns:1fr}.lab-action-button{width:100%}.lab-row span:nth-of-type(2){display:none}}",
       "@media(max-width:430px){.lab-session-bar{grid-template-columns:1fr}.lab-head-actions{grid-template-columns:1fr}.lab-stat strong{font-size:1.08rem}.lab-toolbar input{font-size:.88rem}.lab-login-card{padding:16px}.lab-login-card::before{margin:-16px -16px 14px}}"
     ].join('\n');

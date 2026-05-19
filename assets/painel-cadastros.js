@@ -106,11 +106,11 @@
         throw new Error('A API não confirmou a operação.');
       }
       return response.json();
-    }).then(function (payload) {
-      if (!payload || payload.ok !== true) {
-        throw new Error(payload && payload.error ? payload.error : 'A API retornou erro.');
+    }).then(function (payloadResponse) {
+      if (!payloadResponse || payloadResponse.ok !== true) {
+        throw new Error(payloadResponse && payloadResponse.error ? payloadResponse.error : 'A API retornou erro.');
       }
-      return payload;
+      return payloadResponse;
     });
   }
 

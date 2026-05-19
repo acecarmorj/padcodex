@@ -279,6 +279,12 @@
           : readLogicalStorage('supervisionRequests')
       );
 
+      var locationTrail = asArray(
+        currentApp && typeof currentApp.readLocationTrail === 'function'
+          ? currentApp.readLocationTrail()
+          : readLogicalStorage('locationTrail')
+      );
+
       var logs = asArray(readLogicalStorage('logs'));
       var dirtyProperties = asArray(readLogicalStorage('dirtyProperties'));
       var summary = currentApp && typeof currentApp.getOfflineQueueSummary === 'function'
@@ -307,11 +313,13 @@
         agents: agents.length,
         tubitos: tubitos.length,
         supervisionRequests: supervisionRequests.length,
+        locationTrail: locationTrail.length,
         logs: logs.length,
         dirtyProperties: dirtyProperties.length,
         unsynced: summary ? summary.visits : Number(unsynced || 0),
         unsyncedTubitos: summary ? summary.tubitos : tubitos.filter(function (row) { return row && row.synced === false; }).length,
         unsyncedSupervision: summary ? summary.supervision : supervisionRequests.filter(function (row) { return row && row.synced === false; }).length,
+        unsyncedLocationTrail: summary ? summary.locationTrail : locationTrail.filter(function (row) { return row && row.synced !== true; }).length,
         unsyncedLogs: summary ? summary.logs : logs.filter(function (row) { return row && row.synced !== true; }).length,
         pendingAdmin: summary ? summary.admin : 0,
         totalPending: summary ? summary.total : 0
@@ -321,7 +329,7 @@
     function hasPendingLocalData() {
       var counts = getCounts();
       var systemState = readLogicalStorage('systemState') || {};
-      return Number(counts.totalPending || 0) > 0 || counts.unsynced > 0 || counts.unsyncedTubitos > 0 || counts.unsyncedSupervision > 0 || counts.unsyncedLogs > 0 || counts.dirtyProperties > 0 || !!systemState.pendingSync;
+      return Number(counts.totalPending || 0) > 0 || counts.unsynced > 0 || counts.unsyncedTubitos > 0 || counts.unsyncedSupervision > 0 || counts.unsyncedLocationTrail > 0 || counts.unsyncedLogs > 0 || counts.dirtyProperties > 0 || !!systemState.pendingSync;
     }
 
     function injectStyles() {
@@ -392,7 +400,7 @@
       panel.setAttribute('aria-label', 'Aviso de privacidade e uso de dados');
       panel.innerHTML = [
         '<strong>🔒 Aviso de privacidade</strong>',
-        '<p>Este sistema é de uso restrito da vigilância territorial. Ele pode registrar dados de identificação do imóvel, morador/responsável, telefone, observações operacionais e localização aproximada por GPS.</p>',
+        '<p>Este sistema é de uso restrito da vigilância territorial. Ele pode registrar dados de identificação do imóvel, morador/responsável, telefone, observações operacionais, localização aproximada por GPS e trilha de rota do agente durante o uso do app.</p>',
         '<p>Use as informações apenas para a finalidade pública autorizada. Não compartilhe prints, CSVs ou dados fora dos canais oficiais.</p>',
         '<label for="lgpdConsentCheck">',
         '<input id="lgpdConsentCheck" type="checkbox">',
@@ -403,7 +411,7 @@
         '<button class="btn btn-soft" id="lgpdDetailsBtn" type="button">Ver detalhes</button>',
         '</div>',
         '<div id="lgpdDetailsText" hidden>',
-        '<p><strong>Boas práticas:</strong> confira se o aparelho tem bloqueio de tela, evite salvar CSV fora do ambiente institucional e limpe os dados locais após sincronizar.</p>',
+        '<p><strong>Boas práticas:</strong> confira se o aparelho tem bloqueio de tela, evite salvar CSV fora do ambiente institucional, sincronize a trilha de rota em canal autorizado e limpe os dados locais após sincronizar.</p>',
         '</div>'
       ].join('');
   
@@ -631,6 +639,7 @@
           makeMetric('Pendentes totais', counts.totalPending || counts.unsynced),
           makeMetric('Tubitos locais', counts.tubitos),
           makeMetric('Supervisão local', counts.supervisionRequests),
+          makeMetric('Pontos de rota', counts.locationTrail),
           makeMetric('Imóveis em cache', counts.properties),
           makeMetric('Alterações locais', counts.dirtyProperties)
         ].join('');
@@ -848,6 +857,7 @@
         'Visitas locais: ' + counts.visits,
         'Tubitos locais: ' + counts.tubitos,
         'Solicitações de supervisão locais: ' + counts.supervisionRequests,
+        'Pontos de rota locais: ' + counts.locationTrail,
         'Pendentes totais: ' + (counts.totalPending || counts.unsynced),
         'Imóveis em cache: ' + counts.properties,
         'Agentes locais: ' + counts.agents,

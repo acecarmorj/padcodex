@@ -388,70 +388,8 @@
     return !!url && /^https?:\/\//i.test(url) && url.indexOf('COLE_AQUI') === -1;
   }
 
-  function appendOperationalAuth(url) {
-    var app = getApp();
-    if (app && typeof app.appendOperationalAuthToUrl === 'function') {
-      return app.appendOperationalAuthToUrl(url);
-    }
-    return url;
-  }
-
   function isOffline() {
     return typeof navigator !== 'undefined' && navigator.onLine === false;
-  }
-
-  function requestJsonp(url, timeoutMs) {
-    if (isOffline()) {
-      return Promise.reject(new Error('Offline: usando plano LIRAa local.'));
-    }
-    return new Promise(function (resolve, reject) {
-      var callbackName = '__ACE_LIRAA_PLAN_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
-      var script = documentRef.createElement('script');
-      var completed = false;
-
-      function cleanup() {
-        try {
-          delete root[callbackName];
-        } catch (error) {
-          root[callbackName] = undefined;
-        }
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      }
-
-      var timer = setTimeout(function () {
-        if (completed) {
-          return;
-        }
-        completed = true;
-        cleanup();
-        reject(new Error('Tempo esgotado ao buscar plano LIRAa.'));
-      }, timeoutMs || 12000);
-
-      root[callbackName] = function (payload) {
-        if (completed) {
-          return;
-        }
-        completed = true;
-        clearTimeout(timer);
-        cleanup();
-        resolve(payload);
-      };
-
-      script.async = true;
-      script.onerror = function () {
-        if (completed) {
-          return;
-        }
-        completed = true;
-        clearTimeout(timer);
-        cleanup();
-        reject(new Error('Falha de rede ao buscar plano LIRAa.'));
-      };
-      script.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'callback=' + encodeURIComponent(callbackName);
-      documentRef.head.appendChild(script);
-    });
   }
 
   function fetchReleasedPlan(force) {

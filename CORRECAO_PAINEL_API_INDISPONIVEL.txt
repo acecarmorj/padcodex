@@ -1,0 +1,20 @@
+Correção emergencial - Painel API indisponível
+
+Causa provável:
+- O painel passou a tentar carregar dashboard_range por POST/fetch.
+- Em algumas publicações do Google Apps Script acessadas por GitHub Pages/servidor estático, o POST pode falhar por CORS, redirect ou bloqueio do navegador.
+- Quando isso acontecia, a tela mostrava: "API indisponível. Painel sem dados válidos para o recorte."
+
+Correção aplicada:
+- assets/painel-app.js agora tenta POST primeiro.
+- Se POST falhar, faz fallback automático por JSONP GET, que é compatível com Google Apps Script.
+- O index offline não foi alterado.
+- A API permanece em:
+  - api.txt
+  - API_ATUALIZADA_V59.txt
+  - backend/Code.gs
+
+Após publicar:
+1. Substitua os arquivos do site.
+2. Se ainda não publicou a API v59 no Apps Script, publique.
+3. Limpe cache/service worker no navegador.

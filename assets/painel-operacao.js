@@ -855,59 +855,6 @@
     return Promise.resolve(null);
   }
 
-  function requestJsonpOnce(action, params) {
-    return new Promise(function (resolve, reject) {
-      if (!apiReady()) { reject(new Error('API_URL nao configurada.')); return; }
-      var cb = '__ACE_PANEL_OPERATION_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
-      var mergedParams = Object.assign({}, params || {});
-      var auth = getOperationalAuthParams();
-      if (auth.sessionToken && !mergedParams.sessionToken) { mergedParams.sessionToken = auth.sessionToken; }
-      if (auth.session_token && !mergedParams.session_token) { mergedParams.session_token = auth.session_token; }
-      var url = getApiUrl() + '?action=' + encodeURIComponent(action) + '&format=jsonp&t=' + encodeURIComponent(String(Date.now()));
-      Object.keys(mergedParams || {}).forEach(function (key) {
-        if (mergedParams[key] !== '' && mergedParams[key] != null) {
-          url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(mergedParams[key]);
-        }
-      });
-      var script = documentRef.createElement('script');
-      var done = false;
-      var timer = setTimeout(function () {
-        if (done) { return; }
-        done = true; cleanup(); reject(new Error('Tempo esgotado.'));
-      }, 15000);
-      function cleanup() {
-        try { delete root[cb]; } catch (e) { root[cb] = undefined; }
-        if (script.parentNode) { script.parentNode.removeChild(script); }
-      }
-      root[cb] = function (payload) {
-        if (done) { return; }
-        done = true; clearTimeout(timer); cleanup();
-        if (payload && payload.ok !== false) {
-          resolve(payload);
-          return;
-        }
-        reject(new Error(payload && payload.error ? payload.error : 'Resposta invalida da API.'));
-      };
-      script.src = url + '&callback=' + cb;
-      script.onerror = function () {
-        if (done) { return; }
-        done = true; clearTimeout(timer); cleanup(); reject(new Error('Falha ao consultar a API.'));
-      };
-      documentRef.head.appendChild(script);
-    });
-  }
-
-  function requestJsonp(action, params) {
-    return requestJsonpOnce(action, params).catch(function (error) {
-      if (!isOperationalAuthError(error)) {
-        throw error;
-      }
-      return tryRefreshOperationalSession().then(function () {
-        return requestJsonpOnce(action, params);
-      });
-    });
-  }
-
   function sha256(textValue) {
     if (!root.crypto || !root.crypto.subtle || !root.TextEncoder) {
       return Promise.reject(new Error('Navegador sem crypto.subtle para validar senha.'));
@@ -1275,7 +1222,7 @@
   }
 
   function loadAgents() {
-    return requestJsonp('roster', getOperationalAuthParams()).then(function (payload) {
+    return postJson({ action: 'roster' }).then(function (payload) {
       state.agents = extractAgents(payload);
       renderAgents();
       if (!state.agents.length) { setStatus('Nenhum agente retornado pela API. Confira a aba Agentes.', 'warn'); }
@@ -1304,7 +1251,7 @@
       render();
       return;
     }
-    requestJsonp('operation_schedule', Object.assign({ date: state.date }, getOperationalAuthParams())).then(function (payload) {
+    postJson({ action: 'operation_schedule', date: state.date }).then(function (payload) {
       normalizeSchedulePayload(payload);
       if ($('operationDate')) { $('operationDate').value = state.date; }
       setStatus('Programação operacional carregada.', 'ok');

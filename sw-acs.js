@@ -1,10 +1,10 @@
 /* ACE Campo - service worker offline
  * Garante abertura 100% offline somente do INDEX após o primeiro carregamento online.
- * Painel, 007, Laboratório, Secretaria e Supervisão dependem da rede para dados da Nuvem.
+ * Painel, 007, Laboratório, Secretaria e Supervisão são módulos online e ficam fora do pacote offline do agente.
  */
 'use strict';
 
-const ACE_CACHE_VERSION = 'ace-campo-offline-20260517-007-v57';
+const ACE_CACHE_VERSION = 'ace-campo-offline-20260519-stable-v60';
 const ACE_CACHE_NAME = ACE_CACHE_VERSION;
 const ACE_LEGACY_BRAND_ASSETS = [
   './assets/logo-prefeitura-carmo.png',
@@ -14,7 +14,6 @@ const ACE_LEGACY_BRAND_ASSETS = [
 const ACE_STATIC_ASSETS = [
   './',
   './index.html',
-  './007.html',
   './manifest.webmanifest',
   './sw-acs.js',
   './assets/ace-theme.css',
@@ -60,6 +59,10 @@ function isIndexOfflineAsset(url) {
   return ACE_STATIC_ASSETS.some(function (asset) {
     return cleanUrl === stripUrlSearch(absoluteUrl(asset));
   });
+}
+
+function isRuntimeConfigAsset(url) {
+  return stripUrlSearch(url) === stripUrlSearch(absoluteUrl('./assets/runtime-config.js'));
 }
 
 function deleteLegacyBrandAssets(cache) {
@@ -130,6 +133,16 @@ function networkFirstIndex(request) {
   }).catch(() => caches.match(getIndexUrl(), { ignoreSearch: true }));
 }
 
+function networkFirstAsset(request) {
+  return fetch(request, { cache: 'reload', credentials: 'same-origin' }).then((response) => {
+    if (response && response.status === 200) {
+      const copy = response.clone();
+      caches.open(ACE_CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => null);
+    }
+    return response;
+  }).catch(() => caches.match(request, { ignoreSearch: true }));
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') {
@@ -145,6 +158,11 @@ self.addEventListener('fetch', (event) => {
     if (isIndexNavigation(url)) {
       event.respondWith(networkFirstIndex(request));
     }
+    return;
+  }
+
+  if (isRuntimeConfigAsset(url)) {
+    event.respondWith(networkFirstAsset(request));
     return;
   }
 

@@ -479,55 +479,6 @@
     return !!url && /^https?:\/\//i.test(url) && url.indexOf('COLE_AQUI') === -1;
   }
 
-  function appendOperationalAuth(url) {
-    var app = getApp();
-    if (app && typeof app.appendOperationalAuthToUrl === 'function') {
-      return app.appendOperationalAuthToUrl(url);
-    }
-    return url;
-  }
-
-  function requestJsonp(url, timeoutMs) {
-    if (isOffline()) {
-      return Promise.reject(new Error('Offline: usando plano operacional local.'));
-    }
-    return new Promise(function (resolve, reject) {
-      var callbackName = '__ACE_OPERATION_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
-      var script = documentRef.createElement('script');
-      var completed = false;
-      var timer = setTimeout(function () {
-        if (completed) { return; }
-        completed = true;
-        cleanup();
-        reject(new Error('Tempo esgotado ao buscar modo operacional.'));
-      }, timeoutMs || 12000);
-
-      function cleanup() {
-        try { delete root[callbackName]; } catch (error) { root[callbackName] = undefined; }
-        if (script.parentNode) { script.parentNode.removeChild(script); }
-      }
-
-      root[callbackName] = function (payload) {
-        if (completed) { return; }
-        completed = true;
-        clearTimeout(timer);
-        cleanup();
-        resolve(payload);
-      };
-
-      script.async = true;
-      script.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'callback=' + encodeURIComponent(callbackName);
-      script.onerror = function () {
-        if (completed) { return; }
-        completed = true;
-        clearTimeout(timer);
-        cleanup();
-        reject(new Error('Falha de rede ao buscar modo operacional.'));
-      };
-      documentRef.head.appendChild(script);
-    });
-  }
-
   function fetchOperationPlan(options) {
     var app = getApp();
     var opts = options || {};
@@ -562,16 +513,18 @@
         ? app.refreshOperationalSessionIfNeeded('operation-plan')
         : true
     ).then(function (hasAccess) {
-      var url;
       if (!hasAccess && !(app && app.CONFIG && app.CONFIG.API_TOKEN)) {
         applyPlan(localPlan);
         return localPlan;
       }
-      url = appendOperationalAuth(getApiUrl() + '?action=operation_plan&format=jsonp&matricula=' +
-        encodeURIComponent(app.state.currentAgent.matricula || '') +
-        '&date=' + encodeURIComponent(todayISO()) +
-        '&t=' + encodeURIComponent(String(Date.now())));
-      return requestJsonp(url, 12000).then(function (payload) {
+      if (!app || typeof app.fetchOperationalJson !== 'function') {
+        applyPlan(localPlan);
+        return localPlan;
+      }
+      return app.fetchOperationalJson('operation_plan', {
+        matricula: app.state.currentAgent.matricula || '',
+        date: todayISO()
+      }, 12000).then(function (payload) {
         refreshState.lastSuccessAt = Date.now();
         return applyRemotePayload(payload);
       }).catch(function (error) {

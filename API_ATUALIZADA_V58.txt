@@ -200,7 +200,7 @@ function ACE_sessionStorageRemove_(key) {
 
 var ACE_API = {
   APP_NAME: 'ACE Campo API',
-  VERSION: '2026-05-19-v60-post-privado-jsonp-publico',
+  VERSION: '2026-05-18-v58-auditoria-7-pontos',
   SHEETS: {
     CONFIG: 'Config',
     BAIRROS: 'BairrosCatalogo',
@@ -1765,16 +1765,6 @@ function migrateCanonicalCaixaDAguaData_() {
   };
 }
 
-function ACE_isPublicJsonpAction_(action) {
-  action = normalizeApiAction_(action || 'status');
-  return action === 'status' || action === 'catalogs';
-}
-
-function ACE_getJsonpCallbackParam_(params) {
-  params = params || {};
-  return String(params.callback || params.jsonp || '').trim();
-}
-
 function doGet(e) {
   e = e || {};
   var acePanelResponse = ACE_tryHandlePanelGet_(e);
@@ -1783,20 +1773,9 @@ function doGet(e) {
   }
   var p = e.parameter || {};
   var action = normalizeApiAction_(p.action || 'status');
-  var callback = ACE_getJsonpCallbackParam_(p);
 
   try {
     ensureProductionSheetsCached_();
-    if (callback) {
-      p.callback = callback;
-      if (!ACE_isPublicJsonpAction_(action)) {
-        return respond_(callback, wrapPayload_({
-          ok: false,
-          error: 'JSONP permitido somente para endpoints publicos sem token. Use POST para chamadas privadas.',
-          generatedAt: nowIso_()
-        }));
-      }
-    }
 
     if (action === 'admin_auth' || action === 'panel_admin_auth') {
       if (!ACE_allowLegacyPanelHashAccess_()) {
@@ -1912,26 +1891,6 @@ function doGet(e) {
     if (action === 'dashboard_summary') {
       ACE_requireOperationalAccess_(p);
       return respond_(p.callback, wrapPayload_(buildDashboardResponse_(p, { summaryOnly: true })));
-    }
-
-    if (action === 'panel_bundle_private' || action === 'panel_private_bundle') {
-      return respond_(p.callback, wrapPayload_(ACE_panelPrivateBundle_(p)));
-    }
-
-    if (action === 'panel_session_status' || action === 'panel_private_session_status') {
-      return respond_(p.callback, wrapPayload_(ACE_panelPrivateSessionStatus_(p)));
-    }
-
-    if (action === 'panel_session_refresh' || action === 'panel_private_session_refresh') {
-      return respond_(p.callback, wrapPayload_(ACE_panelRefreshPrivateSession_(p)));
-    }
-
-    if (action === 'secretaria_bundle_private' || action === 'secretaria_private_bundle') {
-      return respond_(p.callback, wrapPayload_(ACE_secretariaPrivateBundle_(p)));
-    }
-
-    if (action === 'admin_agents_list' || action === 'admin_users_list') {
-      return respond_(p.callback, wrapPayload_(ACE_adminListAgents_(p)));
     }
 
     if (action === 'attendance_summary' || action === 'agent_attendance' || action === 'frequencia_agentes') {

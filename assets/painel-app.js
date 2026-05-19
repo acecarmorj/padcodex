@@ -1241,38 +1241,6 @@
     return CONFIG.API_URL && CONFIG.API_URL !== 'COLE_AQUI_A_URL_DO_WEB_APP';
   }
 
-  function jsonpFetch(url) {
-    return new Promise(function (resolve, reject) {
-      var callbackName = 'acsDashboardJsonp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-      var script = document.createElement('script');
-      var timer = setTimeout(function () {
-        cleanup();
-        reject(new Error('JSONP timeout'));
-      }, 15000);
-
-      function cleanup() {
-        clearTimeout(timer);
-        try { delete window[callbackName]; } catch (err) {}
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      }
-
-      window[callbackName] = function (payload) {
-        cleanup();
-        resolve(payload);
-      };
-
-      script.onerror = function () {
-        cleanup();
-        reject(new Error('JSONP error'));
-      };
-      script.src = url + (url.indexOf('?') > -1 ? '&' : '?') + 'callback=' + callbackName;
-      document.body.appendChild(script);
-    });
-  }
-
-
   function fetchWithTimeout(url, options, timeoutMs) {
     return new Promise(function (resolve, reject) {
       var done = false;
@@ -1305,8 +1273,6 @@
       ? root.ACEPanelCloudSync.getSessionInfo()
       : null;
     var sessionToken = String(panelSession && panelSession.sessionToken || '').trim();
-    var tokenParam = token ? '&token=' + encodeURIComponent(token) : '';
-    var sessionParam = sessionToken ? '&session_token=' + encodeURIComponent(sessionToken) : '';
     var bairro = document.getElementById('bairroFilter') ? document.getElementById('bairroFilter').value : '';
     var microarea = document.getElementById('microareaFilter') ? document.getElementById('microareaFilter').value : '';
     var quarteirao = document.getElementById('quarteiraoFilter') ? document.getElementById('quarteiraoFilter').value : '';
@@ -1317,42 +1283,46 @@
     var gps = document.getElementById('gpsFilter') ? document.getElementById('gpsFilter').value : '';
     var operation = document.getElementById('operationFilter') ? document.getElementById('operationFilter').value : '';
     var search = document.getElementById('searchFilter') ? String(document.getElementById('searchFilter').value || '').trim() : '';
-    var url = CONFIG.API_URL +
-      '?action=dashboard_range' +
-      '&start=' + encodeURIComponent(start) +
-      '&end=' + encodeURIComponent(apiEnd) +
-      '&page=1&page_size=5000&sort=desc&include_properties=1&t=' + Date.now() +
-      tokenParam +
-      sessionParam +
-      (bairro ? '&bairro=' + encodeURIComponent(bairro) : '') +
-      (microarea ? '&microarea=' + encodeURIComponent(microarea) : '') +
-      (quarteirao ? '&quarteirao=' + encodeURIComponent(quarteirao) : '') +
-      (logradouro ? '&logradouro=' + encodeURIComponent(logradouro) : '') +
-      (agent ? '&agent=' + encodeURIComponent(agent) : '') +
-      (situacao ? '&situacao=' + encodeURIComponent(situacao) : '') +
-      (foco ? '&foco=' + encodeURIComponent(foco) : '') +
-      (gps ? '&gps=' + encodeURIComponent(gps) : '') +
-      (operation ? '&operation_mode=' + encodeURIComponent(operation) : '') +
-      (search ? '&search=' + encodeURIComponent(search) : '');
-    return fetchWithTimeout(url, {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' }
-    }, 12000).then(function (response) {
-      if (!response.ok) {
-        throw new Error('Falha ao carregar painel');
+    var payload = {
+      action: 'dashboard_range',
+      start: start,
+      end: apiEnd,
+      page: 1,
+      page_size: 5000,
+      sort: 'desc',
+      include_properties: 1,
+      token: token,
+      api_token: token,
+      auth_token: sessionToken || token,
+      session_token: sessionToken,
+      bairro: bairro,
+      microarea: microarea,
+      quarteirao: quarteirao,
+      logradouro: logradouro,
+      agent: agent,
+      situacao: situacao,
+      foco: foco,
+      gps: gps,
+      operation_mode: operation,
+      search: search,
+      t: Date.now()
+    };
+
+    function normalizeDashboardPayload(apiPayload) {
+      if (apiPayload && apiPayload.ok === false) {
+        throw new Error(apiPayload.error || 'A API do painel retornou erro.');
       }
-      return response.json();
-    }).catch(function () {
-      return jsonpFetch(url);
-    }).then(function (payload) {
-      var data = payload && payload.data ? payload.data : payload || {};
-      var rows = Array.isArray(data.visits) ? data.visits : (Array.isArray(payload && payload.visits) ? payload.visits : []);
-      var properties = Array.isArray(data.properties) ? data.properties : (Array.isArray(payload && payload.properties) ? payload.properties : []);
-      var agents = Array.isArray(data.agents) ? data.agents : (Array.isArray(payload && payload.agents) ? payload.agents : getCloudPanelAgents());
-      var tubitos = Array.isArray(data.tubitos) ? data.tubitos : (Array.isArray(payload && payload.tubitos) ? payload.tubitos : []);
-      var supervisionRequests = Array.isArray(data.supervision_requests) ? data.supervision_requests : (Array.isArray(payload && payload.supervision_requests) ? payload.supervision_requests : []);
-      var summary = data.summary || (payload && payload.summary) || null;
-      var meta = data.meta || (payload && payload.meta) || null;
+      var data = apiPayload && apiPayload.data ? apiPayload.data : apiPayload || {};
+      if (data && data.ok === false) {
+        throw new Error(data.error || 'A API do painel retornou erro.');
+      }
+      var rows = Array.isArray(data.visits) ? data.visits : (Array.isArray(apiPayload && apiPayload.visits) ? apiPayload.visits : []);
+      var properties = Array.isArray(data.properties) ? data.properties : (Array.isArray(apiPayload && apiPayload.properties) ? apiPayload.properties : []);
+      var agents = Array.isArray(data.agents) ? data.agents : (Array.isArray(apiPayload && apiPayload.agents) ? apiPayload.agents : getCloudPanelAgents());
+      var tubitos = Array.isArray(data.tubitos) ? data.tubitos : (Array.isArray(apiPayload && apiPayload.tubitos) ? apiPayload.tubitos : []);
+      var supervisionRequests = Array.isArray(data.supervision_requests) ? data.supervision_requests : (Array.isArray(apiPayload && apiPayload.supervision_requests) ? apiPayload.supervision_requests : []);
+      var summary = data.summary || (apiPayload && apiPayload.summary) || null;
+      var meta = data.meta || (apiPayload && apiPayload.meta) || null;
       return {
         visits: (rows || []).map(normalizeVisit),
         properties: (properties || []).map(normalizeProperty),
@@ -1362,7 +1332,22 @@
         summary: summary,
         meta: meta
       };
-    });
+    }
+
+    return fetchWithTimeout(CONFIG.API_URL, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }, 12000).then(function (response) {
+      if (!response.ok) {
+        throw new Error('Falha ao carregar painel');
+      }
+      return response.json();
+    }).then(normalizeDashboardPayload);
   }
 
 

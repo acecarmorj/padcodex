@@ -379,8 +379,10 @@
       kind: Number(totals.gpsCoverage || 0) >= 80 ? 'ok' : 'warn'
     });
     checklist.push({
-      label: health.offline ? 'Modo offline' : 'Rede disponível',
-      kind: health.offline ? 'danger' : 'ok'
+      label: app.state && app.state.locationTrailActive
+        ? 'Rota ativa'
+        : (typeof navigator !== 'undefined' && navigator.geolocation ? 'Rota aguardando GPS' : 'Rota sem GPS'),
+      kind: app.state && app.state.locationTrailActive ? 'ok' : 'warn'
     });
 
     return {

@@ -2786,37 +2786,6 @@
     };
   };
 
-  app.jsonpRequest = function (url) {
-    return new Promise(function (resolve, reject) {
-      var callbackName = 'acsJsonp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-      var script = document.createElement('script');
-      var timer = setTimeout(function () {
-        cleanup();
-        reject(new Error('JSONP timeout'));
-      }, Number(app.CONFIG.BOOTSTRAP_TIMEOUT_MS || 8000));
-
-      function cleanup() {
-        clearTimeout(timer);
-        try { delete window[callbackName]; } catch (err) {}
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      }
-
-      window[callbackName] = function (payload) {
-        cleanup();
-        resolve(payload);
-      };
-
-      script.onerror = function () {
-        cleanup();
-        reject(new Error('JSONP error'));
-      };
-      script.src = url + (url.indexOf('?') > -1 ? '&' : '?') + 'callback=' + callbackName;
-      document.body.appendChild(script);
-    });
-  };
-
   app.createNetworkTimeoutError = function () {
     var error = new Error('Tempo de conexão esgotado');
     error.isNetworkTimeout = true;
@@ -3000,7 +2969,7 @@
     }
   };
 
-  app.fetchJsonWithJsonpFallback = function (url, timeoutMs, options) {
+  app.fetchJson = function (url, timeoutMs, options) {
     var requestOptions = Object.assign({
       cache: 'no-store',
       headers: { Accept: 'application/json' }
@@ -3012,11 +2981,39 @@
         throw new Error('Falha ao carregar dados da Nuvem');
       }
       return response.json();
-    }).catch(function (error) {
-      if (navigator.onLine === false) {
-        throw error;
+    });
+  };
+
+  app.fetchOperationalJson = function (action, payload, timeoutMs) {
+    var apiSessionToken = app.getCurrentApiSessionToken ? app.getCurrentApiSessionToken() : '';
+    var apiToken = String(app.CONFIG.API_TOKEN || '').trim();
+    var body = Object.assign({}, payload || {}, {
+      action: action,
+      session_token: apiSessionToken,
+      auth_token: apiSessionToken || apiToken,
+      token: apiToken,
+      api_token: apiToken,
+      t: Date.now()
+    });
+
+    return app.fetchWithTimeout(app.CONFIG.SHEETS_WEBAPP_URL, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify(body)
+    }, timeoutMs).then(function (response) {
+      if (!response.ok) {
+        throw new Error('Falha ao carregar dados da Nuvem');
       }
-      return app.jsonpRequest(url);
+      return response.json();
+    }).then(function (payload) {
+      if (payload && payload.ok === false) {
+        throw new Error(payload.error || 'A API recusou a solicitação.');
+      }
+      return payload;
     });
   };
 
@@ -3155,7 +3152,24 @@
       url += '&start=' + encodeURIComponent(dates[0]);
       url += '&end=' + encodeURIComponent(dates[dates.length - 1]);
     }
-    return app.appendOperationalAuthToUrl(url);
+    return url;
+  };
+
+  app.buildDashboardRangePayload = function (visits) {
+    var dates = (visits || []).map(function (visit) {
+      return app.normalizeDateOnly(visit && visit.data);
+    }).filter(Boolean).sort();
+    var payload = {
+      include_properties: 0,
+      page: 1,
+      page_size: Math.max(200, Math.min(2000, Math.max(0, (visits || []).length) * 6)),
+      sort: 'desc'
+    };
+    if (dates.length) {
+      payload.start = dates[0];
+      payload.end = dates[dates.length - 1];
+    }
+    return payload;
   };
 
   app.markVisitsSyncedByUid = function (pendingVisitIds) {
@@ -3200,7 +3214,7 @@
     app.setSyncChip('Conferindo Nuvem', 'accent');
     app.updateSyncUi();
 
-    return app.jsonpRequest(app.buildDashboardRangeUrl(pendingVisits)).then(function (payload) {
+    return app.fetchOperationalJson('dashboard_range', app.buildDashboardRangePayload(pendingVisits), app.CONFIG.BOOTSTRAP_TIMEOUT_MS).then(function (payload) {
       var remoteIds = {};
       app.extractRemoteVisits(payload).forEach(function (visit) {
         var uid = String(visit && visit.uid || '').trim();
@@ -3513,9 +3527,7 @@
     if (!app.isApiConfigured() || !navigator.onLine) {
       return Promise.resolve(false);
     }
-    var rosterUrl = app.appendOperationalAuthToUrl(app.CONFIG.SHEETS_WEBAPP_URL + '?action=login_bootstrap&t=' + Date.now());
-
-    return app.fetchJsonWithJsonpFallback(rosterUrl, Math.min(Number(app.CONFIG.BOOTSTRAP_TIMEOUT_MS || 45000), 20000)).then(function (payload) {
+    return app.fetchOperationalJson('login_bootstrap', {}, Math.min(Number(app.CONFIG.BOOTSTRAP_TIMEOUT_MS || 45000), 20000)).then(function (payload) {
       if (payload && Array.isArray(payload.agents)) {
         app.replaceRemoteAgents(payload.agents);
         app.renderAll();
@@ -3541,13 +3553,15 @@
       }
 
       app.setSyncChip('Atualizando Nuvem', 'accent');
-      var bootstrapUrl = app.appendOperationalAuthToUrl(app.CONFIG.SHEETS_WEBAPP_URL + '?action=bootstrap&t=' + Date.now());
       var retentionStart = app.daysAgoISO(Number(app.CONFIG.LOCAL_VISIT_RETENTION_DAYS || 21));
-      var visitsUrl = app.appendOperationalAuthToUrl(app.CONFIG.SHEETS_WEBAPP_URL + '?action=dashboard_range&include_properties=0&page=1&page_size=' +
-        encodeURIComponent(String(app.CONFIG.LOCAL_VISIT_CACHE_LIMIT || 1200)) +
-        '&sort=desc&start=' + encodeURIComponent(retentionStart) +
-        '&end=' + encodeURIComponent(app.todayISO()) +
-        '&t=' + Date.now());
+      var visitsPayload = {
+        include_properties: 0,
+        page: 1,
+        page_size: Number(app.CONFIG.LOCAL_VISIT_CACHE_LIMIT || 1200),
+        sort: 'desc',
+        start: retentionStart,
+        end: app.todayISO()
+      };
       var loadedAny = false;
       var errors = [];
       var applyBootstrap = function (bootstrap) {
@@ -3600,13 +3614,13 @@
         }
         return visitsPayload;
       };
-      var bootstrapPromise = app.fetchJsonWithJsonpFallback(bootstrapUrl, app.CONFIG.BOOTSTRAP_TIMEOUT_MS)
+      var bootstrapPromise = app.fetchOperationalJson('bootstrap', {}, app.CONFIG.BOOTSTRAP_TIMEOUT_MS)
         .then(applyBootstrap)
         .catch(function (error) {
           errors.push(error);
           return null;
         });
-      var visitsPromise = app.fetchJsonWithJsonpFallback(visitsUrl, app.CONFIG.BOOTSTRAP_TIMEOUT_MS)
+      var visitsPromise = app.fetchOperationalJson('dashboard_range', visitsPayload, app.CONFIG.BOOTSTRAP_TIMEOUT_MS)
         .then(applyDashboardRange)
         .catch(function (error) {
           errors.push(error);
@@ -3913,7 +3927,7 @@
         var syncWarningText = reason === 'agent' || reason === 'agent-delete'
           ? 'Agente salvo no aparelho, mas não foi possível atualizar a base agora. Tente novamente com internet.'
           : 'Sem conexão confiável agora. ' + app.getUnsyncedVisits().length + ' registro(s) seguem salvos no aparelho para enviar depois.';
-        if (syncErrorMessage && !/^(Tempo de conexão|JSONP timeout|JSONP error|Failed to fetch|Falha ao sincronizar)$/i.test(syncErrorMessage)) {
+        if (syncErrorMessage && !/^(Tempo de conexão|Failed to fetch|Falha ao sincronizar)$/i.test(syncErrorMessage)) {
           syncWarningText += ' Detalhe: ' + syncErrorMessage;
         }
         app.saveSystemState({ lastSyncError: syncErrorMessage });

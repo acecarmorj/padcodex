@@ -1160,51 +1160,42 @@
     render();
   }
 
-  function requestJsonp(action, params) {
-    return new Promise(function (resolve, reject) {
-      var cb;
-      var script;
-      var timer;
-      var url;
-      if (!apiReady()) {
-        reject(new Error('API_URL nao configurada.'));
-        return;
+  function getPanelSessionToken() {
+    try {
+      var sync = root.ACEPanelCloudSync;
+      var session = sync && typeof sync.getSessionInfo === 'function' ? sync.getSessionInfo() : null;
+      if (!session && root.sessionStorage) {
+        var raw = root.sessionStorage.getItem('ace_panel_private_session_v1') || '';
+        session = raw ? JSON.parse(raw) : null;
       }
-      cb = '__ACE_EXEC_V2_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
-      url = getApiUrl() + '?action=' + encodeURIComponent(action) + '&format=jsonp&t=' + encodeURIComponent(String(Date.now()));
-      Object.keys(params || {}).forEach(function (key) {
-        if (params[key] !== '' && params[key] != null) {
-          url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-        }
-      });
-      url += '&callback=' + encodeURIComponent(cb);
-      script = documentRef.createElement('script');
-      function cleanup() {
-        try { delete root[cb]; } catch (error) { root[cb] = undefined; }
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
+      return text(session && (session.sessionToken || session.session_token || session.token));
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function requestPost(action, params) {
+    if (!apiReady()) {
+      return Promise.reject(new Error('API_URL nao configurada.'));
+    }
+    return fetch(getApiUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({
+        action: action,
+        sessionToken: getPanelSessionToken(),
+        access_module: 'coordenacao'
+      }, params || {}))
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error('API nao confirmou a operacao.');
       }
-      timer = setTimeout(function () {
-        cleanup();
-        reject(new Error('Tempo esgotado.'));
-      }, 15000);
-      root[cb] = function (payload) {
-        clearTimeout(timer);
-        cleanup();
-        if (payload && payload.ok === false) {
-          reject(new Error(payload.error || 'Resposta invalida.'));
-          return;
-        }
-        resolve(payload || {});
-      };
-      script.onerror = function () {
-        clearTimeout(timer);
-        cleanup();
-        reject(new Error('Falha de rede.'));
-      };
-      script.src = url;
-      documentRef.head.appendChild(script);
+      return response.json();
+    }).then(function (payload) {
+      if (!payload || payload.ok === false) {
+        throw new Error(payload && payload.error ? payload.error : 'Resposta invalida.');
+      }
+      return payload || {};
     });
   }
 
@@ -1213,7 +1204,7 @@
     if (!apiReady() || (Date.now() - state.scheduleLoadedAt < 60000 && state.schedule && state.schedule.date === date)) {
       return Promise.resolve(state.schedule);
     }
-    return requestJsonp('operation_schedule', { date: date }).then(function (payload) {
+    return requestPost('operation_schedule', { date: date }).then(function (payload) {
       state.schedule = {
         date: date,
         operations: payload.operations || (payload.data && payload.data.operations) || [],

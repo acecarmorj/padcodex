@@ -4,8 +4,6 @@
   var root = window;
   var documentRef = document;
 
-  var DEFAULT_SUPER_API_URL = 'https://script.google.com/macros/s/AKfycbyevPoSgnnlyJXhaphkPCjEvFBMq1gdqTbrZ521JdXukkq2_PUPjOGuG0gmEAoZjYeX6w/exec';
-
   var PRIVATE_CONFIG = {
     sessionStorageKey: 'ace_super_private_session_v1',
     loginAction: 'panel_login',
@@ -228,8 +226,7 @@
       root.ACE_API_URL,
       root.SHEETS_WEBAPP_URL,
       getApiUrlFromStorage(),
-      getApiUrlFromDom(),
-      DEFAULT_SUPER_API_URL
+      getApiUrlFromDom()
     ];
     for (var i = 0; i < candidates.length; i += 1) {
       var value = candidates[i];
@@ -769,13 +766,13 @@
       body: JSON.stringify(body)
     }, PRIVATE_CONFIG.timeoutMs).then(function(response){
       if (!response.ok) {
-        throw new Error('Falha de comunicação com a Nuvem.');
+        throw new Error('A API não confirmou a operação.');
       }
       return response.json();
     }).then(function(result){
       result = unpackApiPayload(result);
       if (!result || result.ok === false) {
-        throw new Error((result && result.error) || 'A Nuvem recusou a atualização.');
+        throw new Error((result && result.error) || 'A API recusou a operação.');
       }
       return result;
     });

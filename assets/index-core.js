@@ -88,7 +88,7 @@
     BOOTSTRAP_TIMEOUT_MS: 45000,
     SYNC_TIMEOUT_MS: 45000,
     AUTO_SYNC_COOLDOWN_MS: 5 * 60 * 1000,
-    APP_VERSION: 'ACE Campo 20260517-007-v57 - Galaxy Tab A11',
+    APP_VERSION: 'ACE Campo 20260519-v60 - Galaxy Tab A11',
     BAIRROS: BAIRRO_CATALOG.slice(),
     PROPERTY_TYPES: [
       'Residencial', 'Comercial', 'Terreno Baldio', 'Obra/Construção', 'Ponto Estratégico', 'Órgão Público', 'Outro'
@@ -155,7 +155,8 @@
     LOCATION_TRAIL_MIN_INTERVAL_MS: 60000,
     LOCATION_TRAIL_MIN_DISTANCE_METERS: 18,
     LOCATION_TRAIL_RETENTION_DAYS: 14,
-    LOCATION_TRAIL_CACHE_LIMIT: 2500
+    LOCATION_TRAIL_CACHE_LIMIT: 2500,
+    LOCATION_TRAIL_UNSYNCED_TRACK_LIMIT: 1200
   };
 
   app.DEPOSITS = {
@@ -1672,10 +1673,16 @@
     });
     var retentionStart = app.daysAgoISO(Number(app.CONFIG.LOCATION_TRAIL_RETENTION_DAYS || 14));
     var unsynced = normalized.filter(function (row) { return row.synced !== true; });
+    var unsyncedImportant = unsynced.filter(function (row) {
+      return String(row.eventType || 'track') !== 'track' || !!row.visitUid;
+    });
+    var unsyncedTrack = unsynced.filter(function (row) {
+      return String(row.eventType || 'track') === 'track' && !row.visitUid;
+    }).slice(0, Number(app.CONFIG.LOCATION_TRAIL_UNSYNCED_TRACK_LIMIT || 1200));
     var recentSynced = normalized.filter(function (row) {
       return row.synced === true && (!row.date || row.date >= retentionStart);
     }).slice(0, Number(app.CONFIG.LOCATION_TRAIL_CACHE_LIMIT || 2500));
-    app.savePrimary('locationTrail', unsynced.concat(recentSynced));
+    app.savePrimary('locationTrail', unsyncedImportant.concat(unsyncedTrack).concat(recentSynced));
   };
 
   app.addLocationTrailPoint = function (row) {
@@ -1869,7 +1876,7 @@
   };
 
   app.getOfflineCacheName = function () {
-    return 'ace-campo-offline-20260517-007-v57';
+    return 'ace-campo-offline-20260519-stable-v60';
   };
 
   app.isLocalFileMode = function () {
@@ -3789,25 +3796,11 @@
   };
 
   app.buildOperationalAuthQuery = function () {
-    var parts = [];
-    var apiSessionToken = app.getCurrentApiSessionToken();
-    var apiToken = String(app.CONFIG.API_TOKEN || '').trim();
-
-    if (apiSessionToken) {
-      parts.push('session_token=' + encodeURIComponent(apiSessionToken));
-    }
-    if (apiToken) {
-      parts.push('token=' + encodeURIComponent(apiToken));
-    }
-    return parts.join('&');
+    return '';
   };
 
   app.appendOperationalAuthToUrl = function (url) {
-    var authQuery = app.buildOperationalAuthQuery();
-    if (!authQuery) {
-      return url;
-    }
-    return url + (url.indexOf('?') > -1 ? '&' : '?') + authQuery;
+    return url;
   };
 
   app.buildLocalSnapshot = function (options) {
