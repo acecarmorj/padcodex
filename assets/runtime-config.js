@@ -19,6 +19,6 @@
     MAP_ZOOM: 13,
     ONLINE_PANEL_IDLE_TIMEOUT_MINUTES: 20,
     PANEL_007_IDLE_TIMEOUT_MINUTES: 20,
-    FRONTEND_PATCH: 'v60-post-private-jsonp-public'
+    FRONTEND_PATCH: 'v60-post-private-panel-fallback'
   });
 }());

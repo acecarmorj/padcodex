@@ -1918,8 +1918,8 @@
     var apiStart = statsPreviousRange && statsPreviousRange.start ? statsPreviousRange.start : range.start;
     setBanner('Atualizando...', 'accent');
     var promise = isApiConfigured() ? fetchApiVisits(apiStart, range.end) : loadLocalBundle();
-    return promise.then(function (bundle) {
-      state.source = isApiConfigured() ? 'api' : 'local';
+    function applyDashboardBundle(bundle, source) {
+      state.source = source;
       state.allVisits = bundle && bundle.visits ? bundle.visits : [];
       state.allProperties = bundle && bundle.properties ? bundle.properties : [];
       state.allTubitos = bundle && bundle.tubitos ? bundle.tubitos : [];
@@ -1927,55 +1927,57 @@
       state.allAgents = bundle && bundle.agents ? bundle.agents : getCloudPanelAgents();
       state.dashboardSummary = bundle && bundle.summary ? bundle.summary : null;
       state.dashboardMeta = bundle && bundle.meta ? bundle.meta : null;
-      if (!isApiConfigured()) {
+      if (source !== 'api') {
         applyInitialRangeFromVisits();
       }
       applyFilters();
+    }
+    return promise.then(function (bundle) {
+      applyDashboardBundle(bundle, isApiConfigured() ? 'api' : 'local');
       setChip('panelModeChip', state.source === 'api' ? 'Sincronizado' : 'Modo local', state.source === 'api' ? 'ok' : 'warn');
       var totalVisits = state.filteredVisits.length;
       var isTruncated = !!(state.dashboardMeta && state.dashboardMeta.pagination && state.dashboardMeta.pagination.visits && state.dashboardMeta.pagination.visits.truncated);
       setChip('panelStatusChip', totalVisits + ' visita(s)' + (isTruncated ? ' • parcial' : ''), isTruncated ? 'warn' : 'accent');
       updateShellHeaderInfo();
       setBanner(isTruncated ? 'Atualizado com paginação no servidor. Refine o recorte para detalhar mais.' : 'Atualizado.', isTruncated ? 'warn' : 'ok');
-    }).catch(function () {
-      if (isApiConfigured()) {
-        state.source = 'api';
+    }).catch(function (error) {
+      return loadLocalBundle().then(function (localBundle) {
+        var hasFallbackData = !!(
+          (localBundle.visits && localBundle.visits.length) ||
+          (localBundle.properties && localBundle.properties.length) ||
+          (localBundle.agents && localBundle.agents.length)
+        );
+        if (hasFallbackData) {
+          applyDashboardBundle(localBundle, isApiConfigured() ? 'cloud-cache' : 'local');
+          setChip('panelModeChip', isApiConfigured() ? 'Base privada' : 'Modo local', 'warn');
+          setChip('panelStatusChip', state.filteredVisits.length ? (state.filteredVisits.length + ' visita(s)') : 'Sem visitas no recorte', state.filteredVisits.length ? 'accent' : 'warn');
+          updateShellHeaderInfo();
+          setBanner(isApiConfigured()
+            ? 'API do recorte indisponível. Usando a base privada já carregada no painel.'
+            : 'Painel carregado no modo local.', 'warn');
+          return;
+        }
+        if (state.allVisits && state.allVisits.length) {
+          applyFilters();
+          setChip('panelModeChip', 'Nuvem indisponível', 'warn');
+          setChip('panelStatusChip', state.filteredVisits.length ? (state.filteredVisits.length + ' visita(s)') : 'Sem visitas no recorte', state.filteredVisits.length ? 'accent' : 'warn');
+          updateShellHeaderInfo();
+          setBanner('API indisponível. Mantendo o último recorte carregado.', 'warn');
+          return;
+        }
+        state.source = isApiConfigured() ? 'api' : 'local';
+        state.allVisits = [];
+        state.allProperties = [];
+        state.allTubitos = [];
+        state.allSupervisionRequests = [];
+        state.allAgents = getCloudPanelAgents();
         state.dashboardSummary = null;
         state.dashboardMeta = null;
-        if (!(state.allVisits && state.allVisits.length)) {
-          state.allVisits = [];
-        }
-        if (!(state.allProperties && state.allProperties.length)) {
-          state.allProperties = [];
-        }
-        if (!(state.allAgents && state.allAgents.length)) {
-          state.allAgents = getCloudPanelAgents();
-        }
-        if (!(state.allSupervisionRequests && state.allSupervisionRequests.length)) {
-          state.allSupervisionRequests = [];
-        }
         applyFilters();
-        setChip('panelModeChip', 'Nuvem indisponível', 'warn');
-        setChip('panelStatusChip', state.filteredVisits.length ? (state.filteredVisits.length + ' visita(s)') : 'API indisponível', state.filteredVisits.length ? 'accent' : 'warn');
+        setChip('panelModeChip', isApiConfigured() ? 'Nuvem indisponível' : 'Modo local', 'warn');
+        setChip('panelStatusChip', 'Sem dados', 'warn');
         updateShellHeaderInfo();
-        setBanner(state.filteredVisits.length ? 'API indisponível. Mantendo o último recorte carregado.' : 'API indisponível. Painel sem dados válidos para o recorte.', 'warn');
-        return;
-      }
-      state.source = 'local';
-      loadLocalBundle().then(function (localBundle) {
-        state.allVisits = localBundle.visits || [];
-        state.allProperties = localBundle.properties || [];
-        state.allTubitos = localBundle.tubitos || [];
-        state.allSupervisionRequests = localBundle.supervisionRequests || [];
-        state.allAgents = localBundle.agents || getCloudPanelAgents();
-        state.dashboardSummary = null;
-        state.dashboardMeta = null;
-        applyInitialRangeFromVisits();
-        applyFilters();
-        setChip('panelModeChip', 'Modo local', 'warn');
-        setChip('panelStatusChip', 'Fallback local', 'warn');
-        updateShellHeaderInfo();
-        setBanner('API indisponível. Painel carregado no modo local.', 'warn');
+        setBanner((error && error.message ? error.message + '. ' : '') + 'Painel sem dados válidos para o recorte.', 'warn');
       });
     });
   }

@@ -6,7 +6,7 @@
 
   var CONFIG = {
     version: '20260505-liraa-cycle-history-cloud-v14',
-    panelAppSrc: './assets/painel-app.js?v=20260505-map-filter-docked-v27',
+    panelAppSrc: './assets/painel-app.js?v=20260519-v60-panel-fallback',
     loginAction: 'panel_login',
     bundleAction: 'panel_bundle_private',
     logoutAction: 'panel_logout',
