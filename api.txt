@@ -200,7 +200,7 @@ function ACE_sessionStorageRemove_(key) {
 
 var ACE_API = {
   APP_NAME: 'ACE Campo API',
-  VERSION: '2026-05-19-v60-post-privado-jsonp-publico',
+  VERSION: '2026-05-19-v65-mapa-operacional-final',
   SHEETS: {
     CONFIG: 'Config',
     BAIRROS: 'BairrosCatalogo',
@@ -6646,7 +6646,7 @@ function ACE_panelBuildPublicBundle_(params) {
 function ACE_panelAssertPublicAccess_(params) {
   params = params || {};
 
-  var enabled = String(ACE_getScriptProperty_(ACE_PANEL_API.PUBLIC_ENABLED_PROP, '0') || '0').trim().toLowerCase();
+  var enabled = String(ACE_getScriptProperty_(ACE_PANEL_API.PUBLIC_ENABLED_PROP, '1') || '1').trim().toLowerCase();
 
   if (!(enabled === '1' || enabled === 'true' || enabled === 'yes' || enabled === 'on')) {
     throw new Error('Painel público desativado. Use o acesso privado com CPF e senha.');

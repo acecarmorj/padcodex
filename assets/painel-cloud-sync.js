@@ -5,14 +5,14 @@
   var documentRef = document;
 
   var CONFIG = {
-    version: '20260505-liraa-cycle-history-cloud-v14',
-    panelAppSrc: './assets/painel-app.js?v=20260519-v60-panel-map-focus',
+    version: '20260519-v65-mapa-final',
+    panelAppSrc: './assets/painel-app.js?v=20260519-v65-mapa-final',
     loginAction: 'panel_login',
     bundleAction: 'panel_bundle_private',
     logoutAction: 'panel_logout',
     statusAction: 'panel_session_status',
     refreshAction: 'panel_session_refresh',
-    timeoutMs: 25000,
+    timeoutMs: 60000,
     defaultLimit: 10000,
     visitsKey: 'dengue_db_visits_v1',
     propertiesKey: 'dengue_db_properties_v1',

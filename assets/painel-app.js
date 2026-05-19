@@ -108,6 +108,7 @@
     'santo antonio': 'santo antonio',
     'porto velho': 'porto velho do cunha',
     'pvc': 'porto velho do cunha',
+    'porto velho do cunha pvc': 'porto velho do cunha',
     'barra de s francisco': 'barra de sao francisco',
     'light': 'ilha dos pombos',
     'ilha dos pombos': 'ilha dos pombos',
@@ -380,14 +381,33 @@
   function normalizeQuarteirao(value) {
     var raw = repairTextEncoding(value).trim();
     var dateValue = normalizeQuarterDateValue(raw);
+    var parts;
     if (dateValue) {
       raw = dateValue;
     }
-    return normalizeLabel(raw.replace(/^q\s*[-/]?\s*/i, ''));
+    raw = raw.normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[‐‑‒–—]/g, '-')
+      .replace(/^(?:quarteirao|quadra|q)\s*/i, '')
+      .replace(/^[\s:._#/-]+/, '')
+      .replace(/\b(?:quarteirao|quadra|q)\b/g, ' ')
+      .replace(/\s*-\s*/g, '/')
+      .replace(/\s+/g, '')
+      .replace(/[^a-z0-9/]+/g, '');
+    parts = raw.split('/').map(function (part) {
+      if (/^\d+$/.test(part)) {
+        return String(Number(part));
+      }
+      return part.replace(/^0+(?=\d)/, '');
+    }).filter(Boolean);
+    return parts.join('/');
   }
 
   function normalizeTerritoryCandidate(value) {
-    return normalizeLabel(repairTextEncoding(value).replace(/^[A-Z0-9]{1,8}\s*-\s*/i, ''));
+    return normalizeLabel(repairTextEncoding(value)
+      .replace(/^(?:MA\s*)?(?:M\d{1,2}|PVC|BSF|CDP|IDP|INF)\s*[-:]?\s*/i, '')
+      .replace(/^[A-Z0-9]{1,8}\s*-\s*/i, ''));
   }
 
   function getMicroareaLabelForTerritory(value) {
@@ -470,6 +490,9 @@
   }
 
   function getTerritoryBounds() {
+    if (!state.territoryPolygons.length && !state.territoryPoints.length) {
+      hydrateTerritoryData();
+    }
     if (state.territoryBounds) {
       return state.territoryBounds;
     }
@@ -514,22 +537,65 @@
       !(lat === 0 && lng === 0);
   }
 
+  function getTrustedMapCoordinate(lat, lng) {
+    var directLat = normalizeCoord(lat);
+    var directLng = normalizeCoord(lng);
+    var swappedLat = normalizeCoord(lng);
+    var swappedLng = normalizeCoord(lat);
+
+    if (isValidLatLng(directLat, directLng) && isCoordinateInsideTerritory(directLat, directLng)) {
+      return { lat: directLat, lng: directLng, swapped: false };
+    }
+
+    if (isValidLatLng(swappedLat, swappedLng) && isCoordinateInsideTerritory(swappedLat, swappedLng)) {
+      return { lat: swappedLat, lng: swappedLng, swapped: true };
+    }
+
+    return null;
+  }
+
+  function isTrustedMapCoordinate(lat, lng) {
+    return !!getTrustedMapCoordinate(lat, lng);
+  }
+
+  function addTrustedMapPoint(points, lat, lng) {
+    var coordinate = getTrustedMapCoordinate(lat, lng);
+    if (!coordinate || !Array.isArray(points)) {
+      return false;
+    }
+    points.push([coordinate.lat, coordinate.lng]);
+    return true;
+  }
+
+  function getTrustedMapPoints(points) {
+    var safePoints = [];
+    (points || []).forEach(function (coord) {
+      if (!Array.isArray(coord) || coord.length < 2) {
+        return;
+      }
+      addTrustedMapPoint(safePoints, coord[0], coord[1]);
+    });
+    return safePoints;
+  }
+
   function resolveVisitGpsFields(visit) {
     var directLat = normalizeCoord(visit.gps_lat || (visit.gps && visit.gps.lat));
     var directLng = normalizeCoord(visit.gps_lng || (visit.gps && visit.gps.lng));
     var shiftedLat = normalizeCoord(visit.gps_acc);
     var shiftedLng = normalizeCoord(visit.gps_territory);
+    var trusted = getTrustedMapCoordinate(directLat, directLng);
 
-    if (isValidLatLng(directLat, directLng)) {
+    if (trusted) {
       return {
-        lat: directLat,
-        lng: directLng,
+        lat: trusted.lat,
+        lng: trusted.lng,
         acc: Number(visit.gps_acc || (visit.gps && visit.gps.accuracy) || 0) || 0
       };
     }
 
-    if (isValidLatLng(shiftedLat, shiftedLng) && isCoordinateInsideTerritory(shiftedLat, shiftedLng)) {
-      return { lat: shiftedLat, lng: shiftedLng, acc: 0 };
+    trusted = getTrustedMapCoordinate(shiftedLat, shiftedLng);
+    if (trusted) {
+      return { lat: trusted.lat, lng: trusted.lng, acc: 0 };
     }
 
     return { lat: null, lng: null, acc: 0 };
@@ -941,6 +1007,9 @@
       liraaQuarteiraoSorteado: String(visit.liraa_quarteirao_sorteado || visit.liraaQuarteiraoSorteado || '').trim(),
       liraaUnitKey: String(visit.liraa_unit_key || visit.liraaUnitKey || '').trim(),
       liraaColeta: String(visit.liraa_coleta || visit.liraaColeta || '').trim(),
+      operationMicroareaDesignada: String(visit.operation_microarea_designada || visit.operationMicroareaDesignada || '').trim(),
+      operationQuarteiraoDesignado: String(visit.operation_quarteirao_designado || visit.operationQuarteiraoDesignado || '').trim(),
+      operationUnitsDesignadas: String(visit.operation_units_designadas || visit.operationUnitsDesignadas || '').trim(),
       photoUrl: String(visit.photo_url || visit.photoUrl || visit.photo_data_url || visit.photoDataUrl || '').trim(),
       gps_lat: gpsFields.lat,
       gps_lng: gpsFields.lng,
@@ -1099,7 +1168,7 @@
         territoryType: String(feature.territoryType || '').trim(),
         coordinates: Array.isArray(feature.coordinates) ? feature.coordinates : [],
         territoryName: territoryName,
-        territoryKey: normalizeLabel(territoryName),
+        territoryKey: normalizeTerritoryCandidate(territoryName),
         quarteiraoKey: normalizeQuarteirao(feature.name),
         featureType: 'polygon'
       };
@@ -1117,7 +1186,7 @@
         territoryType: String(feature.territoryType || '').trim(),
         coordinates: Array.isArray(feature.coordinates) ? feature.coordinates : [],
         territoryName: territoryName,
-        territoryKey: normalizeLabel(territoryName),
+        territoryKey: normalizeTerritoryCandidate(territoryName),
         quarteiraoKey: normalizeQuarteirao(feature.name),
         featureType: 'point'
       };
@@ -1263,6 +1332,70 @@
     });
   }
 
+  function buildPublicPanelQuery(params) {
+    return Object.keys(params).filter(function (key) {
+      return params[key] !== null && params[key] !== undefined && params[key] !== '';
+    }).map(function (key) {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(String(params[key]));
+    }).join('&');
+  }
+
+  function fetchPanelPublicBundleJsonp(start, end) {
+    if (!isApiConfigured()) {
+      return Promise.reject(new Error('API não configurada.'));
+    }
+
+    return new Promise(function (resolve, reject) {
+      var callbackName = '__ACE_PANEL_PUBLIC_V65_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+      var script = document.createElement('script');
+      var timeout = null;
+
+      function cleanup() {
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+        try {
+          delete root[callbackName];
+        } catch (ignore) {
+          root[callbackName] = undefined;
+        }
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      }
+
+      root[callbackName] = function (payload) {
+        cleanup();
+        if (payload && payload.ok === false) {
+          reject(new Error(payload.error || 'Painel público sanitizado indisponível.'));
+          return;
+        }
+        resolve(payload || {});
+      };
+
+      script.onerror = function () {
+        cleanup();
+        reject(new Error('Falha no fallback público sanitizado do painel.'));
+      };
+
+      timeout = setTimeout(function () {
+        cleanup();
+        reject(new Error('Timeout no fallback público sanitizado do painel.'));
+      }, 30000);
+
+      script.src = CONFIG.API_URL + '?' + buildPublicPanelQuery({
+        action: 'panelBundle',
+        panel: '1',
+        from: start || '',
+        to: end || '',
+        limit: 10000,
+        callback: callbackName,
+        t: Date.now()
+      });
+      document.head.appendChild(script);
+    });
+  }
+
   function fetchApiVisits(start, end) {
     if (!isApiConfigured()) {
       return Promise.resolve(null);
@@ -1342,17 +1475,24 @@
         Accept: 'application/json'
       },
       body: JSON.stringify(payload)
-    }, 12000).then(function (response) {
+    }, 30000).then(function (response) {
       if (!response.ok) {
         throw new Error('Falha ao carregar painel');
       }
       return response.json();
-    }).then(normalizeDashboardPayload);
+    }).then(normalizeDashboardPayload).catch(function (error) {
+      console.warn('[ACE Painel] POST privado indisponível; usando fallback público sanitizado sem token na URL.', error);
+      return fetchPanelPublicBundleJsonp(start, end).then(normalizeDashboardPayload);
+    });
   }
 
 
   function normalizeSupervisionRequest(row) {
     row = row || {};
+    var gpsFields = getTrustedMapCoordinate(
+      row.gps_lat || row.gpsLat || row.latitude || row.lat,
+      row.gps_lng || row.gpsLng || row.longitude || row.lng
+    );
     return {
       uid: String(row.uid || row.id || '').trim(),
       data: normalizeDateOnly(row.data || row.date || ''),
@@ -1364,8 +1504,8 @@
       status: String(row.status || 'Aberta').trim(),
       microarea: normalizeMicroareaLabel(row.gps_territory || row.gpsTerritory || row.microarea || '', row.bairro || ''),
       quarteirao: normalizeAreaCode(row.gps_quarteirao || row.gpsQuarteirao || row.quarteirao || ''),
-      gps_lat: normalizeCoord(row.gps_lat || row.gpsLat || row.latitude || row.lat),
-      gps_lng: normalizeCoord(row.gps_lng || row.gpsLng || row.longitude || row.lng),
+      gps_lat: gpsFields ? gpsFields.lat : null,
+      gps_lng: gpsFields ? gpsFields.lng : null,
       gps_acc: Number(row.gps_acc || row.gpsAccuracy || row.accuracy || 0) || 0,
       createdAt: String(row.createdAt || row.created_at || '').trim(),
       updatedAt: String(row.updatedAt || row.updated_at || '').trim()
@@ -1473,8 +1613,30 @@
     return String(visit.property_uid || visit.propertyUid || '').trim() || addressKey(visit);
   }
 
+  function isPositiveFocusValue(value) {
+    var label;
+    if (value === true || value === 1) {
+      return true;
+    }
+    label = normalizeLabel(value);
+    return label === 'sim' ||
+      label === 's' ||
+      label === 'yes' ||
+      label === 'true' ||
+      label === '1' ||
+      label === 'positivo' ||
+      label === 'positiva' ||
+      label === 'com foco' ||
+      label.indexOf('positivo') > -1 ||
+      label.indexOf('detectado') > -1 ||
+      label.indexOf('confirmado') > -1;
+  }
+
   function visitHasFocus(visit) {
-    return normalizeLabel(visit && visit.foco) === 'sim' || Number(visit && visit.focusCount || 0) > 0 || Number(visit && visit.depositFocusCount || 0) > 0;
+    return isPositiveFocusValue(visit && visit.foco) ||
+      isPositiveFocusValue(visit && visit.focusFound) ||
+      Number(visit && visit.focusCount || 0) > 0 ||
+      Number(visit && visit.depositFocusCount || 0) > 0;
   }
 
   function getVisitFocusMetric(visit) {
@@ -1490,7 +1652,7 @@
   }
 
   function visitHasGps(visit) {
-    return !!(visit && visitCoordinateValid(visit.gps_lat) && visitCoordinateValid(visit.gps_lng));
+    return !!(visit && isTrustedMapCoordinate(visit.gps_lat, visit.gps_lng));
   }
 
   function visitNeedsLadder(visit) {
@@ -1648,10 +1810,11 @@
   }
 
   function buildMapsUrl(lat, lng) {
-    if (!visitCoordinateValid(lat) || !visitCoordinateValid(lng)) {
+    var coordinate = getTrustedMapCoordinate(lat, lng);
+    if (!coordinate) {
       return '';
     }
-    return 'https://www.google.com/maps?q=' + encodeURIComponent(String(lat) + ',' + String(lng));
+    return 'https://www.google.com/maps?q=' + encodeURIComponent(String(coordinate.lat) + ',' + String(coordinate.lng));
   }
 
   function normalizeSituacaoFilterValue(value) {
@@ -1916,7 +2079,19 @@
     var startNode = document.getElementById('dateStart');
     var endNode = document.getElementById('dateEnd');
     var dates = (state.allVisits || []).map(function (visit) { return normalizeDateOnly(visit && visit.data); }).filter(Boolean).sort();
+    var currentStart;
+    var currentEnd;
+    var hasVisitInCurrentRange;
     if (!startNode || !endNode || !dates.length || state.hasAutoExpandedRange) {
+      return;
+    }
+    currentStart = startNode.value || getDateDaysAgo(29);
+    currentEnd = endNode.value || toLocalIsoDate(new Date());
+    hasVisitInCurrentRange = dates.some(function (date) {
+      return (!currentStart || date >= currentStart) && (!currentEnd || date <= currentEnd);
+    });
+    if (hasVisitInCurrentRange) {
+      state.hasAutoExpandedRange = true;
       return;
     }
     startNode.value = dates[0];
@@ -1930,8 +2105,8 @@
     var apiStart = statsPreviousRange && statsPreviousRange.start ? statsPreviousRange.start : range.start;
     setBanner('Atualizando...', 'accent');
     var promise = isApiConfigured() ? fetchApiVisits(apiStart, range.end) : loadLocalBundle();
-    function applyDashboardBundle(bundle, source) {
-      state.source = source;
+    return promise.then(function (bundle) {
+      state.source = isApiConfigured() ? 'api' : 'local';
       state.allVisits = bundle && bundle.visits ? bundle.visits : [];
       state.allProperties = bundle && bundle.properties ? bundle.properties : [];
       state.allTubitos = bundle && bundle.tubitos ? bundle.tubitos : [];
@@ -1939,57 +2114,53 @@
       state.allAgents = bundle && bundle.agents ? bundle.agents : getCloudPanelAgents();
       state.dashboardSummary = bundle && bundle.summary ? bundle.summary : null;
       state.dashboardMeta = bundle && bundle.meta ? bundle.meta : null;
-      if (source !== 'api') {
-        applyInitialRangeFromVisits();
-      }
+      applyInitialRangeFromVisits();
       applyFilters();
-    }
-    return promise.then(function (bundle) {
-      applyDashboardBundle(bundle, isApiConfigured() ? 'api' : 'local');
       setChip('panelModeChip', state.source === 'api' ? 'Sincronizado' : 'Modo local', state.source === 'api' ? 'ok' : 'warn');
       var totalVisits = state.filteredVisits.length;
       var isTruncated = !!(state.dashboardMeta && state.dashboardMeta.pagination && state.dashboardMeta.pagination.visits && state.dashboardMeta.pagination.visits.truncated);
       setChip('panelStatusChip', totalVisits + ' visita(s)' + (isTruncated ? ' • parcial' : ''), isTruncated ? 'warn' : 'accent');
       updateShellHeaderInfo();
       setBanner(isTruncated ? 'Atualizado com paginação no servidor. Refine o recorte para detalhar mais.' : 'Atualizado.', isTruncated ? 'warn' : 'ok');
-    }).catch(function (error) {
-      return loadLocalBundle().then(function (localBundle) {
-        var hasFallbackData = !!(
-          (localBundle.visits && localBundle.visits.length) ||
-          (localBundle.properties && localBundle.properties.length) ||
-          (localBundle.agents && localBundle.agents.length)
-        );
-        if (hasFallbackData) {
-          applyDashboardBundle(localBundle, isApiConfigured() ? 'cloud-cache' : 'local');
-          setChip('panelModeChip', isApiConfigured() ? 'Base privada' : 'Modo local', 'warn');
-          setChip('panelStatusChip', state.filteredVisits.length ? (state.filteredVisits.length + ' visita(s)') : 'Sem visitas no recorte', state.filteredVisits.length ? 'accent' : 'warn');
-          updateShellHeaderInfo();
-          setBanner(isApiConfigured()
-            ? 'API do recorte indisponível. Usando a base privada já carregada no painel.'
-            : 'Painel carregado no modo local.', 'warn');
-          return;
-        }
-        if (state.allVisits && state.allVisits.length) {
-          applyFilters();
-          setChip('panelModeChip', 'Nuvem indisponível', 'warn');
-          setChip('panelStatusChip', state.filteredVisits.length ? (state.filteredVisits.length + ' visita(s)') : 'Sem visitas no recorte', state.filteredVisits.length ? 'accent' : 'warn');
-          updateShellHeaderInfo();
-          setBanner('API indisponível. Mantendo o último recorte carregado.', 'warn');
-          return;
-        }
-        state.source = isApiConfigured() ? 'api' : 'local';
-        state.allVisits = [];
-        state.allProperties = [];
-        state.allTubitos = [];
-        state.allSupervisionRequests = [];
-        state.allAgents = getCloudPanelAgents();
+    }).catch(function () {
+      if (isApiConfigured()) {
+        state.source = 'api';
         state.dashboardSummary = null;
         state.dashboardMeta = null;
+        if (!(state.allVisits && state.allVisits.length)) {
+          state.allVisits = [];
+        }
+        if (!(state.allProperties && state.allProperties.length)) {
+          state.allProperties = [];
+        }
+        if (!(state.allAgents && state.allAgents.length)) {
+          state.allAgents = getCloudPanelAgents();
+        }
+        if (!(state.allSupervisionRequests && state.allSupervisionRequests.length)) {
+          state.allSupervisionRequests = [];
+        }
         applyFilters();
-        setChip('panelModeChip', isApiConfigured() ? 'Nuvem indisponível' : 'Modo local', 'warn');
-        setChip('panelStatusChip', 'Sem dados', 'warn');
+        setChip('panelModeChip', 'Nuvem indisponível', 'warn');
+        setChip('panelStatusChip', state.filteredVisits.length ? (state.filteredVisits.length + ' visita(s)') : 'API indisponível', state.filteredVisits.length ? 'accent' : 'warn');
         updateShellHeaderInfo();
-        setBanner((error && error.message ? error.message + '. ' : '') + 'Painel sem dados válidos para o recorte.', 'warn');
+        setBanner(state.filteredVisits.length ? 'API indisponível. Mantendo o último recorte carregado.' : 'API indisponível. Painel sem dados válidos para o recorte.', 'warn');
+        return;
+      }
+      state.source = 'local';
+      loadLocalBundle().then(function (localBundle) {
+        state.allVisits = localBundle.visits || [];
+        state.allProperties = localBundle.properties || [];
+        state.allTubitos = localBundle.tubitos || [];
+        state.allSupervisionRequests = localBundle.supervisionRequests || [];
+        state.allAgents = localBundle.agents || getCloudPanelAgents();
+        state.dashboardSummary = null;
+        state.dashboardMeta = null;
+        applyInitialRangeFromVisits();
+        applyFilters();
+        setChip('panelModeChip', 'Modo local', 'warn');
+        setChip('panelStatusChip', 'Fallback local', 'warn');
+        updateShellHeaderInfo();
+        setBanner('API indisponível. Painel carregado no modo local.', 'warn');
       });
     });
   }
@@ -3631,7 +3802,7 @@
         map[key] = { bairro: visit.bairro || 'Sem bairro', microarea: visit.microarea || '-', focos: 0, quarteirões: {}, visitas: 0 };
       }
       map[key].visitas += 1;
-      map[key].focos += getVisitFocusMetric(visit);
+      map[key].focos += Number(visit.focusCount || 0) + Number(visit.depositFocusCount || 0);
       if (visit.quarteirao) { map[key].quarteirões[visit.quarteirao] = true; }
     });
     return Object.keys(map).map(function (key) {
@@ -4708,88 +4879,114 @@
 
   function territoryMatchesCurrentFilter(feature) {
     var bairroFilter = document.getElementById('bairroFilter');
+    var microareaFilter = document.getElementById('microareaFilter');
     var quarteiraoFilter = document.getElementById('quarteiraoFilter');
-    var bairro = bairroFilter ? normalizeLabel(bairroFilter.value) : '';
+    var territoryKeys = [];
     var quarteirao = quarteiraoFilter ? normalizeQuarteirao(quarteiraoFilter.value) : '';
 
-    if (bairro && feature.territoryKey !== bairro) {
+    pushUniqueNormalized(territoryKeys, microareaFilter && microareaFilter.value, normalizeTerritoryCandidate);
+    pushUniqueNormalized(territoryKeys, bairroFilter && bairroFilter.value, normalizeTerritoryCandidate);
+
+    if (territoryKeys.length && !featureMatchesTerritoryKeys(feature, territoryKeys)) {
       return false;
     }
     if (quarteirao && feature.quarteiraoKey !== quarteirao) {
       return false;
     }
-    return !!(bairro || quarteirao);
+    return !!(territoryKeys.length || quarteirao);
   }
 
-  function resolvePolygonForVisit(visit) {
-    var visitQuarteirao = normalizeQuarteirao(visit.gpsQuarteirao || visit.quarteirao);
-    var visitTerritory = normalizeTerritoryCandidate(visit.gpsTerritory || visit.bairro || visit.microarea);
-    var directMatch;
-
-    if (visitQuarteirao) {
-      directMatch = state.territoryPolygons.filter(function (feature) {
-        return feature.quarteiraoKey === visitQuarteirao && (!visitTerritory || feature.territoryKey === visitTerritory);
-      });
-      if (directMatch[0]) {
-        return directMatch[0];
-      }
-
-      directMatch = state.territoryPolygons.filter(function (feature) {
-        return feature.quarteiraoKey === visitQuarteirao;
-      });
-      if (directMatch.length === 1) {
-        return directMatch[0];
-      }
-    }
-
-    if (visit.gps_lat === null || visit.gps_lng === null) {
-      return null;
-    }
-
-    return state.territoryPolygons.find(function (feature) {
-      return pointInsidePolygon(visit.gps_lat, visit.gps_lng, feature.coordinates);
-    }) || null;
+  function featureMatchesTerritoryKeys(feature, territoryKeys) {
+    var featureKey = normalizeTerritoryCandidate(feature && (feature.territoryName || feature.folder || feature.originalName || feature.name));
+    return (territoryKeys || []).some(function (key) {
+      return !!(key && featureKey) && (key === featureKey || key.indexOf(featureKey) > -1 || featureKey.indexOf(key) > -1);
+    });
   }
 
-  function resolveTerritoryPointForVisit(visit) {
-    var visitQuarteirao = normalizeQuarteirao(visit.gpsQuarteirao || visit.quarteirao);
-    var visitTerritory = normalizeTerritoryCandidate(visit.gpsTerritory || visit.bairro || visit.microarea);
-    var directMatch;
+  function findTerritoryFeatureByVisitKeys(features, visit, requireQuarter) {
+    var territoryKeys = getVisitTerritoryKeys(visit);
+    var quarterKeys = getVisitQuarteiraoKeys(visit);
+    var matches;
 
-    if (visitQuarteirao) {
-      directMatch = state.territoryPoints.filter(function (feature) {
-        return feature.quarteiraoKey === visitQuarteirao && (!visitTerritory || feature.territoryKey === visitTerritory);
+    features = features || [];
+
+    if (requireQuarter !== false && quarterKeys.length) {
+      matches = features.filter(function (feature) {
+        return quarterKeys.indexOf(feature.quarteiraoKey) > -1 &&
+          (!territoryKeys.length || featureMatchesTerritoryKeys(feature, territoryKeys));
       });
-      if (directMatch[0]) {
-        return directMatch[0];
+      if (matches.length) {
+        return matches[0];
       }
 
-      directMatch = state.territoryPoints.filter(function (feature) {
-        return feature.quarteiraoKey === visitQuarteirao;
+      matches = features.filter(function (feature) {
+        return quarterKeys.indexOf(feature.quarteiraoKey) > -1;
       });
-      if (directMatch.length === 1) {
-        return directMatch[0];
+      if (matches.length === 1) {
+        return matches[0];
       }
     }
 
-    if (visitTerritory) {
-      directMatch = state.territoryPoints.filter(function (feature) {
-        return feature.territoryKey === visitTerritory;
+    if (territoryKeys.length && requireQuarter === false) {
+      matches = features.filter(function (feature) {
+        return featureMatchesTerritoryKeys(feature, territoryKeys);
       });
-      if (directMatch[0]) {
-        return directMatch[0];
+      if (matches.length === 1) {
+        return matches[0];
       }
     }
 
     return null;
   }
 
-  function getMapCoordinateForVisit(visit) {
-    var rawLat = visit.gps_lat;
-    var rawLng = visit.gps_lng;
+  function resolvePolygonForVisit(visit) {
+    var directMatch = findTerritoryFeatureByVisitKeys(state.territoryPolygons, visit, true);
+    var trustedCoordinate;
+    if (directMatch) {
+      return directMatch;
+    }
+
+    trustedCoordinate = getTrustedMapCoordinate(visit.gps_lat, visit.gps_lng);
+    if (trustedCoordinate) {
+      directMatch = state.territoryPolygons.find(function (feature) {
+        return pointInsidePolygon(trustedCoordinate.lat, trustedCoordinate.lng, feature.coordinates);
+      });
+      if (directMatch) {
+        return directMatch;
+      }
+    }
+
+    return null;
+  }
+
+  function resolveTerritoryPointForVisit(visit) {
+    var directMatch = findTerritoryFeatureByVisitKeys(state.territoryPoints, visit, true);
+    if (directMatch) {
+      return directMatch;
+    }
+
+    directMatch = findTerritoryFeatureByVisitKeys(state.territoryPoints, visit, false);
+    if (directMatch) {
+      return directMatch;
+    }
+
+    return null;
+  }
+
+  function getMapCoordinateForVisit(visit, options) {
+    var rawCoordinate = getTrustedMapCoordinate(visit.gps_lat, visit.gps_lng);
+    var rawLat = rawCoordinate ? rawCoordinate.lat : null;
+    var rawLng = rawCoordinate ? rawCoordinate.lng : null;
+    var allowTerritoryFallback = !!(options && options.allowTerritoryFallback);
     var polygon = resolvePolygonForVisit(visit);
     if (rawLat !== null && rawLng !== null && polygon && pointInsidePolygon(rawLat, rawLng, polygon.coordinates)) {
       return { lat: rawLat, lng: rawLng, source: 'gps' };
+    }
+    if (rawLat !== null && rawLng !== null && isCoordinateInsideTerritory(rawLat, rawLng)) {
+      return { lat: rawLat, lng: rawLng, source: 'gps' };
+    }
+    if (!allowTerritoryFallback) {
+      return null;
     }
     var centroid = polygon ? getPolygonCentroid(polygon.coordinates) : null;
     if (centroid) {
@@ -4798,9 +4995,6 @@
     var territoryPoint = resolveTerritoryPointForVisit(visit);
     if (territoryPoint && territoryPoint.coordinates.length === 2) {
       return { lat: territoryPoint.coordinates[0], lng: territoryPoint.coordinates[1], source: 'kmz-point' };
-    }
-    if (rawLat !== null && rawLng !== null && isCoordinateInsideTerritory(rawLat, rawLng)) {
-      return { lat: rawLat, lng: rawLng, source: 'gps' };
     }
     return null;
   }
@@ -4931,14 +5125,36 @@
     return !!expected && keys.indexOf(expected) !== -1;
   }
 
-  function getVisitTerritoryKeys(visit) {
-    return [
-      normalizeTerritoryCandidate(visit && visit.gpsTerritory),
-      normalizeTerritoryCandidate(visit && visit.microarea),
-      normalizeTerritoryCandidate(visit && visit.bairro)
-    ].filter(function (key, index, list) {
-      return !!key && list.indexOf(key) === index;
+  function pushUniqueNormalized(list, value, normalizer) {
+    String(value || '').split(/[|;,]+/).forEach(function (part) {
+      var normalized = normalizer(part);
+      if (normalized && list.indexOf(normalized) === -1) {
+        list.push(normalized);
+      }
     });
+  }
+
+  function getVisitQuarteiraoKeys(visit) {
+    var keys = [];
+    pushUniqueNormalized(keys, visit && visit.gpsQuarteirao, normalizeQuarteirao);
+    pushUniqueNormalized(keys, visit && visit.gps_quarteirao, normalizeQuarteirao);
+    pushUniqueNormalized(keys, visit && visit.quarteirao, normalizeQuarteirao);
+    pushUniqueNormalized(keys, visit && visit.liraaQuarteiraoSorteado, normalizeQuarteirao);
+    pushUniqueNormalized(keys, visit && visit.liraa_quarteirao_sorteado, normalizeQuarteirao);
+    pushUniqueNormalized(keys, visit && visit.operationQuarteiraoDesignado, normalizeQuarteirao);
+    pushUniqueNormalized(keys, visit && visit.operation_quarteirao_designado, normalizeQuarteirao);
+    return keys;
+  }
+
+  function getVisitTerritoryKeys(visit) {
+    var keys = [];
+    pushUniqueNormalized(keys, visit && visit.gpsTerritory, normalizeTerritoryCandidate);
+    pushUniqueNormalized(keys, visit && visit.gps_territory, normalizeTerritoryCandidate);
+    pushUniqueNormalized(keys, visit && visit.microarea, normalizeTerritoryCandidate);
+    pushUniqueNormalized(keys, visit && visit.bairro, normalizeTerritoryCandidate);
+    pushUniqueNormalized(keys, visit && visit.operationMicroareaDesignada, normalizeTerritoryCandidate);
+    pushUniqueNormalized(keys, visit && visit.operation_microarea_designada, normalizeTerritoryCandidate);
+    return keys;
   }
 
   function getPropertyTerritoryKeys(property) {
@@ -4954,14 +5170,14 @@
     var featureTerritory = getTerritoryFeatureKey(feature);
     var visitTerritories = getVisitTerritoryKeys(visit);
     var featureQuarter = isQuarteiraoFeature(feature) ? normalizeQuarteirao(feature.name) : '';
-    var visitQuarter = normalizeQuarteirao(visit && (visit.gpsQuarteirao || visit.quarteirao));
+    var visitQuarters = getVisitQuarteiraoKeys(visit);
     var polygon;
 
     if (featureQuarter) {
-      if (visitQuarter === featureQuarter && (!featureTerritory || hasTerritoryKeyMatch(visitTerritories, featureTerritory))) {
+      if (visitQuarters.indexOf(featureQuarter) > -1 && (!featureTerritory || featureMatchesTerritoryKeys(feature, visitTerritories))) {
         return true;
       }
-    } else if (featureTerritory && hasTerritoryKeyMatch(visitTerritories, featureTerritory)) {
+    } else if (featureTerritory && featureMatchesTerritoryKeys(feature, visitTerritories)) {
       return true;
     }
     polygon = resolvePolygonForVisit(visit);
@@ -4980,7 +5196,7 @@
     if (featureQuarter && propertyQuarter !== featureQuarter) {
       return false;
     }
-    return !featureTerritory || hasTerritoryKeyMatch(propertyTerritories, featureTerritory);
+    return !featureTerritory || featureMatchesTerritoryKeys(feature, propertyTerritories);
   }
 
   function getTerritoryFeatureVisits(feature, visits) {
@@ -5358,6 +5574,8 @@
 
     territoryStats = aggregateTerritoryMetrics(visits);
     var highlightedCount = 0;
+    var allPolygonBounds = [];
+    var highlightedPolygonBounds = [];
 
     state.territoryPolygons.forEach(function (feature) {
       var metrics = territoryStats.rows[feature.id] || null;
@@ -5395,13 +5613,22 @@
         polygon.addTo(state.map);
       }
       state.territoryPolygonLayers.push(polygon);
+      feature.coordinates.forEach(function (coord) {
+        addTrustedMapPoint(allPolygonBounds, coord[0], coord[1]);
+      });
       if (shouldHighlight) {
         highlightedCount += 1;
         feature.coordinates.forEach(function (coord) {
-          bounds.push(coord);
+          addTrustedMapPoint(highlightedPolygonBounds, coord[0], coord[1]);
         });
       }
     });
+
+    if (state.mapToggles.polygons && Array.isArray(bounds)) {
+      (highlightedPolygonBounds.length ? highlightedPolygonBounds : allPolygonBounds).forEach(function (coord) {
+        bounds.push(coord);
+      });
+    }
 
     if (state.mapToggles.points) {
       state.territoryPoints.forEach(function (feature) {
@@ -5525,6 +5752,7 @@
     var groups = [];
     var pointItems = [];
     var showVisits = !!(state.mapToggles.visits && (state.mapToggles.visitOpen || state.mapToggles.visitClosed || state.mapToggles.visitRecovered));
+
     if (showVisits) {
       if (state.mapToggles.visitOpen) {
         pointItems.push('<span><i class="ace-map-dot ace-map-dot-open"></i>Aberto/visitado</span>');
@@ -5656,7 +5884,7 @@
         '<br>Endereço: ' + escapeHtml([(visit.logradouro || '-'), (visit.numero || '')].filter(Boolean).join(', ')) +
         '<br>Status: ' + escapeHtml(getPanelLadderStatus(visit)), { autoPan: false, maxWidth: 300 });
       state.mapLayers.push(marker);
-      points.push([visit.gps_lat, visit.gps_lng]);
+      addTrustedMapPoint(points, visit.gps_lat, visit.gps_lng);
     });
   }
 
@@ -5665,7 +5893,7 @@
       return;
     }
     getOpenPanelSupervisionRequests(requests).filter(function (request) {
-      return visitCoordinateValid(request.gps_lat) && visitCoordinateValid(request.gps_lng);
+      return isTrustedMapCoordinate(request.gps_lat, request.gps_lng);
     }).forEach(function (request) {
       var marker = L.circleMarker([request.gps_lat, request.gps_lng], {
         radius: 9.5,
@@ -5680,7 +5908,7 @@
         '<br>Mensagem: ' + escapeHtml(request.mensagem || 'Agente solicitou supervisão em campo.') +
         '<br>Status: ' + escapeHtml(getPanelSupervisionStatus(request)), { autoPan: false, maxWidth: 300 });
       state.mapLayers.push(marker);
-      points.push([request.gps_lat, request.gps_lng]);
+      addTrustedMapPoint(points, request.gps_lat, request.gps_lng);
     });
   }
 
@@ -5706,7 +5934,7 @@
       });
 
       state.mapLayers.push(marker);
-      points.push([agent.lat, agent.lng]);
+      addTrustedMapPoint(points, agent.lat, agent.lng);
     });
   }
 
@@ -5744,12 +5972,14 @@
     state.mapLayers = [];
 
     var points = [];
+    var territoryBounds = [];
     var heatBuckets = createHeatBuckets();
-    var territoryStats = renderTerritoryLayers(visits, points) || { rows: {} };
+    var territoryStats = renderTerritoryLayers(visits, territoryBounds) || { rows: {} };
     var mode = getTerritoryMetricMode();
 
     visits.forEach(function (visit) {
-      var mapCoordinate = getMapCoordinateForVisit(visit);
+      var gpsCoordinate = getMapCoordinateForVisit(visit, { allowTerritoryFallback: false });
+      var mapCoordinate = gpsCoordinate || getMapCoordinateForVisit(visit, { allowTerritoryFallback: true });
       if (!mapCoordinate) {
         return;
       }
@@ -5766,8 +5996,8 @@
       var statusTone = getVisitStatusTone(visit);
       var labText = formatLabSummaryForVisit(visit);
       var labPositiveCount = getAedesPositiveTubitoCountForVisit(visit);
-      var showVisitMarker = !!(state.mapToggles.visits && state.mapToggles[statusTone.key]);
-      var showLabPositiveMarker = !!(state.mapToggles.labPositive && labPositiveCount > 0);
+      var showVisitMarker = !!(gpsCoordinate && state.mapToggles.visits && state.mapToggles[statusTone.key]);
+      var showLabPositiveMarker = !!(gpsCoordinate && state.mapToggles.labPositive && labPositiveCount > 0);
       if (showVisitMarker || showLabPositiveMarker) {
         var marker = L.circleMarker([mapCoordinate.lat, mapCoordinate.lng], {
           radius: showLabPositiveMarker ? 8.6 : (statusTone.key === 'visitOpen' ? 6.25 : 6.85),
@@ -5797,7 +6027,9 @@
         });
         state.mapLayers.push(marker);
       }
-      points.push([mapCoordinate.lat, mapCoordinate.lng]);
+      if (gpsCoordinate) {
+        addTrustedMapPoint(points, gpsCoordinate.lat, gpsCoordinate.lng);
+      }
     });
 
     renderLadderMapMarkers(visits, points);
@@ -5809,16 +6041,21 @@
         renderToneHeatFallback(state.map, state.mapLayers, heatBuckets);
         ['low', 'medium', 'high'].forEach(function (toneKey) {
           (heatBuckets[toneKey] || []).forEach(function (item) {
-            points.push([item[0], item[1]]);
+            addTrustedMapPoint(points, item[0], item[1]);
           });
         });
       }
     }
 
+    var safePoints = getTrustedMapPoints(points);
+    var safeTerritoryBounds = getTrustedMapPoints(territoryBounds);
+
     if (state.preserveMapView && previousView) {
       state.map.setView(previousView.center, previousView.zoom, { animate: false });
-    } else if (points.length) {
-      state.map.fitBounds(points, { padding: [30, 30], maxZoom: 16 });
+    } else if (safePoints.length) {
+      state.map.fitBounds(safePoints, { padding: [46, 46], maxZoom: 14 });
+    } else if (safeTerritoryBounds.length) {
+      state.map.fitBounds(safeTerritoryBounds, { padding: [46, 46], maxZoom: 15 });
     } else {
       state.map.setView(CONFIG.MAP_CENTER, CONFIG.MAP_ZOOM);
     }
