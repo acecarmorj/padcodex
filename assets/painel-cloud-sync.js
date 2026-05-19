@@ -5,8 +5,8 @@
   var documentRef = document;
 
   var CONFIG = {
-    version: '20260519-v65-mapa-final',
-    panelAppSrc: './assets/painel-app.js?v=20260519-v65-mapa-final',
+    version: '20260519-v65-mapa-icones',
+    panelAppSrc: './assets/painel-app.js?v=20260519-v65-mapa-icones',
     loginAction: 'panel_login',
     bundleAction: 'panel_bundle_private',
     logoutAction: 'panel_logout',

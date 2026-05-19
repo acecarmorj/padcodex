@@ -4982,21 +4982,173 @@
     if (rawLat !== null && rawLng !== null && polygon && pointInsidePolygon(rawLat, rawLng, polygon.coordinates)) {
       return { lat: rawLat, lng: rawLng, source: 'gps' };
     }
-    if (rawLat !== null && rawLng !== null && isCoordinateInsideTerritory(rawLat, rawLng)) {
+    if (!polygon && rawLat !== null && rawLng !== null && isCoordinateInsideTerritory(rawLat, rawLng)) {
       return { lat: rawLat, lng: rawLng, source: 'gps' };
     }
     if (!allowTerritoryFallback) {
       return null;
     }
-    var centroid = polygon ? getPolygonCentroid(polygon.coordinates) : null;
-    if (centroid) {
-      return { lat: centroid[0], lng: centroid[1], source: 'territory' };
+    if (polygon) {
+      return getDistributedPolygonCoordinate_(polygon, visit, options, rawCoordinate);
     }
     var territoryPoint = resolveTerritoryPointForVisit(visit);
     if (territoryPoint && territoryPoint.coordinates.length === 2) {
-      return { lat: territoryPoint.coordinates[0], lng: territoryPoint.coordinates[1], source: 'kmz-point' };
+      return getDistributedPointCoordinate_(territoryPoint, visit, options, rawCoordinate);
     }
     return null;
+  }
+
+  function getVisitDistributionSeed_(visit) {
+    var text = [
+      visit && visit.uid,
+      visit && visit.property_uid,
+      visit && visit.propertyUid,
+      visit && visit.data,
+      visit && visit.hora,
+      visit && visit.logradouro,
+      visit && visit.numero,
+      visit && visit.situacao
+    ].join('|');
+    var hash = 2166136261;
+    var i;
+    for (i = 0; i < text.length; i += 1) {
+      hash ^= text.charCodeAt(i);
+      hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    }
+    return hash >>> 0;
+  }
+
+  function getDistributionSlot_(slotMap, key) {
+    var slot;
+    if (!slotMap || !key) {
+      return 0;
+    }
+    slot = Number(slotMap[key] || 0) || 0;
+    slotMap[key] = slot + 1;
+    return slot;
+  }
+
+  function seededFraction_(seed, salt) {
+    var value = ((Number(seed || 1) >>> 0) + ((Number(salt || 0) + 1) * 2654435761)) >>> 0;
+    value ^= value << 13;
+    value ^= value >>> 17;
+    value ^= value << 5;
+    return ((value >>> 0) % 1000000) / 1000000;
+  }
+
+  function findSafePolygonAnchor_(polygon) {
+    var centroid = getPolygonCentroid(polygon && polygon.coordinates);
+    var bounds = getCoordinatesBounds(polygon && polygon.coordinates);
+    var steps = [0.5, 0.35, 0.65, 0.2, 0.8];
+    var i;
+    var j;
+    var lat;
+    var lng;
+    if (centroid && pointInsidePolygon(centroid[0], centroid[1], polygon.coordinates)) {
+      return centroid;
+    }
+    if (!bounds) {
+      return centroid;
+    }
+    for (i = 0; i < steps.length; i += 1) {
+      for (j = 0; j < steps.length; j += 1) {
+        lat = bounds.minLat + (bounds.latSpan * steps[i]);
+        lng = bounds.minLng + (bounds.lngSpan * steps[j]);
+        if (pointInsidePolygon(lat, lng, polygon.coordinates)) {
+          return [lat, lng];
+        }
+      }
+    }
+    return centroid || [bounds.minLat + (bounds.latSpan / 2), bounds.minLng + (bounds.lngSpan / 2)];
+  }
+
+  function getDistributedPolygonCoordinate_(polygon, visit, options, rawCoordinate) {
+    var bounds = getCoordinatesBounds(polygon && polygon.coordinates);
+    var anchor = findSafePolygonAnchor_(polygon);
+    var seed = getVisitDistributionSeed_(visit);
+    var slot = getDistributionSlot_(options && options.slotMap, 'polygon:' + String(polygon && polygon.id || ''));
+    var goldenAngle = 2.399963229728653;
+    var baseAngle = ((seed % 360) * Math.PI) / 180;
+    var latSpan = bounds ? Math.max(bounds.latSpan, 0.00008) : 0.00008;
+    var lngSpan = bounds ? Math.max(bounds.lngSpan, 0.00008) : 0.00008;
+    var attempt;
+    var sequence;
+    var radius;
+    var angle;
+    var lat;
+    var lng;
+
+    if (!polygon || !Array.isArray(polygon.coordinates) || !anchor) {
+      return null;
+    }
+
+    for (attempt = 0; attempt < 42; attempt += 1) {
+      sequence = Math.max(0, slot) + 1 + (attempt * 7);
+      radius = Math.min(0.46, 0.055 + (Math.sqrt(sequence) * 0.042));
+      angle = baseAngle + (sequence * goldenAngle);
+      lat = anchor[0] + (Math.sin(angle) * latSpan * radius);
+      lng = anchor[1] + (Math.cos(angle) * lngSpan * radius);
+      if (pointInsidePolygon(lat, lng, polygon.coordinates)) {
+        return {
+          lat: Number(lat.toFixed(7)),
+          lng: Number(lng.toFixed(7)),
+          source: 'territory-spread',
+          sourceReason: rawCoordinate ? 'gps-outside-polygon' : 'no-gps',
+          territoryId: polygon.id
+        };
+      }
+    }
+
+    if (bounds) {
+      for (attempt = 0; attempt < 80; attempt += 1) {
+        lat = bounds.minLat + (bounds.latSpan * seededFraction_(seed, attempt + slot));
+        lng = bounds.minLng + (bounds.lngSpan * seededFraction_(seed, attempt + slot + 97));
+        if (pointInsidePolygon(lat, lng, polygon.coordinates)) {
+          return {
+            lat: Number(lat.toFixed(7)),
+            lng: Number(lng.toFixed(7)),
+            source: 'territory-spread',
+            sourceReason: rawCoordinate ? 'gps-outside-polygon' : 'no-gps',
+            territoryId: polygon.id
+          };
+        }
+      }
+    }
+
+    return {
+      lat: Number(anchor[0].toFixed(7)),
+      lng: Number(anchor[1].toFixed(7)),
+      source: 'territory',
+      sourceReason: rawCoordinate ? 'gps-outside-polygon' : 'no-gps',
+      territoryId: polygon.id
+    };
+  }
+
+  function getDistributedPointCoordinate_(feature, visit, options, rawCoordinate) {
+    var coords = feature && feature.coordinates;
+    var seed = getVisitDistributionSeed_(visit);
+    var slot = getDistributionSlot_(options && options.slotMap, 'point:' + String(feature && feature.id || ''));
+    var angle = (((seed % 360) * Math.PI) / 180) + ((slot + 1) * 2.399963229728653);
+    var ring = Math.floor(Math.sqrt(slot + 1));
+    var radius = Math.min(0.0011, 0.00013 + (ring * 0.00009));
+    var lat;
+    var lng;
+    if (!Array.isArray(coords) || coords.length !== 2) {
+      return null;
+    }
+    lat = Number(coords[0]) + (Math.sin(angle) * radius);
+    lng = Number(coords[1]) + (Math.cos(angle) * radius);
+    if (!isCoordinateInsideTerritory(lat, lng)) {
+      lat = Number(coords[0]);
+      lng = Number(coords[1]);
+    }
+    return {
+      lat: Number(lat.toFixed(7)),
+      lng: Number(lng.toFixed(7)),
+      source: 'kmz-point-spread',
+      sourceReason: rawCoordinate ? 'gps-outside-territory' : 'no-gps',
+      territoryId: feature.id
+    };
   }
 
   function aggregateTerritoryMetrics(visits) {
@@ -5976,10 +6128,14 @@
     var heatBuckets = createHeatBuckets();
     var territoryStats = renderTerritoryLayers(visits, territoryBounds) || { rows: {} };
     var mode = getTerritoryMetricMode();
+    var visitPositionSlots = {};
 
     visits.forEach(function (visit) {
       var gpsCoordinate = getMapCoordinateForVisit(visit, { allowTerritoryFallback: false });
-      var mapCoordinate = gpsCoordinate || getMapCoordinateForVisit(visit, { allowTerritoryFallback: true });
+      var mapCoordinate = gpsCoordinate || getMapCoordinateForVisit(visit, {
+        allowTerritoryFallback: true,
+        slotMap: visitPositionSlots
+      });
       if (!mapCoordinate) {
         return;
       }
@@ -5996,13 +6152,19 @@
       var statusTone = getVisitStatusTone(visit);
       var labText = formatLabSummaryForVisit(visit);
       var labPositiveCount = getAedesPositiveTubitoCountForVisit(visit);
-      var showVisitMarker = !!(gpsCoordinate && state.mapToggles.visits && state.mapToggles[statusTone.key]);
-      var showLabPositiveMarker = !!(gpsCoordinate && state.mapToggles.labPositive && labPositiveCount > 0);
+      var showVisitMarker = !!(mapCoordinate && state.mapToggles.visits && state.mapToggles[statusTone.key]);
+      var showLabPositiveMarker = !!(mapCoordinate && state.mapToggles.labPositive && labPositiveCount > 0);
       if (showVisitMarker || showLabPositiveMarker) {
+        var adjustedPositionText = mapCoordinate.source === 'gps'
+          ? ''
+          : (mapCoordinate.sourceReason === 'gps-outside-polygon' || mapCoordinate.sourceReason === 'gps-outside-territory'
+            ? '<br><em>GPS fora do território operacional: ícone distribuído no polígono KMZ.</em>'
+            : '<br><em>Sem GPS confiável: ícone distribuído no território KMZ.</em>');
         var marker = L.circleMarker([mapCoordinate.lat, mapCoordinate.lng], {
           radius: showLabPositiveMarker ? 8.6 : (statusTone.key === 'visitOpen' ? 6.25 : 6.85),
           color: showLabPositiveMarker ? '#7c3aed' : (mapCoordinate.source === 'gps' ? '#fff' : statusTone.markerStroke),
           weight: showLabPositiveMarker ? 3.4 : 2,
+          dashArray: mapCoordinate.source === 'gps' ? null : '3 3',
           fillColor: showLabPositiveMarker ? '#dc2626' : statusTone.markerFill,
           fillOpacity: showLabPositiveMarker ? 0.96 : 0.9
         }).addTo(state.map);
@@ -6016,7 +6178,7 @@
           (labPositiveCount > 0 ? '<br><strong>Tubito Aedes +: ' + escapeHtml(String(labPositiveCount)) + '</strong>' : '') +
           (labText ? '<br>Laboratório: ' + escapeHtml(labText) : '') +
           '<br>Caixa d\'água: ' + escapeHtml(normalizeWaterAccess(visit.waterAccess) || '-') + (normalizeWaterTankCondition(visit.waterTankCondition) ? ' • ' + escapeHtml(normalizeWaterTankCondition(visit.waterTankCondition)) : '') + (visit.waterAccessReason ? ' • ' + escapeHtml(visit.waterAccessReason) : '') +
-          (mapCoordinate.source === 'gps' ? '' : '<br><em>Posicao ajustada pelo KMZ territorial.</em>'), {
+          adjustedPositionText, {
           autoPan: false,
           maxWidth: 320
         });
@@ -6027,8 +6189,8 @@
         });
         state.mapLayers.push(marker);
       }
-      if (gpsCoordinate) {
-        addTrustedMapPoint(points, gpsCoordinate.lat, gpsCoordinate.lng);
+      if (mapCoordinate) {
+        addTrustedMapPoint(points, mapCoordinate.lat, mapCoordinate.lng);
       }
     });
 

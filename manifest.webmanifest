@@ -1,11 +1,11 @@
 {
   "name": "ACE Campo",
   "short_name": "ACE Campo",
-  "start_url": "./index.html?v=20260519-v65",
+  "start_url": "./index.html?v=20260519-v65-mapa-icones",
   "scope": "./",
   "display": "standalone",
   "background_color": "#edf4f0",
   "theme_color": "#0b4f2f",
   "description": "Aplicativo ACE Campo com trilha offline dos agentes e Painel 007 de rotas.",
-  "version": "20260519-v65"
+  "version": "20260519-v65-mapa-icones"
 }
