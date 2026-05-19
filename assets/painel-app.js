@@ -182,7 +182,7 @@
       polygons: true,
       points: false
     },
-    territoryMetricMode: 'combined',
+    territoryMetricMode: 'focus',
     activePanelView: 'indicators',
     pendingMapRender: false,
     autoTimer: null,
@@ -554,7 +554,7 @@
   }
 
   function getVisitHeatTone(visit) {
-    var hasFocus = visit.foco === 'Sim' || (visit.focusCount || 0) > 0 || (visit.depositFocusCount || 0) > 0;
+    var hasFocus = visitHasFocus(visit);
     if (hasFocus) {
       return {
         key: 'high',
@@ -634,7 +634,7 @@
   }
 
   function getTerritoryMetricMode() {
-    return state.territoryMetricMode || 'combined';
+    return state.territoryMetricMode || 'focus';
   }
 
   function getTerritoryMetricMeta(mode) {
@@ -1474,7 +1474,19 @@
   }
 
   function visitHasFocus(visit) {
-    return visit.foco === 'Sim' || Number(visit.focusCount || 0) > 0 || Number(visit.depositFocusCount || 0) > 0;
+    return normalizeLabel(visit && visit.foco) === 'sim' || Number(visit && visit.focusCount || 0) > 0 || Number(visit && visit.depositFocusCount || 0) > 0;
+  }
+
+  function getVisitFocusMetric(visit) {
+    var focusCount = Number(visit && visit.focusCount || 0) || 0;
+    var depositFocusCount = Number(visit && visit.depositFocusCount || 0) || 0;
+    if (focusCount > 0) {
+      return focusCount;
+    }
+    if (depositFocusCount > 0) {
+      return depositFocusCount;
+    }
+    return visitHasFocus(visit) ? 1 : 0;
   }
 
   function visitHasGps(visit) {
@@ -2778,7 +2790,7 @@
       depositsWithFocus += visit.depositFocusCount;
       depositsTreated += getVisitTreatedDepositCount(visit);
       bpiGrams += getVisitBpiGrams(visit);
-      focusVisits += visit.foco === 'Sim' ? 1 : 0;
+      focusVisits += visitHasFocus(visit) ? 1 : 0;
       tubitos += Number(visit.tubitos_qtd || visit.tubitosQty || 0) || 0;
       if (visit.situacao === 'Visitado') {
         opened += 1;
@@ -3590,7 +3602,7 @@
   function getTopQuarteiroesProblematicos(visits, limit) {
     var map = {};
     visits.forEach(function (visit) {
-      var foco = (visit.depositFocusCount || 0) + ((visit.foco === 'Sim' || visit.focusCount > 0) ? Number(visit.focusCount || 0) : 0);
+      var foco = getVisitFocusMetric(visit);
       var key = [visit.bairro || 'Sem bairro', visit.microarea || '-', visit.quarteirao || '-', visit.logradouro || '-'].join('||');
       if (!map[key]) {
         map[key] = { bairro: visit.bairro || 'Sem bairro', microarea: visit.microarea || '-', quarteirao: visit.quarteirao || '-', visitas: 0, focos: 0, pendencias: 0, ruas: {} };
@@ -3612,14 +3624,14 @@
   function getMicroareasComMaisQuarteiroesComFoco(visits, limit) {
     var map = {};
     visits.forEach(function (visit) {
-      var temFoco = (visit.depositFocusCount || 0) > 0 || visit.foco === 'Sim' || Number(visit.focusCount || 0) > 0;
+      var temFoco = visitHasFocus(visit);
       if (!temFoco) { return; }
       var key = [visit.bairro || 'Sem bairro', visit.microarea || '-'].join('||');
       if (!map[key]) {
         map[key] = { bairro: visit.bairro || 'Sem bairro', microarea: visit.microarea || '-', focos: 0, quarteirões: {}, visitas: 0 };
       }
       map[key].visitas += 1;
-      map[key].focos += Number(visit.focusCount || 0) + Number(visit.depositFocusCount || 0);
+      map[key].focos += getVisitFocusMetric(visit);
       if (visit.quarteirao) { map[key].quarteirões[visit.quarteirao] = true; }
     });
     return Object.keys(map).map(function (key) {
@@ -4050,8 +4062,8 @@
     var properties = state.filteredProperties || [];
     var metrics = computeMetrics(visits);
     var agents = aggregateAgents(visits, properties);
-    var bairros = aggregateByField(visits, 'bairro', function (visit) { return visit.depositFocusCount > 0 || visit.foco === 'Sim'; });
-    var microáreas = aggregateByField(visits, 'microarea', function (visit) { return visit.depositFocusCount > 0 || visit.foco === 'Sim'; });
+    var bairros = aggregateByField(visits, 'bairro', visitHasFocus);
+    var microáreas = aggregateByField(visits, 'microarea', visitHasFocus);
     var visitsByDay = aggregateByDate(visits);
     var recentVisitsByDay = visitsByDay.slice(-5);
     var treatmentByFocusType = aggregateTreatmentByFocusType(visits);
@@ -4498,7 +4510,7 @@
     var metrics = computeMetrics(state.filteredVisits || []);
     var supervisionOpen = getOpenPanelSupervisionRequests(getSupervisionRequestsForCurrentRange()).length;
     var ladderOpen = getOpenPanelLadderRequests(state.filteredVisits || []).length;
-    var bairros = aggregateByField(state.filteredVisits || [], 'bairro', function (visit) { return visit.depositFocusCount > 0 || visit.foco === 'Sim'; });
+    var bairros = aggregateByField(state.filteredVisits || [], 'bairro', visitHasFocus);
     var mainTerritory = bairros[0] ? bairros[0].nome : 'sem território crítico consolidado';
     var text = 'Resumo do dia: foram registradas ' + metrics.totalVisits + ' visita(s), com ' + metrics.depositsWithFocus + ' depósito(s) com foco, ' + metrics.depositsTreated + ' depósito(s) tratado(s), ' + metrics.bpiGrams + ' g de BPI aplicado, ' + ladderOpen + ' pedido(s) de escada em aberto e ' + supervisionOpen + ' solicitação(ões) de supervisão em aberto. Território de maior atenção: ' + mainTerritory + '.';
     switchPanelView('reports');
@@ -4818,7 +4830,7 @@
         };
       }
       map[polygon.id].visitas += 1;
-      map[polygon.id].focos += Number(visit.focusCount || 0) || 0;
+      map[polygon.id].focos += getVisitFocusMetric(visit);
       map[polygon.id].depositos += Number(visit.depositCount || 0) || 0;
       map[polygon.id].depositosComFoco += Number(visit.depositFocusCount || 0) || 0;
       map[polygon.id].tubitos += Number(visit.tubitosQty || 0) || 0;
@@ -4850,6 +4862,12 @@
     }
     if (level === 'atencao') {
       return { level: level, label: 'Atenção', stroke: '#b7791f', fill: '#facc15', opacity: 0.22 };
+    }
+    if (mode === 'focus') {
+      return { level: level, label: 'Sem foco', stroke: '#15803d', fill: '#86efac', opacity: 0.14 };
+    }
+    if (mode === 'depositFocus') {
+      return { level: level, label: 'Sem depósito com foco', stroke: '#15803d', fill: '#86efac', opacity: 0.14 };
     }
     return { level: level, label: 'Baixo risco', stroke: '#15803d', fill: '#86efac', opacity: 0.16 };
   }
@@ -4980,7 +4998,7 @@
 
   function getVisitFocusTotal(visits) {
     return (visits || []).reduce(function (total, visit) {
-      return total + (Number(visit.focusCount || 0) || 0);
+      return total + getVisitFocusMetric(visit);
     }, 0);
   }
 
@@ -5206,10 +5224,10 @@
       };
     }
     return {
-      color: shouldHighlight ? palette.stroke : '#8da0ad',
+      color: shouldHighlight ? palette.stroke : '#6f8f7c',
       weight: shouldHighlight ? 2 : 1,
-      fillColor: shouldHighlight ? palette.fill : '#dbe4e7',
-      fillOpacity: shouldHighlight ? Math.min(0.36, Math.max(palette.opacity, 0.10 + (intensity * 0.20))) : 0.05
+      fillColor: palette.fill,
+      fillOpacity: shouldHighlight ? Math.min(0.36, Math.max(palette.opacity, 0.10 + (intensity * 0.20))) : 0.08
     };
   }
 
@@ -5507,7 +5525,6 @@
     var groups = [];
     var pointItems = [];
     var showVisits = !!(state.mapToggles.visits && (state.mapToggles.visitOpen || state.mapToggles.visitClosed || state.mapToggles.visitRecovered));
-
     if (showVisits) {
       if (state.mapToggles.visitOpen) {
         pointItems.push('<span><i class="ace-map-dot ace-map-dot-open"></i>Aberto/visitado</span>');
@@ -5533,10 +5550,10 @@
     }
 
     if (state.mapToggles.polygons) {
-      groups.push('<div class="ace-map-legend-group"><em>Quarteirões</em>' +
-        '<span><i class="ace-map-swatch ace-map-risk-low"></i>Baixo / sem foco</span>' +
-        '<span><i class="ace-map-swatch ace-map-risk-medium"></i>Atenção</span>' +
-        '<span><i class="ace-map-swatch ace-map-risk-high"></i>Crítico</span>' +
+      groups.push('<div class="ace-map-legend-group"><em>Quarteirões por focos</em>' +
+        '<span><i class="ace-map-swatch ace-map-risk-low"></i>0 foco(s)</span>' +
+        '<span><i class="ace-map-swatch ace-map-risk-medium"></i>1-2 foco(s)</span>' +
+        '<span><i class="ace-map-swatch ace-map-risk-high"></i>3+ foco(s)</span>' +
       '</div>');
     }
 
@@ -6147,8 +6164,8 @@
     var visits = state.filteredVisits;
     var metrics = computeMetrics(visits);
     var agents = aggregateAgents(visits, state.filteredProperties);
-    var bairros = aggregateByField(visits, 'bairro', function (visit) { return visit.depositFocusCount > 0 || visit.foco === 'Sim'; });
-    var microáreas = aggregateByField(visits, 'microarea', function (visit) { return visit.depositFocusCount > 0 || visit.foco === 'Sim'; });
+    var bairros = aggregateByField(visits, 'bairro', visitHasFocus);
+    var microáreas = aggregateByField(visits, 'microarea', visitHasFocus);
     var focusSummary = computePropertyFocusSummary(visits);
     metrics.propertiesWithFocus = focusSummary.withFocus;
     metrics.propertiesWithoutFocus = focusSummary.withoutFocus;
