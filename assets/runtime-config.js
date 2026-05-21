@@ -9,7 +9,7 @@
    */
   window.ACS_RUNTIME_CONFIG = Object.assign({}, window.ACS_RUNTIME_CONFIG || {}, {
 
-    BUILD_VERSION: '20260521-v73-fila-operacional',
+    BUILD_VERSION: '20260521-v75-cadastro-imoveis-limpo',
     API_URL: API_URL,
     SHEETS_WEBAPP_URL: API_URL,
     API_TOKEN: '',
@@ -19,6 +19,6 @@
     MAP_ZOOM: 13,
     ONLINE_PANEL_IDLE_TIMEOUT_MINUTES: 20,
     PANEL_007_IDLE_TIMEOUT_MINUTES: 20,
-    FRONTEND_PATCH: 'v73-fila-operacional'
+    FRONTEND_PATCH: 'v75-cadastro-imoveis-limpo'
   });
 }());

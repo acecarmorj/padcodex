@@ -1,0 +1,293 @@
+SISTEMA ACE CAMPO / PADCODEX - LEIA ANTES DE ALTERAR
+Ultima auditoria local: 2026-05-21
+
+Objetivo deste arquivo
+======================
+Este TXT resume o que o sistema faz, quais telas existem, quais regras devem
+ser preservadas e quais cuidados uma IA futura deve seguir antes de editar ou
+publicar qualquer versao.
+
+Pastas e repositorios
+=====================
+- Pasta principal local: D:\padcodex
+- Espelho local: D:\ACE-FINAL
+- GitHub principal: https://github.com/acecarmorj/padcodex
+- GitHub espelho/legado: https://github.com/acecarmorj/ACE
+- O conteudo de D:\ACE-FINAL deve ficar igual ao conteudo de D:\padcodex.
+- O arquivo backend\Code.gs e o arquivo api.txt devem ser identicos. api.txt e
+  a copia unica da API em TXT para colar/conferir no Google Apps Script.
+
+Regra de identidade visual
+==========================
+- Nao usar brasao, marca oficial municipal, icone oficial ou assinatura visual
+  oficial nas telas, abertura do programa ou documentos impressos.
+- Permitido usar textos institucionais neutros como "ACE Campo", "Painel
+  municipal" e "Coordenacao Municipal de Combate as Endemias".
+- O app nao deve exibir imagens de abertura ligadas a orgao publico; a abertura
+  deve ficar limpa.
+
+Telas e publico de uso
+======================
+1. index.html
+   - Tela do agente de campo.
+   - Alvo principal: tablet Samsung Galaxy Tab A11 de 8,7 polegadas.
+   - Deve funcionar 100% offline depois do primeiro login/bootstrap com internet.
+   - Usa service worker sw-acs.js, cache local, localStorage/IndexedDB e fila de
+     sincronizacao.
+   - Serve para visitas, cadastro de imoveis, tubitos, LIRAa, P.E., plano de
+     acao, supervisao, GPS pontual e trilha operacional.
+
+2. lab.html
+   - Tela do laboratorio de tubitos.
+   - Alvo principal: tablet Samsung Galaxy Tab A11 de 8,7 polegadas.
+   - Online. Nao faz parte do pacote offline do index.
+   - Usa o modulo assets/painel-laboratorio.js.
+   - Login privado por CPF/senha. Acesso esperado: Supervisor ou Administrador.
+   - Serve para consultar fila de tubitos e lancar resultado laboratorial.
+
+3. painel.html
+   - Painel da coordenacao, para computador/tela maior.
+   - Online.
+   - Mostra indicadores, mapa, relatorios, LIRAa, operacoes, cadastros e tambem
+     modulo de laboratorio dentro do painel.
+   - Dados publicos/fallback sao higienizados; dados sensiveis dependem de
+     sessao privada.
+
+4. secretaria.html
+   - Modulo da secretaria, para computador/tela maior.
+   - Online.
+   - Consulta dados, gera documentos e controla status de documentos emitidos.
+
+5. super.html
+   - Modulo de supervisao.
+   - Online.
+   - Usa mapa e solicita dados privados da API.
+
+6. 007.html
+   - Painel/rota de agentes.
+   - Online.
+   - Usa dados de trilha GPS e pontos de visitas quando disponiveis.
+
+Backend e API
+=============
+- Backend principal: backend\Code.gs.
+- Copia TXT valida da API: api.txt.
+- Plataforma: Google Apps Script + Google Sheets.
+- Segredos nao devem ficar no GitHub nem na planilha:
+  - ACE_SPREADSHEET_ID
+  - ACE_API_TOKEN
+  - ACE_ADMIN_INITIAL_PASSWORD
+  - ACE_ADMIN_INITIAL_CPF
+- Segredos reais ficam em Script Properties.
+- A aba Config deve guardar placeholders, nao segredos reais.
+- JSONP e permitido apenas para endpoints publicos sem token, como status e
+  catalogs. Chamadas privadas devem usar POST/session/token.
+
+Abas principais do Google Sheets
+================================
+- Config
+- BairrosCatalogo
+- RuasBase
+- Agentes
+- Imoveis
+- Visitas
+- Tubitos
+- AgentAttendance
+- Operations
+- OperationAssignments
+- LiraaCycles
+- MetricsDaily
+- SupervisionRequests
+- AgentLocationTrail
+- Log
+- SystemState
+- SecretariaDocumentos
+
+Autenticacao e perfis
+=====================
+- Campo/index:
+  - Agente ACE e Administrador podem entrar no app de campo.
+  - Login gera sessao operacional privada para sincronizacao.
+- Painel/coordenacao:
+  - Administrador e Coordenador.
+- Laboratorio:
+  - Administrador e Supervisor.
+- Supervisao:
+  - Administrador e Supervisor.
+- Secretaria:
+  - Administrador, Coordenador, Supervisor, Secretaria, Atendente ou
+    Administrativo.
+- Administrador:
+  - Pode criar/editar/remover usuarios, mas nao deve remover o ultimo
+    administrador ativo.
+
+Offline do index
+================
+- Somente o index deve ser 100% offline.
+- Painel, lab, secretaria, supervisao e 007 sao online.
+- O service worker sw-acs.js deixa em cache somente arquivos essenciais do
+  index.
+- Primeiro uso exige login/bootstrap com internet para salvar agentes,
+  propriedades, plano do dia, catalogos e credencial local.
+- Depois disso, o agente pode trabalhar offline e sincronizar quando voltar a
+  internet.
+- Nunca apagar visitas/tubitos locais sem confirmar sincronizacao.
+- Encerrar dia ou voltar ao login nao pode apagar producao operacional pendente.
+
+Fila, pendentes e retornos
+==========================
+- "Fila operacional" significa dados ainda nao enviados ao Sheets:
+  visitas, tubitos, imoveis alterados, solicitacoes de supervisao e alteracoes
+  administrativas.
+- "Rota GPS" e separada da fila operacional. Pontos de rota nao devem aumentar
+  o contador principal de pendencias de producao.
+- No index, "Retornos" ou "Pendentes" do dia normalmente se referem a imoveis
+  fechados/recusas que precisam de nova passagem, nao a erro de sincronizacao.
+- A logica atual separa:
+  - operationalTotal: producao que bloqueia encerramento.
+  - locationTrail/telemetryTotal: rota GPS aguardando envio.
+
+GPS e mapa
+==========
+- O GPS continuo nao deve ficar 100% ativo por padrao.
+- Config atual do index:
+  - LOCATION_TRAIL_INTERVAL_MS: 180000 ms
+  - LOCATION_TRAIL_MIN_INTERVAL_MS: 120000 ms
+  - LOCATION_TRAIL_WATCH_ENABLED: false
+- Captura pontual de GPS pode usar watchPosition temporario para pegar melhor
+  coordenada, mas a trilha continua fica desligada por padrao.
+- No painel, os icones de visitas seguem esta regra:
+  - Se o GPS e confiavel e esta no territorio/poligono correto, usar o GPS.
+  - Se o GPS esta muito distante, fora do poligono ou ausente, distribuir o
+    icone dentro do poligono KMZ/KML correspondente.
+  - Essa distribuicao evita icones sobrepostos e evita pontos perdidos fora do
+    mapa operacional.
+- Poligonos podem receber dados por territorio; icones de visita precisam de
+  coordenada confiavel ou distribuicao controlada dentro do poligono.
+
+Visitas e recuperacao
+=====================
+- Situacoes principais: Visitado, Fechado, Recuperado.
+- Recuperado so deve ser permitido quando a ultima visita anterior do imovel
+  foi Fechado.
+- A regra atual permite recuperar no mesmo dia um imovel que estava Fechado,
+  sem bloquear como duplicidade do mesmo tipo.
+- Ainda deve bloquear duplicidade quando ja existe visita do mesmo imovel,
+  mesma data, mesmo modo operacional e mesma situacao operacional, exceto no
+  caso Recuperado depois de Fechado.
+- Recuperado conta como aberto/solucionado para reduzir retorno pendente.
+
+Tubitos e laboratorio
+=====================
+- No index, ao registrar tubitos em uma visita, o app cria linhas locais de
+  tubitos com numero curto, vinculo de visita, deposito, imovel e origem
+  operacional.
+- Os tubitos entram na fila operacional e sao sincronizados para a aba Tubitos.
+- O backend usa upsertTubitoRowsPreservingLab_ para preservar resultado de
+  laboratorio ja lancado.
+- Se uma visita for sincronizada novamente, tubitos pendentes antigos daquela
+  visita podem ser podados, mas tubitos ja analisados nao devem perder resultado.
+- O laboratorio salva:
+  - status_laboratorio
+  - resultado_laboratorio
+  - especie
+  - positivo_aedes
+  - analisado_por
+  - analisado_em
+  - observacao_laboratorio
+- Depois de salvar resultado, o backend atualiza o resumo laboratorial da visita:
+  - laboratorio_status
+  - laboratorio_resultado
+  - laboratorio_positivo_aedes
+  - laboratorio_atualizado_em
+- Os cartoes de visitas e o painel devem mostrar o resultado consolidado quando
+  houver tubito vinculado.
+
+LIRAa, PE e operacoes
+=====================
+- O index recebe plano de operacao e plano LIRAa no bootstrap.
+- O modo operacional altera campos e validacoes:
+  - VD: visita domiciliar de rotina.
+  - PE: ponto estrategico, exige identificacao/local.
+  - LIRAA: ciclo/plano/quarteirao/unidade sorteada.
+- OperationAssignments e Operations controlam programacao do dia.
+- LiraaCycles guarda ciclos, plano, resumo e arquivo de ciclo.
+- Nao misturar microarea administrativa com bairro; sao campos independentes.
+
+Painel, relatorios e privacidade
+================================
+- O painel publico/fallback remove dados pessoais como morador, telefone,
+  observacoes livres e identificacao de atendido.
+- O painel privado pode exibir dados completos quando a sessao permite.
+- Relatorio de imoveis deve acompanhar filtros ativos e listar:
+  morador/responsavel, telefone, endereco, bairro, microarea, quarteirao, tipo,
+  referencia e ultima visita no recorte.
+- Se nomes de moradores aparecerem como "-", conferir se o painel esta usando
+  bundle privado; bundle publico redige esses campos de proposito.
+- Secretaria e painel sao para computador/tela maior.
+- Index e lab sao para tablet Samsung Galaxy Tab A11.
+
+Documentos da secretaria
+========================
+- Documentos ficam na aba SecretariaDocumentos.
+- Status esperado: Gerado, Impresso, Entregue, Cancelado.
+- Transicoes importantes:
+  - Entregue exige documento Impresso antes.
+  - Cancelado nao deve reabrir.
+  - Entregue nao deve voltar para etapa anterior.
+- Documentos nao devem exibir identidade visual oficial. Usar ACE Campo /
+  Modulo Secretaria.
+
+Checklist antes de publicar
+===========================
+1. Rodar sintaxe JS:
+   node --check nos arquivos JS alterados.
+2. Conferir API:
+   hash de api.txt deve ser igual ao hash de backend\Code.gs.
+3. Conferir espelho:
+   D:\ACE-FINAL deve ter os mesmos arquivos e conteudos de D:\padcodex.
+4. Conferir identidade visual:
+   buscar termos/arquivos de marca oficial, brasao ou icones antigos.
+5. Se alterar JS/CSS/HTML, atualizar sufixo ?v=... para evitar cache antigo.
+6. Se alterar index/offline, atualizar tambem:
+   - APP_VERSION em assets/index-core.js
+   - BUILD_VERSION em assets/runtime-config.js
+   - ACE_CACHE_VERSION em sw-acs.js
+   - manifest.webmanifest
+7. Se alterar backend, copiar exatamente para api.txt e depois atualizar o
+   Google Apps Script publicado.
+8. Depois de publicar GitHub, ainda pode ser necessario atualizar o deploy do
+   Apps Script manualmente.
+
+Auditoria local de 2026-05-21
+=============================
+- node --check passou em 20 arquivos JS principais.
+- api.txt, backend\Code.gs, D:\ACE-FINAL\api.txt e
+  D:\ACE-FINAL\backend\Code.gs estavam com o mesmo SHA256 antes deste TXT.
+- D:\ACE-FINAL estava identico a D:\padcodex antes das ultimas edicoes.
+- O index esta versionado como 20260521-v75-cadastro-imoveis-limpo e preparado
+  para Galaxy Tab A11.
+- Na aba Imoveis do index, o cadastro deve ficar direto: titulo centralizado,
+  sem frase "Cadastro rapido para uso em campo", sem selo "Campo" e com
+  subtitulos centralizados. Em Observacoes, evitar repetir o mesmo titulo no
+  label do campo.
+- O lab foi marcado como tela tablet A11 e usa o modulo de laboratorio com CSS
+  responsivo de A11.
+- O painel recebeu ajuste de cache para branding limpo.
+- A busca local nao encontrou ocorrencias de brasao, icones antigos nem
+  assinatura visual oficial nas telas/assets/backend antes da criacao deste TXT.
+- O mapa do painel tem funcoes para usar GPS confiavel ou distribuir icones no
+  poligono quando GPS esta ausente/fora.
+- A recuperacao de imovel fechado no mesmo dia foi ajustada para nao bloquear
+  como duplicidade indevida.
+- O fluxo de tubitos preserva resultados laboratoriais ja lancados.
+
+Cuidados finais
+===============
+- Nao adicionar bibliotecas novas se o arquivo atual ja resolve.
+- Manter o index leve, grande o suficiente para toque no A11 e sem elementos
+  ocupando espaco desnecessario.
+- Em tela de tablet, priorizar botoes grandes, texto legivel e pouca decoracao.
+- Em painel/secretaria desktop, priorizar densidade, filtros e leitura rapida.
+- Qualquer alteracao em fluxo de dados deve ser testada do campo ate o painel:
+  index -> sync -> Google Sheets/API -> painel/lab/secretaria.

@@ -21321,3 +21321,37 @@ html body.field-page #screen-painel .panel-list-card .tubito-code-list{
     grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
+/* Ajustes v75: cadastro de imóveis limpo e centralizado para o Galaxy Tab A11. */
+html body.field-page #screen-imoveis .property-form-head{
+  display:block !important;
+  text-align:center !important;
+}
+
+html body.field-page #screen-imoveis .property-form-title-wrap{
+  text-align:center !important;
+}
+
+html body.field-page #screen-imoveis .property-form-title-wrap .section-title{
+  display:flex !important;
+  justify-content:center !important;
+  text-align:center !important;
+  margin:0 !important;
+}
+
+html body.field-page #screen-imoveis .property-form-intro,
+html body.field-page #screen-imoveis .property-form-badge{
+  display:none !important;
+}
+
+html body.field-page #screen-imoveis .property-form-section__heading{
+  display:flex !important;
+  justify-content:center !important;
+  text-align:center !important;
+}
+
+html body.field-page #screen-imoveis .property-form-section__heading h3{
+  justify-content:center !important;
+  text-align:center !important;
+  width:100% !important;
+}

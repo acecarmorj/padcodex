@@ -1,11 +1,11 @@
 {
   "name": "ACE Campo",
   "short_name": "ACE Campo",
-  "start_url": "./index.html?v=20260521-v73-fila-operacional",
+  "start_url": "./index.html?v=20260521-v75-cadastro-imoveis-limpo",
   "scope": "./",
   "display": "standalone",
   "background_color": "#edf4f0",
   "theme_color": "#0b4f2f",
   "description": "Aplicativo ACE Campo com trilha offline dos agentes e Painel 007 de rotas.",
-  "version": "20260521-v73-fila-operacional"
+  "version": "20260521-v75-cadastro-imoveis-limpo"
 }

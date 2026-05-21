@@ -1443,7 +1443,7 @@
     return [
       '<div class="doc-page">',
       '<div class="doc-header">',
-      '<div class="doc-brand">PREFEITURA MUNICIPAL • ACE • MÓDULO SECRETARIA</div>',
+      '<div class="doc-brand">ACE Campo • Módulo Secretaria</div>',
       '<h1>' + escapeHtml(ctx.title || 'Documento') + '</h1>',
       '<div class="small muted">Documento padronizado para secretaria, atendimento ao cidadão e apoio à supervisão.</div>',
       '</div>',
@@ -1855,7 +1855,7 @@
     return wrapPrintableHtml(title, [
       '<div class="doc-page">',
       '<div class="doc-header">',
-      '<div class="doc-brand">PREFEITURA MUNICIPAL • ACE • MÓDULO SECRETARIA</div>',
+      '<div class="doc-brand">ACE Campo • Módulo Secretaria</div>',
       '<h1>' + escapeHtml(title) + '</h1>',
       '<div class="small muted">Emitido em ' + escapeHtml(formatDateTimeBR(new Date().toISOString())) + '</div>',
       '</div>',
