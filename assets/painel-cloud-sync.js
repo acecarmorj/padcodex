@@ -5,8 +5,8 @@
   var documentRef = document;
 
   var CONFIG = {
-    version: '20260521-v71-relatorio-imoveis',
-    panelAppSrc: './assets/painel-app.js?v=20260521-v71-relatorio-imoveis',
+    version: '20260521-v72-morador-relatorio',
+    panelAppSrc: './assets/painel-app.js?v=20260521-v72-morador-relatorio',
     loginAction: 'panel_login',
     bundleAction: 'panel_bundle_private',
     logoutAction: 'panel_logout',

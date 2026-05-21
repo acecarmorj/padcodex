@@ -6537,6 +6537,8 @@
     var propertyReportCss = '<style>@page{size:A4 landscape}.properties-report-table{table-layout:fixed;font-size:7.8px}.properties-report-table th,.properties-report-table td{padding:3px 4px}.properties-report-table .col-owner{width:15%}.properties-report-table .col-contact{width:9%}.properties-report-table .col-address{width:24%}.properties-report-table .col-area{width:16%}.properties-report-table .col-kind{width:10%}.properties-report-table .col-ref{width:14%}.properties-report-table .col-last{width:12%}.cell-detail{display:block;color:#66727c;font-size:7.2px;line-height:1.2;margin-top:2px}.nowrap{white-space:nowrap}</style>';
     var rowsHtml = properties.map(function (property) {
       var lastVisit = getLatestVisitForProperty(property, latestVisitByKey);
+      var ownerText = property.morador || (lastVisit && lastVisit.morador) || '-';
+      var phoneText = property.telefone || (lastVisit && lastVisit.telefone) || '-';
       var addressText = [
         property.logradouro || '-',
         property.numero || '-',
@@ -6551,9 +6553,9 @@
         ? [formatDateBR(lastVisit.data), lastVisit.hora || '', lastVisit.situacao || '', lastVisit.agente || ''].filter(Boolean).join(' • ')
         : 'Sem visita no período';
       return '<tr>' +
-        '<td class="col-owner">' + escapeHtml(property.morador || '-') + '</td>' +
-        '<td class="col-contact nowrap">' + escapeHtml(property.telefone || '-') + '</td>' +
-        '<td class="col-address">' + escapeHtml(addressText) + '<span class="cell-detail">' + escapeHtml(property.address_key || property.uid || '-') + '</span></td>' +
+        '<td class="col-owner">' + escapeHtml(ownerText) + '</td>' +
+        '<td class="col-contact nowrap">' + escapeHtml(phoneText) + '</td>' +
+        '<td class="col-address">' + escapeHtml(addressText) + '</td>' +
         '<td class="col-area">' + escapeHtml(areaText) + '</td>' +
         '<td class="col-kind">' + escapeHtml([property.tipo || '-', property.complemento || 'Normal'].join(' • ')) + '</td>' +
         '<td class="col-ref">' + escapeHtml(property.referencia || '-') + '</td>' +

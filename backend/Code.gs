@@ -6407,6 +6407,7 @@ function ACE_panelPrivateBundle_(payload) {
   var session = ACE_panelRequirePrivateSession_(payload || {});
   ACE_panelTouchPrivateSession_(session.token, session);
   var bundle = ACE_panelBuildPublicBundle_(payload || {});
+  bundle.visits = ACE_panelBuildPrivateVisitsForBundle_(bundle.visits || []);
   bundle.properties = ACE_panelBuildPrivatePropertiesForBundle_(bundle.properties || []);
   if (bundle.privacy) {
     bundle.privacy.redacted = false;
@@ -6414,6 +6415,7 @@ function ACE_panelPrivateBundle_(payload) {
     bundle.privacy.note = 'Pacote privado autenticado. Dados de morador e telefone liberados somente para usuários autorizados do painel.';
   }
   if (bundle.meta) {
+    bundle.meta.totalVisitsReturned = bundle.visits.length;
     bundle.meta.totalPropertiesReturned = bundle.properties.length;
   }
   bundle.private = {
@@ -6429,6 +6431,29 @@ function ACE_panelPrivateBundle_(payload) {
     expiresInSeconds: ACE_PANEL_PRIVATE.SESSION_TTL_SECONDS
   };
   return bundle;
+}
+
+function ACE_panelSanitizePrivateVisit_(visit) {
+  var clean = ACE_panelSanitizeVisit_(visit || {});
+  clean.morador = ACE_panelText_(visit && visit.morador);
+  clean.telefone = ACE_panelText_(visit && visit.telefone);
+  return clean;
+}
+
+function ACE_panelBuildPrivateVisitsForBundle_(publicVisits) {
+  var rows = readRowsAsObjects_(ACE_API.SHEETS.VISITAS);
+  var byUid = {};
+
+  rows.forEach(function(row) {
+    var clean = sanitizeObjectForHeaders_(row, ACE_API.HEADERS.Visitas);
+    var uid = String(clean.uid || '').trim();
+    if (uid) { byUid[uid] = clean; }
+  });
+
+  return (publicVisits || []).map(function(visit) {
+    var uid = String(visit && visit.uid || '').trim();
+    return ACE_panelSanitizePrivateVisit_((uid && byUid[uid]) ? byUid[uid] : (visit || {}));
+  });
 }
 
 function ACE_panelPrivatePropertyKey_(property) {
