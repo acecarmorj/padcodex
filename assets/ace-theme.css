@@ -20427,7 +20427,7 @@ body.field-page::before{
 .field-page .login-card .brand-mark,
 .field-page .ace-login-card > img,
 .field-page .ace-login-card [class*="logo"],
-.field-page .ace-login-card [class*="prefeitura"]{
+.field-page .ace-login-card [class*="pref"]{
   display:none !important;
   visibility:hidden !important;
 }

@@ -4,13 +4,8 @@
  */
 'use strict';
 
-const ACE_CACHE_VERSION = 'ace-campo-offline-20260521-stable-v68-retornos-plano';
+const ACE_CACHE_VERSION = 'ace-campo-offline-20260521-stable-v69-sem-icones';
 const ACE_CACHE_NAME = ACE_CACHE_VERSION;
-const ACE_LEGACY_BRAND_ASSETS = [
-  './assets/logo-prefeitura-carmo.png',
-  './assets/icon-192.png',
-  './assets/icon-512.png',
-];
 const ACE_STATIC_ASSETS = [
   './',
   './index.html',
@@ -65,12 +60,6 @@ function isRuntimeConfigAsset(url) {
   return stripUrlSearch(url) === stripUrlSearch(absoluteUrl('./assets/runtime-config.js'));
 }
 
-function deleteLegacyBrandAssets(cache) {
-  return Promise.all(ACE_LEGACY_BRAND_ASSETS.map((asset) => {
-    return cache.delete(absoluteUrl(asset));
-  }));
-}
-
 function precacheAsset(cache, asset) {
   const url = absoluteUrl(asset);
   return fetch(url, { cache: 'reload', credentials: 'same-origin' }).then((response) => {
@@ -98,7 +87,7 @@ self.addEventListener('activate', (event) => {
       if (key.indexOf('ace-campo-offline-') === 0 && key !== ACE_CACHE_NAME) {
         return caches.delete(key);
       }
-      return caches.open(key).then(deleteLegacyBrandAssets);
+      return Promise.resolve();
     }))).then(() => self.clients.claim()).then(() => self.clients.matchAll({ includeUncontrolled: true })).then((clients) => {
       clients.forEach((client) => {
         client.postMessage({ type: 'ACE_SW_UPDATED', version: ACE_CACHE_VERSION });
