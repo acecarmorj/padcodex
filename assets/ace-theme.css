@@ -13919,6 +13919,8 @@ body.dashboard-page.dashboard-layout-v3{
   font-weight:900;
   color:#183c2c;
   letter-spacing:.01em;
+  font-size:1rem;
+  line-height:1.25;
 }
 @media(max-width:760px){
   .field-page #screen-painel .panel-tubitos-table table,
@@ -21287,3 +21289,35 @@ body.field-page::before{
       }
     }
 /* Fim ACE Campo index tablet design v51 */
+
+/* Ajustes locais v73 para o Galaxy Tab A11 8,7". */
+html body.field-page #screen-painel #localMetricGrid.metric-grid{
+  grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+}
+
+html body.field-page #screen-painel #localRecommendations{
+  display:none !important;
+}
+
+html body.field-page #screen-painel .panel-tubitos-table .tubito-code-list,
+html body.field-page #screen-painel .panel-list-card .tubito-code-list{
+  display:inline-block !important;
+  color:#123d2a !important;
+  font-size:1rem !important;
+  line-height:1.25 !important;
+  font-weight:950 !important;
+  letter-spacing:0 !important;
+}
+
+@media (max-width: 900px){
+  html body.field-page #screen-painel #localMetricGrid.metric-grid{
+    grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+    gap:8px !important;
+  }
+}
+
+@media (max-width: 620px){
+  html body.field-page #screen-painel #localMetricGrid.metric-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  }
+}

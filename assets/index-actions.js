@@ -274,7 +274,7 @@
     var items = [
       'Versão: ' + app.CONFIG.APP_VERSION + '.',
       'Nuvem: ' + (app.isApiConfigured() ? 'conectada.' : 'não configurada.'),
-      'Fila local: ' + (health.queueTotal || health.queue || 0) + ' item(ns) aguardando envio.',
+      'Fila operacional: ' + (health.queueOperationalTotal || health.queue || 0) + ' item(ns) aguardando envio.',
       health.lastSyncAt ? 'Última sincronização: ' + app.formatSyncMoment(health.lastSyncAt) + '.' : 'Ainda não houve sincronização concluída nesta versão.',
       health.lastBackupAt ? 'Última exportação CSV: ' + health.lastBackupAt + '.' : 'CSV local ainda não exportado.',
       currentAgent ? 'Sessão atual: ' + currentAgent.nome + ' • ' + currentAgent.role + '.' : 'Sem sessão ativa no momento.'
@@ -328,7 +328,7 @@
       app.renderPanelFieldGuide();
     }
     grid.innerHTML = [
-      app.makeMetricCard('Pendentes no aparelho', health.queueTotal || health.queue || 0, (health.queueTotal || health.queue) ? 'warn' : 'ok'),
+      app.makeMetricCard('Pendentes no aparelho', health.queueOperationalTotal || health.queue || 0, (health.queueOperationalTotal || health.queue) ? 'warn' : 'ok'),
       app.makeMetricCard('Rede', health.offline ? 'Offline' : 'Online', health.offline ? 'danger' : 'accent'),
       app.makeMetricCard('Último envio', health.lastSyncAt ? app.formatSyncMoment(health.lastSyncAt) : 'Ainda não', health.lastSyncAt ? 'accent' : 'warn'),
       app.makeMetricCard('Supervisão pendente', health.queueSupervision || 0, (health.queueSupervision || 0) ? 'warn' : 'ok'),
@@ -338,7 +338,7 @@
 
     if (!pendingVisits.length) {
       list.innerHTML = '<div class="empty-state">' + app.escapeHtml(
-        (health.queueTotal || 0) > 0
+        (health.queueOperationalTotal || 0) > 0
           ? 'Não há visita pendente, mas há outros itens aguardando envio: ' + [
               health.queueTubitos ? health.queueTubitos + ' tubito(s)' : '',
               health.queueProperties ? health.queueProperties + ' cadastro(s)' : '',
@@ -366,7 +366,8 @@
 
   app.getSyncUiText = function () {
     var health = app.getServiceHealth();
-    var pendingTotal = Number(health.queueTotal || health.queue || 0);
+    var pendingTotal = Number(health.queueOperationalTotal || health.queue || 0);
+    var routePendingTotal = Number(health.queueLocationTrail || health.queueRouteTotal || 0);
     var hasPending = pendingTotal > 0 || health.pendingSync;
     if (!app.isApiConfigured()) {
       return {
@@ -405,6 +406,16 @@
         button: 'Sincronizar',
         headerButton: 'Enviar',
         title: 'Enviar agora os dados salvos no aparelho.',
+        disabled: false
+      };
+    }
+    if (routePendingTotal > 0) {
+      return {
+        chip: 'Rota ' + routePendingTotal,
+        kind: 'accent',
+        button: 'Sincronizar',
+        headerButton: 'Enviar rota',
+        title: 'Enviar pontos de rota GPS salvos no aparelho.',
         disabled: false
       };
     }
@@ -450,7 +461,8 @@
       return;
     }
     var health = app.getServiceHealth();
-    var pendingTotal = Number(health.queueTotal || health.queue || 0);
+    var pendingTotal = Number(health.queueOperationalTotal || health.queue || 0);
+    var routePendingTotal = Number(health.queueLocationTrail || health.queueRouteTotal || 0);
     var lastSync = health.lastSyncAt ? app.formatSyncMoment(health.lastSyncAt) : 'ainda não realizada';
     var detail = [];
     if (health.queue) {
@@ -467,6 +479,9 @@
     }
     if (health.pendingSync) {
       detail.push('alteração administrativa');
+    }
+    if (routePendingTotal) {
+      detail.push(routePendingTotal + ' ponto(s) de rota GPS');
     }
     node.className = 'panel-card-note sync-day-status' + (health.offline ? ' is-danger' : (pendingTotal ? ' is-warn' : ''));
     node.textContent = 'Última sincronização: ' + lastSync + '. Pendentes no aparelho: ' + pendingTotal +
@@ -652,7 +667,8 @@
     var payload = app.buildLocalBackupPayload();
     var summary = payload.fila || {};
     var message = 'O backup local contém visitas, imóveis, tubitos, GPS, rastreio de rota, supervisão e dados de fila deste aparelho.' +
-      '\n\nPendentes totais: ' + (summary.total || 0) +
+      '\n\nPendentes operacionais: ' + (summary.operationalTotal || 0) +
+      '\nPontos de rota GPS: ' + (summary.locationTrail || 0) +
       '\n\nUse apenas para contingência ou suporte autorizado. Deseja gerar o arquivo agora?';
     if (!window.confirm(message)) {
       app.showMessage('Backup local cancelado.', 'warn');
@@ -864,22 +880,24 @@
       app.refreshBatteryForTrail();
       app.recordLocationTrailPoint('track', null, {});
     }, Number(app.CONFIG.LOCATION_TRAIL_INTERVAL_MS || 120000));
-    try {
-      app.state.locationTrailWatchId = navigator.geolocation.watchPosition(function (position) {
-        app.saveLocationTrailFromGps({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-          speed: position.coords.speed,
-          heading: position.coords.heading
-        }, 'track', {});
-      }, function () {}, {
-        enableHighAccuracy: true,
-        maximumAge: Number(app.CONFIG.LOCATION_TRAIL_MAXIMUM_AGE_MS || 45000),
-        timeout: Number(app.CONFIG.LOCATION_TRAIL_GPS_TIMEOUT_MS || 12000)
-      });
-    } catch (error) {
-      app.state.locationTrailWatchId = null;
+    if (app.CONFIG.LOCATION_TRAIL_WATCH_ENABLED === true) {
+      try {
+        app.state.locationTrailWatchId = navigator.geolocation.watchPosition(function (position) {
+          app.saveLocationTrailFromGps({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            accuracy: position.coords.accuracy,
+            speed: position.coords.speed,
+            heading: position.coords.heading
+          }, 'track', {});
+        }, function () {}, {
+          enableHighAccuracy: true,
+          maximumAge: Number(app.CONFIG.LOCATION_TRAIL_MAXIMUM_AGE_MS || 45000),
+          timeout: Number(app.CONFIG.LOCATION_TRAIL_GPS_TIMEOUT_MS || 12000)
+        });
+      } catch (error) {
+        app.state.locationTrailWatchId = null;
+      }
     }
     return true;
   };
@@ -4452,9 +4470,9 @@
     var opts = options || {};
     var systemState = app.readSystemState();
     var keepClosedMark = opts.keepClosedMark !== false;
-    var summary = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { hasPending: !!app.getUnsyncedVisits().length, total: app.getUnsyncedVisits().length };
+    var summary = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { hasOperationalPending: !!app.getUnsyncedVisits().length, operationalTotal: app.getUnsyncedVisits().length };
 
-    if (summary.hasPending && opts.allowPendingClear !== true) {
+    if (summary.hasOperationalPending && opts.allowPendingClear !== true) {
       if (typeof app.showMessage === 'function') {
         app.showMessage('Dados pendentes preservados no aparelho. Sincronize antes de qualquer limpeza local.', 'warn');
       }
@@ -4571,7 +4589,7 @@
 
   app.closeDay = function () {
     var health = app.getServiceHealth ? app.getServiceHealth() : { queue: app.getUnsyncedVisits().length, queueTotal: app.getUnsyncedVisits().length };
-    var pendingTotal = Number(health.queueTotal || health.queue || 0);
+    var pendingTotal = Number(health.queueOperationalTotal || health.queue || 0);
     var button = document.getElementById('closeDayBtn');
     if (app.state.closeDayInFlight) {
       return;
@@ -4605,13 +4623,13 @@
         app.showMessage('Encerramento cancelado porque a sincronização falhou.', 'danger');
         return;
       }
-      var remaining = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { total: app.getUnsyncedVisits().length };
-      if (Number(remaining.total || 0) > 0) {
+      var remaining = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { operationalTotal: app.getUnsyncedVisits().length };
+      if (Number(remaining.operationalTotal || 0) > 0) {
         app.state.closeDayInFlight = false;
         if (typeof app.renderLocalPanel === 'function') {
           app.renderLocalPanel();
         }
-        app.showMessage('Encerramento cancelado: ainda existem ' + remaining.total + ' item(ns) salvos no aparelho aguardando envio.', 'danger');
+        app.showMessage('Encerramento cancelado: ainda existem ' + remaining.operationalTotal + ' item(ns) operacionais aguardando envio.', 'danger');
         return;
       }
       app.markDayClosed();
@@ -4982,8 +5000,8 @@
   };
 
   app.confirmExitWithPendingData = function () {
-    var summary = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { total: app.getUnsyncedVisits().length };
-    var total = Number(summary && summary.total || 0);
+    var summary = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { operationalTotal: app.getUnsyncedVisits().length };
+    var total = Number(summary && summary.operationalTotal || 0);
     if (total <= 0) { return true; }
     return window.confirm(
       'Existem ' + total + ' item(ns) salvos no tablet e ainda não enviados. ' +
@@ -5421,8 +5439,8 @@
       if (app.state.currentAgent && typeof app.recordLocationTrailPoint === 'function') {
         app.recordLocationTrailPoint('app_close', null, { eventLabel: 'App fechado' });
       }
-      var summary = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { total: app.getUnsyncedVisits().length };
-      if (Number(summary.total || 0) > 0) {
+      var summary = app.getOfflineQueueSummary ? app.getOfflineQueueSummary() : { operationalTotal: app.getUnsyncedVisits().length };
+      if (Number(summary.operationalTotal || 0) > 0) {
         event.preventDefault();
         event.returnValue = '';
       }

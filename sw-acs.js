@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const ACE_CACHE_VERSION = 'ace-campo-offline-20260521-stable-v70-recuperado-fechado';
+const ACE_CACHE_VERSION = 'ace-campo-offline-20260521-stable-v73-fila-operacional';
 const ACE_CACHE_NAME = ACE_CACHE_VERSION;
 const ACE_STATIC_ASSETS = [
   './',

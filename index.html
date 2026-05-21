@@ -9,11 +9,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ACE Campo">
-  <link rel="manifest" href="./manifest.webmanifest?v=20260521-v70-recuperado-fechado">
+  <link rel="manifest" href="./manifest.webmanifest?v=20260521-v73-fila-operacional">
   <title>ACE Campo | Carmo/RJ</title>
-  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260521-v70-recuperado-fechado">
+  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260521-v73-fila-operacional">
 
-  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260521-v70-recuperado-fechado">
+  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260521-v73-fila-operacional">
 
   <style id="index-tablet-field-final-v57">
     /* v57: CSS final para tablet; une melhorias do Codex com correção v54 da faixa verde das abas. */
@@ -358,6 +358,10 @@
       grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
       gap: 10px !important;
       margin-bottom: 12px !important;
+    }
+
+    html body.field-page #screen-painel #localMetricGrid.metric-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     }
 
     html body.field-page #screen-painel .hero-card,
@@ -1432,15 +1436,9 @@ html body.field-page {
           <div id="localMetricGrid" class="metric-grid"></div>
         </div>
 
-        <div class="grid two">
-          <div class="card ace-card">
-            <h2 class="section-title ace-section-title">Depósitos</h2>
-            <div id="localDepositSummary" class="ranking-list"></div>
-          </div>
-          <div class="card ace-card">
-            <h2 class="section-title ace-section-title">Recomendações</h2>
-            <div id="localRecommendations" class="insight-list"></div>
-          </div>
+        <div class="card ace-card">
+          <h2 class="section-title ace-section-title">Depósitos</h2>
+          <div id="localDepositSummary" class="ranking-list"></div>
         </div>
 
         <div class="card ace-card">
@@ -1498,15 +1496,15 @@ html body.field-page {
 
   <div id="syncStatus" class="sync-banner is-hidden" aria-hidden="true"></div>
 
-    <script src="./assets/runtime-config.js?v=20260521-v70-recuperado-fechado"></script>
-    <script src="./assets/carmo-territorios-data.js?v=20260521-v70-recuperado-fechado"></script>
-    <script src="./assets/ruas-carmo-data.js?v=20260521-v70-recuperado-fechado"></script>
-  <script src="./assets/ace-storage.js?v=20260521-v70-recuperado-fechado"></script>
-  <script src="./assets/index-core.js?v=20260521-v70-recuperado-fechado"></script>
-  <script src="./assets/index-render.js?v=20260521-v70-recuperado-fechado"></script>
-  <script src="./assets/index-actions.js?v=20260521-v70-recuperado-fechado"></script>
-  <script src="./assets/lgpd-hardening.js?v=20260521-v70-recuperado-fechado"></script>
-  <script src="./assets/operation-mode.js?v=20260521-v70-recuperado-fechado"></script>
-  <script src="./assets/liraa-mode.js?v=20260521-v70-recuperado-fechado"></script>
+    <script src="./assets/runtime-config.js?v=20260521-v73-fila-operacional"></script>
+    <script src="./assets/carmo-territorios-data.js?v=20260521-v73-fila-operacional"></script>
+    <script src="./assets/ruas-carmo-data.js?v=20260521-v73-fila-operacional"></script>
+  <script src="./assets/ace-storage.js?v=20260521-v73-fila-operacional"></script>
+  <script src="./assets/index-core.js?v=20260521-v73-fila-operacional"></script>
+  <script src="./assets/index-render.js?v=20260521-v73-fila-operacional"></script>
+  <script src="./assets/index-actions.js?v=20260521-v73-fila-operacional"></script>
+  <script src="./assets/lgpd-hardening.js?v=20260521-v73-fila-operacional"></script>
+  <script src="./assets/operation-mode.js?v=20260521-v73-fila-operacional"></script>
+  <script src="./assets/liraa-mode.js?v=20260521-v73-fila-operacional"></script>
 </body>
 </html>

@@ -237,7 +237,9 @@
     var snapshot = app.buildLocalSnapshot();
     var health = app.getServiceHealth();
     var totals = snapshot.totals;
-    var pendingTotal = Number(health.queueTotal || health.queue || 0);
+    var queueSummary = health.queueSummary || {};
+    var pendingTotal = Number(queueSummary.operationalTotal || health.queueOperationalTotal || health.queue || 0);
+    var routePendingTotal = Number(queueSummary.locationTrail || health.queueLocationTrail || health.queueRouteTotal || 0);
     var modeLabel = app.getCurrentOperationModeLabel ? app.getCurrentOperationModeLabel() : 'VD';
     var title;
     var text;
@@ -251,6 +253,10 @@
       title = 'Fila offline no aparelho: sincronize antes de encerrar.';
       text = 'Use Sincronizar dados para enviar visitas, tubitos e alterações locais ao Sheets.';
       kind = 'warn';
+    } else if (routePendingTotal) {
+      title = 'Rota GPS aguardando envio.';
+      text = 'Sem producao pendente. A rota vai em separado na proxima sincronizacao.';
+      kind = 'accent';
     } else {
       title = 'Fila limpa para continuar o dia.';
       text = health.lastSyncAt ? 'Última sincronização: ' + app.formatSyncMoment(health.lastSyncAt) + '.' : 'Ainda não houve sincronização concluída neste aparelho.';
@@ -264,7 +270,8 @@
       text: text,
       items: [
         { label: 'Modo atual', value: modeLabel, kind: modeLabel === 'VD' ? 'ok' : 'accent' },
-        { label: 'Fila offline', value: pendingTotal ? pendingTotal + ' item(ns)' : '0', kind: pendingTotal ? 'warn' : 'ok' },
+        { label: 'Fila operacional', value: pendingTotal ? pendingTotal + ' item(ns)' : '0', kind: pendingTotal ? 'warn' : 'ok' },
+        { label: 'Rota GPS', value: routePendingTotal ? routePendingTotal + ' ponto(s)' : '0', kind: routePendingTotal ? 'accent' : 'ok' },
         { label: 'Enviados hoje', value: String(health.sentToday || 0), kind: (health.sentToday || 0) ? 'accent' : 'warn' },
         { label: 'Último envio', value: health.lastSyncAt ? app.formatSyncMoment(health.lastSyncAt) : 'Ainda não', kind: health.lastSyncAt ? 'ok' : 'warn' },
         { label: 'GPS', value: totals.gpsCoverage + '%', kind: totals.gpsCoverage >= 80 ? 'ok' : 'warn' }
@@ -282,7 +289,8 @@
       return check && check.critical !== false && check.status !== 'ok';
     });
     var statusName = status && status.status ? status.status : 'pending';
-    var pendingTotal = Number(pending.total || health.queueTotal || health.queue || 0);
+    var pendingTotal = Number(pending.operationalTotal || health.queueOperationalTotal || health.queue || 0);
+    var routePendingTotal = Number(pending.locationTrail || health.queueLocationTrail || health.queueRouteTotal || 0);
     var networkLabel = (typeof navigator !== 'undefined' && navigator.onLine === false) || health.offline ? 'OFF' : 'ON';
     var planLabel = operation.confirmed ? 'OK' : (operation.hasSpecialPlan ? 'AJUST' : 'FALTA');
     var sentToday = Number(health.sentToday || 0);
@@ -305,7 +313,7 @@
       title = 'Tablet pronto para trabalhar offline';
       text = pendingTotal
         ? 'Há itens na fila local, mas o aparelho está pronto para continuar sem internet.'
-        : 'Login, cache e bases locais confirmados para uso no campo.';
+        : (routePendingTotal ? 'Producao sem pendencia. Pontos de rota serao enviados na proxima sincronizacao.' : 'Login, cache e bases locais confirmados para uso no campo.');
       nodeClass = 'panel-offline-command';
     } else if (statusName === 'error') {
       title = failed.length
@@ -399,8 +407,8 @@
     }
 
     checklist.push({
-      label: Number(health.queueTotal || health.queue || 0) ? (Number(health.queueTotal || health.queue || 0) + ' pendente(s)') : 'Fila local limpa',
-      kind: Number(health.queueTotal || health.queue || 0) ? 'warn' : 'ok'
+      label: Number(health.queueOperationalTotal || health.queue || 0) ? (Number(health.queueOperationalTotal || health.queue || 0) + ' pendente(s)') : 'Fila local limpa',
+      kind: Number(health.queueOperationalTotal || health.queue || 0) ? 'warn' : 'ok'
     });
     checklist.push({
       label: pendingRows.length ? (pendingRows.length + ' retorno(s)' + scopeSuffix) : ('Sem retorno aberto' + scopeSuffix),
@@ -1655,7 +1663,7 @@
             '<strong>Visita ' + app.escapeHtml(String(index + 1)) + ' • ' + app.escapeHtml(app.formatDateBR(visit.data) + ' ' + (visit.hora || '')) + '</strong>' +
             '<span>' + app.escapeHtml(getVisitAddressLabel(visit)) + '</span>' +
             (detail ? '<small>' + app.escapeHtml(detail) + '</small>' : '') +
-            '<div class="meta-pills"><span>' + app.escapeHtml(summary) + '</span></div>' +
+            '<div class="meta-pills"><span class="tubito-code-list">' + app.escapeHtml(summary) + '</span></div>' +
           '</article>';
       }).join('');
     }
@@ -1783,7 +1791,8 @@
           '<span><strong>Operação:</strong> ' + app.escapeHtml(operation.label || 'VD') + '</span>',
           '<span><strong>Data:</strong> ' + app.escapeHtml(operation.planDate ? app.formatDateBR(operation.planDate) : app.formatDateBR(app.todayISO())) + '</span>',
           '<span><strong>Agente:</strong> ' + app.escapeHtml(status.agent ? ((status.agent.matricula || '-') + ' • ' + (status.agent.nome || '')) : '-') + '</span>',
-          '<span><strong>Pendentes:</strong> ' + app.escapeHtml(String(Number(pending.total || 0))) + ' item(ns)</span>'
+          '<span><strong>Pendentes:</strong> ' + app.escapeHtml(String(Number(pending.operationalTotal || 0))) + ' item(ns)</span>',
+          '<span><strong>Rota GPS:</strong> ' + app.escapeHtml(String(Number(pending.locationTrail || 0))) + ' ponto(s)</span>'
         ].join('');
       }
       checksNode.innerHTML = (status.checks || []).map(function (check) {
@@ -1899,13 +1908,15 @@
     if (!recs.length) {
       recs.push('Produção estável. Continue registrando visitas com foco em qualidade de dado.');
     }
-    recNode.innerHTML = recs.map(function (text, index) {
-      return '' +
-        '<div class="mail-report-card mail-report-card--mini">' +
-          '<div class="mail-report-meta">' + app.escapeHtml(String(index + 1).padStart(2, '0')) + '</div>' +
-          '<p>' + app.escapeHtml(text) + '</p>' +
-        '</div>';
-    }).join('');
+    if (recNode) {
+      recNode.innerHTML = recs.map(function (text, index) {
+        return '' +
+          '<div class="mail-report-card mail-report-card--mini">' +
+            '<div class="mail-report-meta">' + app.escapeHtml(String(index + 1).padStart(2, '0')) + '</div>' +
+            '<p>' + app.escapeHtml(text) + '</p>' +
+          '</div>';
+      }).join('');
+    }
 
     if (typeof app.renderSyncDayStatus === 'function') {
       app.renderSyncDayStatus();

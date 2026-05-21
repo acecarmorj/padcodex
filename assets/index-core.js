@@ -88,7 +88,7 @@
     BOOTSTRAP_TIMEOUT_MS: 45000,
     SYNC_TIMEOUT_MS: 45000,
     AUTO_SYNC_COOLDOWN_MS: 5 * 60 * 1000,
-    APP_VERSION: 'ACE Campo 20260521-v70-recuperado-fechado - Galaxy Tab A11',
+    APP_VERSION: 'ACE Campo 20260521-v73-fila-operacional - Galaxy Tab A11',
     BAIRROS: BAIRRO_CATALOG.slice(),
     PROPERTY_TYPES: [
       'Residencial', 'Comercial', 'Terreno Baldio', 'Obra/Construção', 'Ponto Estratégico', 'Órgão Público', 'Outro'
@@ -151,9 +151,10 @@
     LOCAL_VISIT_RETENTION_DAYS: 21,
     LOCAL_VISIT_CACHE_LIMIT: 1200,
     LOCAL_LOG_RETENTION: 600,
-    LOCATION_TRAIL_INTERVAL_MS: 120000,
-    LOCATION_TRAIL_MIN_INTERVAL_MS: 60000,
+    LOCATION_TRAIL_INTERVAL_MS: 180000,
+    LOCATION_TRAIL_MIN_INTERVAL_MS: 120000,
     LOCATION_TRAIL_MIN_DISTANCE_METERS: 18,
+    LOCATION_TRAIL_WATCH_ENABLED: false,
     LOCATION_TRAIL_RETENTION_DAYS: 14,
     LOCATION_TRAIL_CACHE_LIMIT: 2500,
     LOCATION_TRAIL_UNSYNCED_TRACK_LIMIT: 1200
@@ -1743,10 +1744,13 @@
     var propertyConflictCount = propertyRows.filter(function (property) {
       return property && property.syncConflict === true;
     }).length;
-    var adminPending = system.pendingSync ? 1 : 0;
+    var isRouteOnlyPending = !!system.pendingSync && String(system.pendingReason || '') === 'location-trail';
+    var statePending = !!system.pendingSync && !isRouteOnlyPending;
+    var adminPending = statePending ? 1 : 0;
     // Logs de auditoria são mantidos e enviados em carona nas próximas sincronizações,
     // mas não bloqueiam o agente nem aparecem como produção pendente de campo.
-    var total = visits.length + tubitos.length + properties.length + supervision.length + locationTrail.length + adminPending;
+    var operationalTotal = visits.length + tubitos.length + properties.length + supervision.length + adminPending;
+    var total = operationalTotal + locationTrail.length;
     return {
       visits: visits.length,
       tubitos: tubitos.length,
@@ -1756,14 +1760,20 @@
       supervision: supervision.length,
       locationTrail: locationTrail.length,
       admin: adminPending,
+      statePending: adminPending,
+      routeOnlyPending: isRouteOnlyPending,
+      operationalTotal: operationalTotal,
+      telemetryTotal: locationTrail.length,
       total: total,
       hasPending: total > 0,
+      hasOperationalPending: operationalTotal > 0,
+      hasTelemetryPending: locationTrail.length > 0,
       pendingReason: system.pendingReason || ''
     };
   };
 
   app.hasOfflinePendingData = function () {
-    return app.getOfflineQueueSummary().hasPending;
+    return app.getOfflineQueueSummary().hasOperationalPending;
   };
 
   app.addLog = function (scope, action, targetUid, details) {
@@ -1834,15 +1844,20 @@
       queueLogs: summary.logs,
       queueSupervision: summary.supervision,
       queueLocationTrail: summary.locationTrail || 0,
+      queueRouteTotal: summary.telemetryTotal || summary.locationTrail || 0,
       queueAdmin: summary.admin,
+      queueOperationalTotal: summary.operationalTotal || 0,
       queueTotal: summary.total,
       queueSummary: summary,
+      hasOperationalPending: !!summary.hasOperationalPending,
+      hasTelemetryPending: !!summary.hasTelemetryPending,
       sentToday: typeof app.countSentTodayForCurrentAgent === 'function' ? app.countSentTodayForCurrentAgent() : 0,
       lastSyncAt: system.lastSyncAt || '',
       lastSyncError: system.lastSyncError || '',
       lastBackupAt: system.lastBackupAt || '',
       lastBootstrapAt: system.lastBootstrapAt || '',
-      pendingSync: !!system.pendingSync,
+      pendingSync: !!summary.statePending,
+      rawPendingSync: !!system.pendingSync,
       pendingReason: system.pendingReason || '',
       lastDayClosedAt: system.lastDayClosedAt || '',
       lastDayClosedDate: system.lastDayClosedDate || '',
@@ -1876,7 +1891,7 @@
   };
 
   app.getOfflineCacheName = function () {
-    return 'ace-campo-offline-20260521-stable-v70-recuperado-fechado';
+    return 'ace-campo-offline-20260521-stable-v73-fila-operacional';
   };
 
   app.isLocalFileMode = function () {
@@ -2192,7 +2207,7 @@
     addCheck('properties', 'Base de imóveis disponível localmente', Array.isArray(properties), true, 'Imóveis locais: ' + String(properties.length) + '.');
     addCheck('territory', 'Base territorial disponível', territoryReady, true, territoryReady ? 'Catálogo territorial/KMZ carregado no aparelho.' : 'Catálogo territorial não carregado.');
     addCheck('localStorage', 'Armazenamento local funcionando', localStorageOk, true, localStorageOk ? 'localStorage funcionando.' : 'O navegador bloqueou o armazenamento local.');
-    addCheck('pendingQueue', 'Fila offline protegida', !!queue && Number(queue.total || 0) >= 0, true, 'Pendentes: ' + Number(queue.total || 0) + ' item(ns), incluindo ' + Number(queue.visits || 0) + ' visita(s), ' + Number(queue.tubitos || 0) + ' tubito(s) e ' + Number(queue.locationTrail || 0) + ' ponto(s) de rota.');
+    addCheck('pendingQueue', 'Fila offline protegida', !!queue && Number(queue.total || 0) >= 0, true, 'Fila operacional: ' + Number(queue.operationalTotal || 0) + ' item(ns), incluindo ' + Number(queue.visits || 0) + ' visita(s), ' + Number(queue.tubitos || 0) + ' tubito(s), ' + Number(queue.properties || 0) + ' cadastro(s) e ' + Number(queue.supervision || 0) + ' supervisão. Rota GPS: ' + Number(queue.locationTrail || 0) + ' ponto(s) aguardando envio.');
 
     return Promise.all([
       app.testIndexedStorageAvailable(),
