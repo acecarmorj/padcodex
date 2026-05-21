@@ -6407,6 +6407,15 @@ function ACE_panelPrivateBundle_(payload) {
   var session = ACE_panelRequirePrivateSession_(payload || {});
   ACE_panelTouchPrivateSession_(session.token, session);
   var bundle = ACE_panelBuildPublicBundle_(payload || {});
+  bundle.properties = ACE_panelBuildPrivatePropertiesForBundle_(bundle.properties || []);
+  if (bundle.privacy) {
+    bundle.privacy.redacted = false;
+    bundle.privacy.privateAuthenticated = true;
+    bundle.privacy.note = 'Pacote privado autenticado. Dados de morador e telefone liberados somente para usuários autorizados do painel.';
+  }
+  if (bundle.meta) {
+    bundle.meta.totalPropertiesReturned = bundle.properties.length;
+  }
   bundle.private = {
     authenticated: true,
     version: ACE_PANEL_PRIVATE.VERSION
@@ -6420,6 +6429,68 @@ function ACE_panelPrivateBundle_(payload) {
     expiresInSeconds: ACE_PANEL_PRIVATE.SESSION_TTL_SECONDS
   };
   return bundle;
+}
+
+function ACE_panelPrivatePropertyKey_(property) {
+  property = property || {};
+  return [
+    normalizeComparableText_(property.bairro || ''),
+    normalizeComparableText_(property.logradouro || ''),
+    normalizeComparableText_(property.numero || '')
+  ].join('|');
+}
+
+function ACE_panelSanitizePrivateProperty_(property) {
+  property = property || {};
+  return {
+    uid: ACE_panelText_(property.uid),
+    morador: ACE_panelText_(property.morador),
+    telefone: ACE_panelText_(property.telefone),
+    microarea: ACE_panelText_(property.microarea),
+    quarteirao: ACE_panelText_(property.quarteirao),
+    bairro: ACE_panelText_(property.bairro),
+    logradouro: ACE_panelText_(property.logradouro),
+    numero: ACE_panelText_(property.numero),
+    complemento: ACE_panelText_(property.complemento || 'Normal'),
+    tipo: ACE_panelText_(property.tipo),
+    referencia: ACE_panelText_(property.referencia),
+    obs: '',
+    address_key: ACE_panelText_(property.address_key),
+    last_lat: ACE_panelCoordinate_(property.last_lat),
+    last_lng: ACE_panelCoordinate_(property.last_lng),
+    gps_territory: ACE_panelText_(property.gps_territory),
+    gps_quarteirao: ACE_panelText_(property.gps_quarteirao),
+    quality_flags: ACE_panelText_(property.quality_flags),
+    quality_status: ACE_panelText_(property.quality_status),
+    last_visit_at: ACE_panelText_(property.last_visit_at),
+    updatedAt: ACE_panelText_(property.updatedAt || property.updated_at),
+    created_by_name: ACE_panelText_(property.created_by_name || property.createdByName),
+    created_by_matricula: ACE_panelText_(property.created_by_matricula || property.createdByMatricula),
+    created_at: ACE_panelText_(property.created_at || property.createdAt)
+  };
+}
+
+function ACE_panelBuildPrivatePropertiesForBundle_(publicProperties) {
+  var rows = readRowsAsObjects_(ACE_API.SHEETS.IMOVEIS);
+  var byUid = {};
+  var byAddress = {};
+
+  rows.forEach(function(row) {
+    var clean = sanitizeObjectForHeaders_(row, ACE_API.HEADERS.Imoveis);
+    var uid = String(clean.uid || '').trim();
+    var addressKey = ACE_panelPrivatePropertyKey_(clean);
+    if (uid) { byUid[uid] = clean; }
+    if (addressKey) { byAddress[addressKey] = clean; }
+  });
+
+  return (publicProperties || []).map(function(property) {
+    var uid = String(property && property.uid || '').trim();
+    var raw = uid ? byUid[uid] : null;
+    if (!raw) {
+      raw = byAddress[ACE_panelPrivatePropertyKey_(property || {})] || property || {};
+    }
+    return ACE_panelSanitizePrivateProperty_(raw);
+  });
 }
 
 function ACE_panelPrivateLogout_(payload) {

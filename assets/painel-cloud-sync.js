@@ -5,8 +5,8 @@
   var documentRef = document;
 
   var CONFIG = {
-    version: '20260519-v68-plano-operacional',
-    panelAppSrc: './assets/painel-app.js?v=20260519-v68-plano-operacional',
+    version: '20260521-v71-relatorio-imoveis',
+    panelAppSrc: './assets/painel-app.js?v=20260521-v71-relatorio-imoveis',
     loginAction: 'panel_login',
     bundleAction: 'panel_bundle_private',
     logoutAction: 'panel_logout',

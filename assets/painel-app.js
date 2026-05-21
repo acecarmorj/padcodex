@@ -2015,7 +2015,7 @@
   }
 
   function setActiveReportAction(buttonId) {
-    ['reportExecutiveBtn', 'reportIndividualBtn', 'reportWaterTankBtn', 'reportTubitosBtn'].forEach(function (id) {
+    ['reportExecutiveBtn', 'reportIndividualBtn', 'reportWaterTankBtn', 'reportTubitosBtn', 'reportPropertiesBtn', 'reportDailyBtn'].forEach(function (id) {
       var node = document.getElementById(id);
       if (node) {
         node.classList.toggle('is-active', id === buttonId);
@@ -6452,6 +6452,131 @@
     openPrintableWindow('Relatório de caixas d\'água', buildWaterTankReportHtml(), 'Relatório de caixas d\'água aberto para impressão.');
   }
 
+  function getPropertyReportKeys(row) {
+    var keys = [];
+    var uid = String(row && (row.property_uid || row.propertyUid || row.uid) || '').trim();
+    var address = addressKey(row || {});
+    if (uid) {
+      keys.push(uid);
+    }
+    if (address && keys.indexOf(address) === -1) {
+      keys.push(address);
+    }
+    return keys;
+  }
+
+  function getLatestVisitByPropertyKey(visits) {
+    var map = {};
+    (visits || []).forEach(function (visit) {
+      getPropertyReportKeys(visit).forEach(function (key) {
+        if (!map[key] || compareVisitDescForPdf(visit, map[key]) < 0) {
+          map[key] = visit;
+        }
+      });
+    });
+    return map;
+  }
+
+  function getLatestVisitForProperty(property, latestMap) {
+    var found = null;
+    getPropertyReportKeys(property).some(function (key) {
+      if (latestMap[key]) {
+        found = latestMap[key];
+        return true;
+      }
+      return false;
+    });
+    return found;
+  }
+
+  function hasVisitSpecificPropertyReportFilter() {
+    return !!(
+      (document.getElementById('agentFilter') && document.getElementById('agentFilter').value) ||
+      (document.getElementById('situacaoFilter') && document.getElementById('situacaoFilter').value) ||
+      (document.getElementById('focoFilter') && document.getElementById('focoFilter').value) ||
+      (document.getElementById('gpsFilter') && document.getElementById('gpsFilter').value) ||
+      (document.getElementById('operationFilter') && document.getElementById('operationFilter').value)
+    );
+  }
+
+  function comparePropertyReportRows(a, b) {
+    return [
+      a.bairro || '',
+      a.microarea || '',
+      a.quarteirao || '',
+      a.logradouro || '',
+      a.numero || ''
+    ].join('|').localeCompare([
+      b.bairro || '',
+      b.microarea || '',
+      b.quarteirao || '',
+      b.logradouro || '',
+      b.numero || ''
+    ].join('|'), 'pt-BR', { numeric: true, sensitivity: 'base' });
+  }
+
+  function buildPropertyReportHtml() {
+    var latestVisitByKey = getLatestVisitByPropertyKey(state.filteredVisits || []);
+    var restrictToVisited = hasVisitSpecificPropertyReportFilter();
+    var properties = (state.filteredProperties || []).slice().filter(function (property) {
+      return !restrictToVisited || !!getLatestVisitForProperty(property, latestVisitByKey);
+    }).sort(comparePropertyReportRows);
+    var range = getDateRange();
+    var filterSummary = [
+      document.getElementById('bairroFilter').value || 'Todos os bairros',
+      document.getElementById('microareaFilter').value ? 'MA ' + document.getElementById('microareaFilter').value : 'Todas as microáreas',
+      document.getElementById('quarteiraoFilter') && document.getElementById('quarteiraoFilter').value ? 'Q ' + document.getElementById('quarteiraoFilter').value : 'Todos os quarteirões',
+      document.getElementById('logradouroFilter') && document.getElementById('logradouroFilter').value ? document.getElementById('logradouroFilter').value : 'Todas as ruas',
+      document.getElementById('agentFilter').value || 'Todos os agentes',
+      document.getElementById('situacaoFilter') && document.getElementById('situacaoFilter').value ? document.getElementById('situacaoFilter').value : 'Todas as situações',
+      document.getElementById('operationFilter') && document.getElementById('operationFilter').value ? operationModeLabel(document.getElementById('operationFilter').value) : 'Todas as operações'
+    ].join(' • ');
+    var visitedCount = properties.filter(function (property) {
+      return !!getLatestVisitForProperty(property, latestVisitByKey);
+    }).length;
+    var propertyReportCss = '<style>@page{size:A4 landscape}.properties-report-table{table-layout:fixed;font-size:7.8px}.properties-report-table th,.properties-report-table td{padding:3px 4px}.properties-report-table .col-owner{width:15%}.properties-report-table .col-contact{width:9%}.properties-report-table .col-address{width:24%}.properties-report-table .col-area{width:16%}.properties-report-table .col-kind{width:10%}.properties-report-table .col-ref{width:14%}.properties-report-table .col-last{width:12%}.cell-detail{display:block;color:#66727c;font-size:7.2px;line-height:1.2;margin-top:2px}.nowrap{white-space:nowrap}</style>';
+    var rowsHtml = properties.map(function (property) {
+      var lastVisit = getLatestVisitForProperty(property, latestVisitByKey);
+      var addressText = [
+        property.logradouro || '-',
+        property.numero || '-',
+        property.complemento && property.complemento !== 'Normal' ? property.complemento : ''
+      ].filter(Boolean).join(', ');
+      var areaText = [
+        property.bairro || '-',
+        property.microarea ? 'MA ' + property.microarea : '',
+        property.quarteirao ? 'Q ' + property.quarteirao : ''
+      ].filter(Boolean).join(' • ');
+      var lastVisitText = lastVisit
+        ? [formatDateBR(lastVisit.data), lastVisit.hora || '', lastVisit.situacao || '', lastVisit.agente || ''].filter(Boolean).join(' • ')
+        : 'Sem visita no período';
+      return '<tr>' +
+        '<td class="col-owner">' + escapeHtml(property.morador || '-') + '</td>' +
+        '<td class="col-contact nowrap">' + escapeHtml(property.telefone || '-') + '</td>' +
+        '<td class="col-address">' + escapeHtml(addressText) + '<span class="cell-detail">' + escapeHtml(property.address_key || property.uid || '-') + '</span></td>' +
+        '<td class="col-area">' + escapeHtml(areaText) + '</td>' +
+        '<td class="col-kind">' + escapeHtml([property.tipo || '-', property.complemento || 'Normal'].join(' • ')) + '</td>' +
+        '<td class="col-ref">' + escapeHtml(property.referencia || '-') + '</td>' +
+        '<td class="col-last">' + escapeHtml(lastVisitText) + '</td>' +
+      '</tr>';
+    }).join('');
+    var body = propertyReportCss +
+      '<div class="inline"><span class="chip">Imóveis listados: ' + escapeHtml(String(properties.length)) + '</span><span class="chip">Com visita no período: ' + escapeHtml(String(visitedCount)) + '</span><span class="chip">Período: ' + escapeHtml(formatDateBR(range.start) + ' a ' + formatDateBR(range.end)) + '</span></div>' +
+      '<p class="muted">Filtros aplicados: ' + escapeHtml(filterSummary) + '. Quando há filtro de agente, situação, foco, GPS ou operação, a listagem mostra somente imóveis com visita compatível no recorte.</p>' +
+      '<h2>Lista de imóveis</h2><table class="properties-report-table"><thead><tr><th class="col-owner">Morador / responsável</th><th class="col-contact">Telefone</th><th class="col-address">Endereço</th><th class="col-area">Bairro / microárea / quarteirão</th><th class="col-kind">Tipo</th><th class="col-ref">Referência</th><th class="col-last">Última visita no recorte</th></tr></thead><tbody>' +
+      (rowsHtml || '<tr><td colspan="7">Nenhum imóvel encontrado para os filtros atuais.</td></tr>') +
+      '</tbody></table>';
+    return buildPrintableShell('Relatório de imóveis', 'Base cadastral de imóveis conforme filtros ativos do painel.', body);
+  }
+
+  function openPropertiesReport() {
+    if (!state.filteredProperties.length) {
+      setBanner('Não há imóveis filtrados para gerar relatório.', 'danger');
+      return;
+    }
+    openPrintableWindow('Relatório de imóveis', buildPropertyReportHtml(), 'Relatório de imóveis aberto para impressão.');
+  }
+
   function isPendingTubito(row) {
     var status = normalizeLabel(row && row.statusLaboratorio || '');
     if (!row) {
@@ -6863,6 +6988,12 @@
       document.getElementById('reportTubitosBtn').addEventListener('click', function () {
         setActiveReportAction('reportTubitosBtn');
         openTubitosReport();
+      });
+    }
+    if (document.getElementById('reportPropertiesBtn')) {
+      document.getElementById('reportPropertiesBtn').addEventListener('click', function () {
+        setActiveReportAction('reportPropertiesBtn');
+        openPropertiesReport();
       });
     }
     if (document.getElementById('reportDailyBtn')) {
