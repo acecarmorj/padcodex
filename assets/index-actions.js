@@ -2275,13 +2275,16 @@
       return;
     }
 
+    var incomingVisitStatus = app.normalizeStatus(app.state.visit.situacao || '');
     var duplicateVisit = app.readVisits().find(function (visit) {
       var sameUid = app.state.editingVisitId && visit.uid === app.state.editingVisitId;
       var sameDate = visit && visit.data === app.state.visit.data;
       var sameProperty = visit && ((property.uid && visit.property_uid === property.uid) || app.addressKey(visit) === app.addressKey(property));
       var sameOperation = app.normalizeOperationMode(visit.operationMode || visit.operation_mode || visit.origem_visita || 'VD') ===
         app.normalizeOperationMode(app.state.visit.operationMode || 'VD');
-      return !sameUid && sameDate && sameProperty && sameOperation;
+      var existingVisitStatus = app.normalizeStatus(visit && visit.situacao || '');
+      var isRecoveryAfterClosed = incomingVisitStatus === 'Recuperado' && existingVisitStatus === 'Fechado';
+      return !sameUid && sameDate && sameProperty && sameOperation && !isRecoveryAfterClosed;
     });
     if (duplicateVisit) {
       app.stopVisitSaveWithMessage('Já existe uma visita deste mesmo tipo para este imóvel nesta data. Edite a visita existente ou registre em outra data.');
