@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const ACE_CACHE_VERSION = 'ace-campo-offline-20260519-stable-v65-mapa-icones';
+const ACE_CACHE_VERSION = 'ace-campo-offline-20260521-stable-v68-retornos-plano';
 const ACE_CACHE_NAME = ACE_CACHE_VERSION;
 const ACE_LEGACY_BRAND_ASSETS = [
   './assets/logo-prefeitura-carmo.png',

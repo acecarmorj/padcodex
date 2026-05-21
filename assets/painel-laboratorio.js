@@ -3,7 +3,7 @@
 
   var root = window;
   var documentRef = document;
-  var MODULE_VERSION = '20260519-v65-mapa-icones';
+  var MODULE_VERSION = '20260519-v68-plano-operacional';
   var LAB_API_TIMEOUT_MS = 25000;
   var TUBITOS_KEY = 'dengue_db_tubitos_v1';
   var LAB_SESSION_KEY = 'ace_lab_admin_session_v1';

@@ -200,7 +200,7 @@ function ACE_sessionStorageRemove_(key) {
 
 var ACE_API = {
   APP_NAME: 'ACE Campo API',
-  VERSION: '2026-05-19-v65-mapa-operacional-final',
+  VERSION: '2026-05-19-v68-plano-operacional-tablet',
   SHEETS: {
     CONFIG: 'Config',
     BAIRROS: 'BairrosCatalogo',
@@ -2555,6 +2555,45 @@ function doPost(e) {
         ok: true,
         generatedAt: nowIso_(),
         agents: buildAgentsForResponse_(buildVisibleAgentRoster_(), payload),
+        catalogs: { bairros: readBairrosCatalog_() }
+      }));
+    }
+
+    if (action === 'liraa_plan' || action === 'liraa_active_plan') {
+      ACE_requireOperationalAccess_(payload);
+      return jsonResponse_(wrapPayload_(getActiveLiraaPlanPayload_()));
+    }
+
+    if (action === 'liraa_cycle_history' || action === 'liraa_cycles' || action === 'historico_liraa') {
+      ACE_requireOperationalAccess_(payload);
+      return jsonResponse_(wrapPayload_(getLiraaCycleHistoryPayload_(payload)));
+    }
+
+    if (action === 'operation_plan' || action === 'active_operation_plan' || action === 'modo_operacao') {
+      ACE_requireOperationalAccess_(payload);
+      return jsonResponse_(wrapPayload_(getActiveOperationPlanPayload_(payload)));
+    }
+
+    if (action === 'operation_schedule' || action === 'operations_day' || action === 'operacoes_dia') {
+      ACE_requireOperationalAccess_(payload);
+      return jsonResponse_(wrapPayload_(getDailyOperationSchedulePayload_(payload)));
+    }
+
+    if (action === 'operation_workday_settings' || action === 'operation_jornada' || action === 'jornada_operacao') {
+      ACE_requireOperationalAccess_(payload);
+      return jsonResponse_(wrapPayload_({
+        ok: true,
+        generatedAt: nowIso_(),
+        workday_settings: getOperationWorkdaySettings_()
+      }));
+    }
+
+    if (action === 'properties_catalog' || action === 'properties') {
+      ACE_requireOperationalAccess_(payload);
+      return jsonResponse_(wrapPayload_({
+        ok: true,
+        generatedAt: nowIso_(),
+        properties: readRowsAsObjects_(ACE_API.SHEETS.IMOVEIS),
         catalogs: { bairros: readBairrosCatalog_() }
       }));
     }

@@ -14,6 +14,26 @@
     return { stroke: '#c78615', fill: '#d7a642', opacity: Math.min(0.34, 0.14 + (weight * 0.035)) };
   }
 
+  function getOperationScopeForUi() {
+    var api = window.ACEOperationMode;
+    var restriction;
+    if (!api || typeof api.getTerritoryRestriction !== 'function') {
+      return null;
+    }
+    try {
+      restriction = api.getTerritoryRestriction();
+    } catch (error) {
+      return null;
+    }
+    return restriction && !restriction.blocked && Array.isArray(restriction.units) && restriction.units.length
+      ? restriction
+      : null;
+  }
+
+  function getReturnScopeSuffix() {
+    return getOperationScopeForUi() ? ' no plano' : '';
+  }
+
   app.hideMessage = function () {
     var node = document.getElementById('syncStatus');
     if (!node) { return; }
@@ -176,10 +196,21 @@
         lastVisitByAddress[key] = visit;
       }
     });
-    var pendingCount = properties.reduce(function (count, property) {
-      var last = lastVisitByAddress[app.addressKey(property)];
-      return count + (last && (last.situacao === 'Fechado' || last.situacao === 'Recusa') ? 1 : 0);
-    }, 0);
+    var scopeSuffix = getReturnScopeSuffix();
+    var pendingCount = null;
+    if (scopeSuffix && typeof app.getPrioritizedProperties === 'function') {
+      try {
+        pendingCount = app.getPrioritizedProperties().filter(function (row) { return row && row.pending; }).length;
+      } catch (error) {
+        pendingCount = null;
+      }
+    }
+    if (pendingCount === null) {
+      pendingCount = properties.reduce(function (count, property) {
+        var last = lastVisitByAddress[app.addressKey(property)];
+        return count + (last && (last.situacao === 'Fechado' || last.situacao === 'Recusa') ? 1 : 0);
+      }, 0);
+    }
     var title = hasGps
       ? 'Escolha o próximo ponto mais perto.'
       : 'Capture GPS para ordenar por proximidade.';
@@ -196,7 +227,7 @@
       items: [
         { label: 'No aparelho', value: properties.length + ' imóvel(is)', kind: properties.length ? 'ok' : 'warn' },
         { label: 'GPS', value: hasGps ? 'Ativo' : 'Não capturado', kind: hasGps ? 'ok' : 'warn' },
-        { label: 'Pendências', value: pendingCount ? pendingCount + ' retorno(s)' : 'Sem retorno', kind: pendingCount ? 'warn' : 'ok' },
+        { label: scopeSuffix ? 'Retornos no plano' : 'Retornos', value: pendingCount ? pendingCount + ' retorno(s)' + scopeSuffix : 'Sem retorno' + scopeSuffix, kind: pendingCount ? 'warn' : 'ok' },
         { label: 'Selecionado', value: selected ? 'Pronto para visita' : 'Nenhum', kind: selected ? 'accent' : 'warn' }
       ]
     });
@@ -217,7 +248,7 @@
       text = 'A fila será enviada quando a conexão voltar.';
       kind = 'danger';
     } else if (pendingTotal || health.pendingSync) {
-      title = 'Pendências no aparelho: sincronize antes de encerrar.';
+      title = 'Fila offline no aparelho: sincronize antes de encerrar.';
       text = 'Use Sincronizar dados para enviar visitas, tubitos e alterações locais ao Sheets.';
       kind = 'warn';
     } else {
@@ -233,7 +264,7 @@
       text: text,
       items: [
         { label: 'Modo atual', value: modeLabel, kind: modeLabel === 'VD' ? 'ok' : 'accent' },
-        { label: 'Pendentes', value: pendingTotal ? pendingTotal + ' item(ns)' : '0', kind: pendingTotal ? 'warn' : 'ok' },
+        { label: 'Fila offline', value: pendingTotal ? pendingTotal + ' item(ns)' : '0', kind: pendingTotal ? 'warn' : 'ok' },
         { label: 'Enviados hoje', value: String(health.sentToday || 0), kind: (health.sentToday || 0) ? 'accent' : 'warn' },
         { label: 'Último envio', value: health.lastSyncAt ? app.formatSyncMoment(health.lastSyncAt) : 'Ainda não', kind: health.lastSyncAt ? 'ok' : 'warn' },
         { label: 'GPS', value: totals.gpsCoverage + '%', kind: totals.gpsCoverage >= 80 ? 'ok' : 'warn' }
@@ -334,6 +365,7 @@
     var prioritized = [];
     var pendingRows = [];
     var checklist = [];
+    var scopeSuffix = getReturnScopeSuffix();
     var title;
     var text;
     var primary = { label: 'Próximo imóvel', action: 'next' };
@@ -354,7 +386,7 @@
       secondary = { label: 'Trocar imóvel', action: 'properties' };
     } else if (pendingRows.length) {
       title = 'Retomar pendências primeiro';
-      text = 'Há imóvel fechado ou recusa para nova abordagem. O tablet pode sugerir o retorno mais próximo.';
+      text = 'Há imóvel fechado ou recusa para nova abordagem' + (scopeSuffix ? ' dentro do plano atual' : '') + '. O tablet pode sugerir o retorno mais próximo.';
       primary = { label: 'Ver retorno', action: 'pending' };
     } else if (prioritized.length) {
       title = 'Escolher próximo imóvel';
@@ -371,7 +403,7 @@
       kind: Number(health.queueTotal || health.queue || 0) ? 'warn' : 'ok'
     });
     checklist.push({
-      label: pendingRows.length ? (pendingRows.length + ' retorno(s)') : 'Sem retorno aberto',
+      label: pendingRows.length ? (pendingRows.length + ' retorno(s)' + scopeSuffix) : ('Sem retorno aberto' + scopeSuffix),
       kind: pendingRows.length ? 'warn' : 'ok'
     });
     checklist.push({
@@ -1806,7 +1838,7 @@
       app.makeMetricCard('Total', totals.totalProperties, 'accent'),
       app.makeMetricCard('Recuperados', totals.recovered, 'accent'),
       app.makeMetricCard('Trabalhados', totals.visitedProperties, 'accent'),
-      app.makeMetricCard('Pendências', totals.pending, 'danger'),
+      app.makeMetricCard('Retornos do dia', totals.pending, 'danger'),
       app.makeMetricCard('Tubitos', totals.tubitos, 'warn'),
       app.makeMetricCard('Total de depósitos', totals.deposits, 'warn'),
       app.makeMetricCard('Depósitos com foco', totals.depositsWithFocus, 'danger'),
