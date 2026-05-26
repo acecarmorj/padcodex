@@ -46,12 +46,17 @@ Telas e publico de uso
    - Serve para consultar fila de tubitos e lancar resultado laboratorial.
 
 3. painel.html
-   - Painel da coordenacao, para computador/tela maior.
+   - Painel da coordenacao. Principalmente para computador/tela maior, mas
+     tambem possui modo tablet paisagem para Samsung Galaxy Tab A11.
    - Online.
    - Mostra indicadores, mapa, relatorios, LIRAa, operacoes, cadastros e tambem
      modulo de laboratorio dentro do painel.
    - Dados publicos/fallback sao higienizados; dados sensiveis dependem de
      sessao privada.
+   - No tablet, nao criar outro HTML: usar a classe responsiva automatica
+     panel-tablet-landscape/panel-tablet-portrait no proprio painel.html.
+   - No tablet em paisagem, priorizar consulta operacional: nav horizontal,
+     filtros recolhidos, mapa/listas maiores e textos explicativos reduzidos.
 
 4. secretaria.html
    - Modulo da secretaria, para computador/tela maior.
@@ -224,7 +229,9 @@ Painel, relatorios e privacidade
   referencia e ultima visita no recorte.
 - Se nomes de moradores aparecerem como "-", conferir se o painel esta usando
   bundle privado; bundle publico redige esses campos de proposito.
-- Secretaria e painel sao para computador/tela maior.
+- Secretaria e painel completo sao para computador/tela maior.
+- Painel da coordenacao tambem deve funcionar no Samsung Galaxy Tab A11 em
+  paisagem como modo operacional resumido.
 - Index e lab sao para tablet Samsung Galaxy Tab A11.
 
 Documentos da secretaria

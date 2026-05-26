@@ -5,8 +5,8 @@
   var documentRef = document;
 
   var CONFIG = {
-    version: '20260521-v74-branding-limpo',
-    panelAppSrc: './assets/painel-app.js?v=20260521-v74-branding-limpo',
+    version: '20260526-v76-tablet-a11',
+    panelAppSrc: './assets/painel-app.js?v=20260526-v76-tablet-a11',
     loginAction: 'panel_login',
     bundleAction: 'panel_bundle_private',
     logoutAction: 'panel_logout',

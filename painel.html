@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="">
-  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260521-v72-morador-relatorio">
+  <link rel="stylesheet" href="./assets/ace-theme.css?v=20260526-v76-tablet-a11">
 
   <style>
     body:not(.ace-panel-ready) .page-shell { visibility: hidden; }
@@ -1160,8 +1160,476 @@
       }
     }
 
+    /* v76 - modo tablet A11 para o painel da coordenacao, sem novo HTML. */
+    @media (pointer: coarse) and (orientation: landscape) and (min-width:900px) and (max-width:1400px){
+      html,
+      body.dashboard-page.dashboard-layout-v3{
+        width:100%;
+        min-height:100dvh;
+        overflow:hidden !important;
+        background:#edf4f0 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape{
+        --coord-tablet-nav-h:76px;
+        --coord-tablet-topbar-h:126px;
+        --coord-tablet-gap:8px;
+        touch-action:manipulation;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-shell-v3{
+        display:grid !important;
+        grid-template-columns:1fr !important;
+        grid-template-rows:auto minmax(0,1fr) !important;
+        gap:var(--coord-tablet-gap) !important;
+        height:100dvh !important;
+        min-height:100dvh !important;
+        padding:8px !important;
+        overflow:hidden !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar{
+        position:relative !important;
+        top:auto !important;
+        display:grid !important;
+        grid-template-columns:auto minmax(0,1fr) !important;
+        align-items:center !important;
+        gap:8px !important;
+        min-height:0 !important;
+        height:var(--coord-tablet-nav-h) !important;
+        padding:8px !important;
+        border-radius:18px !important;
+        overflow:hidden !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar::before,
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__footer{
+        display:none !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__brand-card{
+        width:96px !important;
+        min-width:96px !important;
+        padding:0 8px 0 0 !important;
+        border:0 !important;
+        gap:7px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__brand-logo{
+        width:38px !important;
+        height:38px !important;
+        min-width:38px !important;
+        border-radius:12px !important;
+        font-size:12px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__brand-copy{
+        gap:1px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__brand-copy strong{
+        font-size:12px !important;
+        line-height:1 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__brand-copy span{
+        display:none !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__nav{
+        display:flex !important;
+        align-items:center !important;
+        gap:6px !important;
+        min-width:0 !important;
+        padding:0 2px 2px !important;
+        overflow-x:auto !important;
+        overflow-y:hidden !important;
+        scrollbar-width:none !important;
+        -webkit-overflow-scrolling:touch;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .app-sidebar__nav::-webkit-scrollbar{
+        display:none;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .sidebar-divider{
+        display:none !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .sidebar-tab{
+        width:auto !important;
+        min-width:112px !important;
+        max-width:132px !important;
+        min-height:48px !important;
+        height:48px !important;
+        grid-template-columns:26px minmax(0,1fr) !important;
+        gap:6px !important;
+        padding:6px 8px !important;
+        border-radius:14px !important;
+        font-size:11px !important;
+        flex:0 0 auto !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .sidebar-tab__icon{
+        width:26px !important;
+        height:26px !important;
+        min-width:26px !important;
+        border-radius:9px !important;
+        font-size:12px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .nav-copy{
+        min-width:0 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .nav-copy span{
+        display:block !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+        white-space:nowrap !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .nav-copy small{
+        display:none !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-main-v3{
+        display:grid !important;
+        grid-template-rows:auto minmax(0,1fr) !important;
+        gap:var(--coord-tablet-gap) !important;
+        min-height:0 !important;
+        height:100% !important;
+        padding:0 !important;
+        overflow:hidden !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .topbar-v3{
+        display:grid !important;
+        gap:var(--coord-tablet-gap) !important;
+        min-height:0 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .topbar-v3__title-row{
+        min-height:50px !important;
+        padding:8px 10px !important;
+        border-radius:17px !important;
+        grid-template-columns:minmax(0,1fr) auto !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .topbar-v3__copy h1{
+        font-size:1.02rem !important;
+        line-height:1.05 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .topbar-v3__copy p{
+        display:none !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .topbar-v3__widgets{
+        justify-content:flex-end !important;
+        gap:6px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .ace-panel-private-logout-btn,
+      body.dashboard-layout-v3.panel-tablet-landscape .ace-panel-refresh-cloud-btn{
+        min-height:36px !important;
+        height:36px !important;
+        padding:0 12px !important;
+        border-radius:999px !important;
+        font-size:12px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-shell-card-v3{
+        padding:8px 10px !important;
+        margin:0 !important;
+        border-radius:16px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-filter-drawer summary{
+        min-height:34px !important;
+        padding:0 !important;
+        font-size:12px !important;
+        font-weight:950 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-filter-toolbar-v3{
+        grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+        gap:7px !important;
+        padding-top:8px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-filter-toolbar-v3 label,
+      body.dashboard-layout-v3.panel-tablet-landscape label{
+        font-size:10px !important;
+        margin-bottom:3px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape input,
+      body.dashboard-layout-v3.panel-tablet-landscape select,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-filter-toolbar-v3 input,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-filter-toolbar-v3 select{
+        min-height:36px !important;
+        height:36px !important;
+        border-radius:10px !important;
+        padding:0 9px !important;
+        font-size:12px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .field-search-v3,
+      body.dashboard-layout-v3.panel-tablet-landscape .field-search-v3--wide{
+        grid-column:span 2 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .field-button-v6{
+        grid-column:span 1 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-workspace-v3{
+        min-height:0 !important;
+        height:100% !important;
+        display:block !important;
+        overflow:hidden !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-view{
+        height:100% !important;
+        min-height:0 !important;
+        overflow:hidden !important;
+        gap:8px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-view.is-active{
+        display:grid !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-view-split.is-active{
+        grid-template-columns:minmax(260px,34%) minmax(0,1fr) !important;
+        align-items:stretch !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-view-fixed{
+        position:relative !important;
+        top:auto !important;
+        height:100% !important;
+        min-height:0 !important;
+        overflow:auto !important;
+        -webkit-overflow-scrolling:touch;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-scroll-box{
+        max-height:none !important;
+        height:100% !important;
+        min-height:0 !important;
+        overflow:auto !important;
+        padding-right:2px !important;
+        -webkit-overflow-scrolling:touch;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-shell-card-v3,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-fixed-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-placeholder-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-report-actions-fixed,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-report-screen-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-strategy-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-visits-table-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-visit-inspection-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .card{
+        border-radius:16px !important;
+        padding:10px !important;
+        box-shadow:0 8px 18px rgba(24,60,44,.07) !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .section-title,
+      body.dashboard-layout-v3.panel-tablet-landscape .section-title-v3,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-mini-title{
+        font-size:.93rem !important;
+        line-height:1.12 !important;
+        margin:0 0 7px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .muted,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-view-note-v3,
+      body.dashboard-layout-v3.panel-tablet-landscape .statistics-lead,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-screen-head .screen-head-copy span{
+        display:none !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .metric-grid,
+      body.dashboard-layout-v3.panel-tablet-landscape .statistics-kpi-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:7px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .metric-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .summary-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .stat-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .kpi-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .dashboard-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .insight-card{
+        min-height:54px !important;
+        padding:8px !important;
+        border-radius:13px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .metric-card strong,
+      body.dashboard-layout-v3.panel-tablet-landscape .summary-card strong,
+      body.dashboard-layout-v3.panel-tablet-landscape .stat-card strong,
+      body.dashboard-layout-v3.panel-tablet-landscape .kpi-card strong{
+        font-size:1.12rem !important;
+        line-height:1 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .metric-card small,
+      body.dashboard-layout-v3.panel-tablet-landscape .summary-card small,
+      body.dashboard-layout-v3.panel-tablet-landscape .stat-card small,
+      body.dashboard-layout-v3.panel-tablet-landscape .kpi-card small{
+        font-size:.68rem !important;
+        line-height:1.1 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-operational-grid,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-side-grid,
+      body.dashboard-layout-v3.panel-tablet-landscape .statistics-grid-main,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-report-analysis-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:8px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-operational-grid-4{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-report-actions{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:7px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .btn,
+      body.dashboard-layout-v3.panel-tablet-landscape button{
+        min-height:38px !important;
+        border-radius:11px !important;
+        font-size:12px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-visits-grid{
+        grid-template-columns:minmax(250px,32%) minmax(0,1fr) !important;
+        height:100% !important;
+        min-height:0 !important;
+        gap:8px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-visit-inspection-card,
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-visits-table-card{
+        min-height:0 !important;
+        height:100% !important;
+        overflow:auto !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .consolidated-visits-box,
+      body.dashboard-layout-v3.panel-tablet-landscape .consolidated-visits-list{
+        max-height:none !important;
+        height:calc(100dvh - 214px) !important;
+        overflow:auto !important;
+        -webkit-overflow-scrolling:touch;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .visit-list-item{
+        padding:8px !important;
+        border-radius:12px !important;
+        gap:5px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape [data-panel-view-content="map"]{
+        grid-template-rows:auto minmax(0,1fr) !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-screen-head{
+        min-height:0 !important;
+        padding:8px 10px !important;
+        border-radius:15px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-screen-head .screen-head-copy strong{
+        font-size:.96rem !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-screen-head .screen-badge{
+        display:none !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .panel-map-card{
+        display:grid !important;
+        grid-template-rows:auto auto minmax(0,1fr) !important;
+        height:100% !important;
+        min-height:0 !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape #territoryMapSummary{
+        font-size:11px !important;
+        line-height:1.25 !important;
+        padding:6px 8px !important;
+        margin-bottom:6px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape #territoryMapControls{
+        display:flex !important;
+        gap:6px !important;
+        overflow-x:auto !important;
+        padding:0 0 7px !important;
+        scrollbar-width:none !important;
+        -webkit-overflow-scrolling:touch;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape #territoryMapControls::-webkit-scrollbar{
+        display:none;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape .map-toggle{
+        flex:0 0 auto !important;
+        min-height:34px !important;
+        height:34px !important;
+        padding:0 10px !important;
+        border-radius:999px !important;
+        font-size:11px !important;
+        white-space:nowrap !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape #heatMap,
+      body.dashboard-layout-v3.panel-tablet-landscape .map-shell{
+        height:100% !important;
+        min-height:calc(100dvh - 232px) !important;
+        border-radius:15px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape table{
+        min-width:680px !important;
+        font-size:11px !important;
+      }
+
+      body.dashboard-layout-v3.panel-tablet-landscape th,
+      body.dashboard-layout-v3.panel-tablet-landscape td{
+        padding:7px 8px !important;
+      }
+    }
+
+    @media (pointer: coarse) and (orientation: portrait) and (min-width:700px) and (max-width:920px){
+      body.dashboard-layout-v3.panel-tablet-portrait .panel-main-v3::before{
+        content:"Para o painel da coordenacao, use o tablet em modo paisagem.";
+        display:block;
+        margin:0 0 8px;
+        padding:9px 12px;
+        border:1px solid rgba(47,122,82,.16);
+        border-radius:14px;
+        background:#f0f8f3;
+        color:#18412e;
+        font-size:13px;
+        font-weight:900;
+        text-align:center;
+      }
+    }
+
   </style>
-  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260521-v72-morador-relatorio">
+  <link rel="stylesheet" href="./assets/ace-ui-standard.css?v=20260526-v76-tablet-a11">
 
 
   <style id="coord-filter-gap-1cm-final">
@@ -1833,11 +2301,31 @@
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"
           integrity="sha256-65UqrlgGoRAnKfKRuriH3eeDrOhZgZo1SCenduc+SGo="
           crossorigin=""></script>
-  <script src="./assets/runtime-config.js?v=20260521-v72-morador-relatorio"></script>
-  <script src="./assets/carmo-territorios-data.js?v=20260521-v72-morador-relatorio"></script>
+  <script src="./assets/runtime-config.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/carmo-territorios-data.js?v=20260526-v76-tablet-a11"></script>
   <script>
     (function(){
+      function isPanelTabletLike(){
+        var width = window.innerWidth || document.documentElement.clientWidth || 0;
+        var height = window.innerHeight || document.documentElement.clientHeight || 0;
+        var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        var touch = navigator.maxTouchPoints && navigator.maxTouchPoints > 0;
+        return (coarse || touch) && Math.min(width, height) >= 600 && Math.max(width, height) <= 1400;
+      }
+
+      function updatePanelDeviceMode(){
+        var isTablet = isPanelTabletLike();
+        var isLandscape = isTablet && (window.innerWidth || 0) >= (window.innerHeight || 0);
+        var body = document.body;
+        if (!body) return;
+        body.classList.toggle('panel-tablet-mode', isTablet);
+        body.classList.toggle('panel-tablet-landscape', isTablet && isLandscape);
+        body.classList.toggle('panel-tablet-portrait', isTablet && !isLandscape);
+        document.documentElement.style.setProperty('--panel-device-vh', Math.max(1, window.innerHeight || 1) + 'px');
+      }
+
       function updatePanelStickyVars(){
+        updatePanelDeviceMode();
         var shell = document.querySelector('.panel-shell-card');
         var topbar = document.querySelector('.topbar-v3');
         if (shell) {
@@ -1849,27 +2337,33 @@
       }
       window.addEventListener('load', updatePanelStickyVars);
       window.addEventListener('resize', updatePanelStickyVars);
+      window.addEventListener('orientationchange', function(){
+        setTimeout(updatePanelStickyVars, 160);
+        setTimeout(updatePanelStickyVars, 420);
+      });
       document.addEventListener('DOMContentLoaded', function(){
         updatePanelStickyVars();
         setTimeout(updatePanelStickyVars, 120);
       });
     })();
   </script>
-  <script src="./assets/ace-storage.js?v=20260521-v72-morador-relatorio"></script>
-  <script src="./assets/painel-cloud-sync.js?v=20260521-v74-branding-limpo"></script>
-  <script src="./assets/painel-privacy-tools.js?v=20260521-v74-branding-limpo"></script>
-  <script src="./assets/painel-agents-tools.js?v=20260521-v72-morador-relatorio"></script>
-  <script src="./assets/painel-liraa.js?v=20260521-v72-morador-relatorio"></script>
-  <script src="./assets/painel-laboratorio.js?v=20260521-v72-morador-relatorio"></script>
-  <script src="./assets/painel-operacao.js?v=20260521-v74-branding-limpo"></script>
-  <script src="./assets/painel-status.js?v=20260521-v72-morador-relatorio"></script>
-  <script src="./assets/painel-executivo.js?v=20260521-v72-morador-relatorio"></script>
-  <script src="./assets/painel-cadastros.js?v=20260521-v72-morador-relatorio"></script>
+  <script src="./assets/ace-storage.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-cloud-sync.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-privacy-tools.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-agents-tools.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-liraa.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-laboratorio.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-operacao.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-status.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-executivo.js?v=20260526-v76-tablet-a11"></script>
+  <script src="./assets/painel-cadastros.js?v=20260526-v76-tablet-a11"></script>
 
   <script>
     (function(){
       function isMobilePanel(){
-        return window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+        return (window.matchMedia && window.matchMedia('(max-width: 820px)').matches) ||
+          document.body.classList.contains('panel-tablet-landscape') ||
+          document.body.classList.contains('panel-tablet-portrait');
       }
 
       function ajustarFiltroMobilePainel(){
