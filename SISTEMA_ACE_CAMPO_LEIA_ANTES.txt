@@ -55,8 +55,8 @@ Telas e publico de uso
      sessao privada.
    - No tablet, nao criar outro HTML: usar a classe responsiva automatica
      panel-tablet-landscape/panel-tablet-portrait no proprio painel.html.
-   - No tablet em paisagem, priorizar consulta operacional: nav horizontal,
-     filtros recolhidos, mapa/listas maiores e textos explicativos reduzidos.
+   - No tablet em paisagem, usar modo compacto v77: botoes menores, filtros
+     recolhidos, rolagem normal e prioridade para mapa/listas/indicadores.
 
 4. secretaria.html
    - Modulo da secretaria, para computador/tela maior.
@@ -294,7 +294,8 @@ Cuidados finais
 - Nao adicionar bibliotecas novas se o arquivo atual ja resolve.
 - Manter o index leve, grande o suficiente para toque no A11 e sem elementos
   ocupando espaco desnecessario.
-- Em tela de tablet, priorizar botoes grandes, texto legivel e pouca decoracao.
+- Em tela de tablet, priorizar botoes compactos, texto legivel, rolagem normal
+  e somente conteudo operacional util.
 - Em painel/secretaria desktop, priorizar densidade, filtros e leitura rapida.
 - Qualquer alteracao em fluxo de dados deve ser testada do campo ate o painel:
   index -> sync -> Google Sheets/API -> painel/lab/secretaria.

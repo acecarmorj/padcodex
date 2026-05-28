@@ -5,8 +5,8 @@
   var documentRef = document;
 
   var CONFIG = {
-    version: '20260526-v76-tablet-a11',
-    panelAppSrc: './assets/painel-app.js?v=20260526-v76-tablet-a11',
+    version: '20260528-v77-tablet-compact',
+    panelAppSrc: './assets/painel-app.js?v=20260528-v77-tablet-compact',
     loginAction: 'panel_login',
     bundleAction: 'panel_bundle_private',
     logoutAction: 'panel_logout',
